@@ -1,0 +1,99 @@
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px rgb(89, 86, 86) solid !important;
+  background-color: rgb(245, 236, 223) !important;
+}
+
+body{
+    background-color: rgb(244, 210, 177) !important;
+}
+
+a{
+     background-color: rgb(244, 236, 227) !important;
+}
+
+.otp-input {
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+  text-align: center;
+  border-radius: 10px; /* rounded corners */
+}
+
+.admin li a{
+   background-color: rgb(244, 210, 177) !important;
+   font-weight: 700;
+}
+
+.image{
+ padding: 10px; 
+}
+.image:hover{
+  cursor: pointer;
+  background-color: rgb(233, 228, 222);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.upload-box{
+  border: dashed 1px rgb(164, 159, 159);
+  border-radius: 10px;
+  background-color: rgb(197, 214, 228);
+}
+
+.addLink{
+  padding: 5px 5px;
+  background-color: black;
+  border-radius: 5px;
+  color: white;
+}
+
+
+.table-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+}
+
+.cat-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: black;
+  color: white;
+  z-index: 1;
+}
+#show{
+  cursor: pointer;
+}
+
+.footerBody{
+  background-color: white !important;
+}
+.footer a{
+  text-decoration: none;
+  color: black;
+  background-color: white !important;
+}
+
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row td {
+  transition: background-color 0.2s ease;
+}
+
+.clickable-row:hover td {
+  background-color: #b1caeb !important;
+}
+
+.pagination .page-link {
+    color: #000;
+  }
+  .pagination .page-item.active .page-link {
+    background-color: #3a4f64 !important;
+    border-color: #626d77;
+    color: #fdfdfd !important;
+  }

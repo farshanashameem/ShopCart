@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShopCart | Women Products</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .product-card img {
+      height: 300px;
+      object-fit: cover;
+    }
+    .filter-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+    .category-btn {
+      border: 1px solid #ccc;
+      padding: 5px 15px;
+      border-radius: 4px;
+      margin: 3px;
+      background-color: white;
+    }
+    .category-btn.active {
+      background-color: black;
+      color: white;
+    }
+    .pagination .page-link {
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      padding: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-fluid px-5">
+    <!-- Title -->
+    <div class="text-center my-5">
+      <h5 class="text-muted">WOMEN</h5>
+      <h2 class="fw-bold">ALL PRODUCTS</h2>
+      <p>Stock up your fashion wardrobe or test a fresh ‘fit. Shop all women's iron products here.</p>
+    </div>
+
+    <!-- Category buttons -->
+    <div class="text-center mb-4">
+      <button class="category-btn active">ALL</button>
+      <button class="category-btn">Jackets</button>
+      <button class="category-btn">Skirt</button>
+      <button class="category-btn">Jeans</button>
+      <button class="category-btn">Abaya</button>
+      <button class="category-btn">Kurti</button>
+    </div>
+
+    <div class="row">
+      <!-- Filter Sidebar -->
+      <div class="col-md-3">
+        <h6 class="fw-bold">FILTERS & SORT</h6>
+        <a href="#" class="text-decoration-underline text-muted small">Clear All</a>
+        <hr/>
+
+        <!-- Sort -->
+        <div class="mb-3">
+          <div class="filter-title">Sort By</div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sort" id="lowHigh">
+            <label class="form-check-label" for="lowHigh">Price: Low To High</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sort" id="highLow">
+            <label class="form-check-label" for="highLow">Price: High To Low</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sort" id="az">
+            <label class="form-check-label" for="az">Alphabetic: A-Z</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="sort" id="za">
+            <label class="form-check-label" for="za">Alphabetic: Z-A</label>
+          </div>
+        </div>
+
+        <!-- Additional filters (size, color etc.) -->
+        <div class="mb-3">
+          <div class="filter-title">Size</div>
+          <select class="form-select">
+            <option>Select</option>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="filter-title">Color</div>
+          <select class="form-select">
+            <option>Select</option>
+            <option>Black</option>
+            <option>White</option>
+            <option>Red</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product Grid -->
+      <div class="col-md-9">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          <% products.forEach(product => { %>
+          <div class="col">
+            <div class="card product-card h-100">
+              <img src="<%= product.image %>" class="card-img-top" alt="<%= product.name %>">
+              <div class="card-body">
+                <h6 class="card-title"><%= product.name %></h6>
+                <p class="mb-0 text-muted"><%= product.fit %></p>
+                <p class="mb-0 text-muted"><%= product.color %></p>
+                <p class="fw-bold">US$<%= product.price %></p>
+              </div>
+            </div>
+          </div>
+          <% }) %>
+        </div>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center mt-5">
+          <nav>
+            <ul class="pagination">
+              <% if (currentPage > 1) { %>
+                <li class="page-item"><a class="page-link" href="?page=<%= currentPage - 1 %>">&laquo;</a></li>
+              <% } %>
+
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                  <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                </li>
+              <% } %>
+
+              <% if (currentPage < totalPages) { %>
+                <li class="page-item"><a class="page-link" href="?page=<%= currentPage + 1 %>">&raquo;</a></li>
+              <% } %>
+            </ul>
+          </nav>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

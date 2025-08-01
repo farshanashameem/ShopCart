@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Admin Profile' }) %>
+  <body >
+    <div class="container-fluid ">
+      <div class="row min-vh-100" >
+         <%- include('../partials/adminDashboard') %>
+
+        
+        <!-- Main Content -->
+      <div class="col-md-10 p-5">
+        <h3 class="fw-bold mb-4">Edit Product</h3>
+
+        <form action="/admin/add-product" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="productName" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="productName" name="name" placeholder="Product name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Product Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Write your description here..."></textarea>
+          </div>
+
+          <div class="mb-3 bg-light ">
+            <label class="form-label">Edit photos</label>
+            <div class="d-flex gap-3 border rounded-2 p-5">
+               <div class="d-flex gap-3  p-5">
+                   <% for (let i = 0; i < 3; i++) { %>
+                        <div class="upload-box col position-relative text-center me-5 image">
+                        <input type="file" name="images" class="image-input d-none " accept="image/*">
+                        <img src="https://img.icons8.com/ios/50/image--v1.png" alt="Upload" class="upload-preview" style="width: 40px;" />
+                        <div>Add Image</div>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+          </div>
+        
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Base Price</label>
+              <input type="number" class="form-control" name="basePrice" placeholder="Price of product" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Discount Price</label>
+              <input type="number" class="form-control" name="discountPrice" placeholder="Enter discount price">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Stock</label>
+              <input type="number" class="form-control" name="stock" placeholder="Enter stock limit">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <select class="form-select" name="genderId">
+                <option selected disabled>Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="unisex">Unisex</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" name="colorId">
+                <option selected disabled>Colour</option>
+                <option value="black">Black</option>
+                <option value="red">Red</option>
+                <option value="blue">Blue</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" name="productTypeId">
+                <option selected disabled>Product Type</option>
+                <option value="tshirt">T-Shirt</option>
+                <option value="jeans">Jeans</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select class="form-select" name="fitId">
+                <option selected disabled>Fit</option>
+                <option value="slim">Slim</option>
+                <option value="regular">Regular</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <a href="/admin/products" class="btn btn-outline-dark me-2">Cancel</a>
+            <button type="submit" class="btn btn-dark">Save</button>
+          </div>
+        </form>
+    </div>
+          
+          
+            
+
+           
+            
+          
+            
+        </div>
+      </div>
+       <footer class="text-center py-4 small text-muted border-top mt-4" style="font-weight: 700;">
+      © 2025 | ShopCart | All Rights Reserved. | We Give You Style.
+    </footer>
+    </div>
+
+   
+    <script src="/js/image.js">
+
+    </script>
+    <!-- Bootstrap & Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+
+    </script>
+  </body>
+</html>

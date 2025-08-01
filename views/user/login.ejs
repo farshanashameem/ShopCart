@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Login' }) %>
+  <body class=" d-flex justify-content-center align-items-center vh-100">
+
+    <div class="container p-4 shadow rounded-4 overflow-hidden a" style="max-width: 900px;background-color: rgb(244, 236, 227) !important;">
+      <div class="row g-0">
+        <!-- Left Section (Form) -->
+        <div class="col-md-6  p-5 d-flex flex-column justify-content-center">
+          <img src="/images/ShopCart.png" alt="">
+
+      <a href="/auth/google" class="btn btn-light border-0 d-flex align-items-center justify-content-center gap-2 mb-3 mt-2" style="background-color: #ccc4c0!important;">
+           <img src="/images/google.png" alt="Google" width="30" height="30" >
+            <span>Login with Google</span>
+          </a>
+
+          <div class="text-center mb-3 text-muted">
+            <hr class="my-2" />
+            <span class="position-relative px-2 " style="top: -18px; background-color: rgb(244, 236, 227) !important;"><b>or</b></span>
+          </div>
+
+          <form action="/login" method="POST" >
+            <div class="mb-3">
+              <input type="email" name="email" class="form-control rounded-2 px-3 py-2" placeholder="Email" value="<%= typeof old !== 'undefined' ? old.email : '' %>" />
+
+            </div>
+            <div class="mb-2 position-relative">
+              <input type="password" name="password" id="password"class="form-control rounded-2 px-3 py-2" placeholder="Password"  oninput="showField()"/>
+              
+              <!-- Show/Hide & Clear Buttons -->
+                  <div class="position-absolute top-50 end-0 translate-middle-y d-flex align-items-center me-3">
+                    <span class="d-none text-primary" id="show" onclick="showPassword()">Show</span>
+                  </div>
+
+            </div>
+            <div class="mb-3 text-end">
+              <a href="/resetPassword" class="text-decoration-none text-muted small">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn w-100 rounded-2 py-2 text-white" style="background-color: #4e4039;">Login</button>
+          </form>
+          <% if (error) { %>
+              <div class="text py-2 px-3 rounded-2">
+                <p class="text-danger"> <b><%= error %></b></p>
+              </div>
+          <% } %>
+
+          <p class="mt-4 text-center text-muted">
+            New User? <a href="/signup" class="text-primary text-decoration-none">Sign up now..!</a>
+          </p>
+        </div>
+
+        <!-- Right Section (Image) -->
+        <div class="col-md-6 d-none d-md-block">
+          <img src="/images/login-side.jpg" alt="Login Visual" class="img-fluid h-100 w-100 object-fit-cover" style="object-fit: cover;" />
+        </div>
+      </div>
+    </div>
+
+    
+    <script src="/js/showpassword.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <%- include('../partials/successAlert')  %>
+
+  </body>
+</html>

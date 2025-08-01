@@ -1,0 +1,13 @@
+ <% if (typeof successMessage !== 'undefined' && successMessage) { %>
+    <script>
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: "<%= successMessage %>",
+        timer: 2000,
+        showConfirmButton: false
+      });
+    </script>
+    <% } %>
+
+    

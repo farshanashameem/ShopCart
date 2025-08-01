@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Login' }) %>
+  <body class=" d-flex justify-content-center align-items-center vh-100">
+
+    <div class="container p-4 shadow rounded-4 overflow-hidden a" style="max-width: 400px;background-color: rgb(244, 236, 227) !important;">
+      <div class="row g-0">
+        <!-- Left Section (Form) -->
+        <div class="col-md-12  p-5 d-flex flex-column justify-content-center">
+          <img src="/images/ShopCart.png" alt="">
+
+                  <% if (error && error.length > 0) { %>
+          <div class="alert alert-danger py-2 px-3 rounded-2">
+            <%= error[0] %>
+          </div>
+        <% } %>
+
+        <% if (success && success.length > 0) { %>
+          <div class="alert alert-success py-2 px-3 rounded-2">
+            <%= success[0] %>
+          </div>
+        <% } %>
+
+
+          
+
+          <form action="/admin/login" method="POST" >
+            <div class="mb-3">
+              <input type="email" name="email" class="form-control rounded-2 px-3 py-2" placeholder="Email" required />
+            </div>
+            <div class="mb-2">
+              <input type="password" name="password" class="form-control rounded-2 px-3 py-2" placeholder="Password" required />
+            </div>
+            <div class="mb-3 text-end">
+              <a href="/resetPassword" class="text-decoration-none text-muted small">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn w-100 rounded-2 py-2 text-white" style="background-color: #4e4039;">Login</button>
+          </form>
+
+        </div>
+
+       
+      </div>
+    </div>
+
+  </body>
+</html>

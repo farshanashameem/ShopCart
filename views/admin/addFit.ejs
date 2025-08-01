@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Add Fit' }) %>
+  <body >
+    <div class="container-fluid ">
+      <div class="row min-vh-100" >
+         <%- include('../partials/adminDashboard') %>
+
+        <!-- Main Content -->
+         <div class="col-md-8 d-flex flex-column m-4 text-center" >
+            <h1 class="text-center">Add Fit</h1>
+            <% if(error) { %>
+                <p class="text-danger"><b><%= error%></b></p>
+            <%} %>
+            <div class="d-flex justify-content-center mt-5">
+                <form action="/admin/addFit" method="post" class="d-flex flex-column p-4 gap-4 col-md-6">
+                    <label for="fitname"></label>
+                    <input type="text" name="fitname" placeholder="Fit" class="form-control" />
+                    
+                    <label for="description"></label>
+                    <textarea name="description" placeholder="Description" class="form-control"></textarea>
+                    
+                    <button class="btn btn-dark" type="submit">Add</button>
+                </form>
+            </div>
+
+
+         </div>
+        
+    </div>
+             <footer class="text-center py-4 small text-muted border-top mt-4" style="font-weight: 700;">
+            © 2025 | ShopCart | All Rights Reserved. | We Give You Style.
+            </footer>
+    </div>
+
+   
+
+    <!-- Bootstrap & Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

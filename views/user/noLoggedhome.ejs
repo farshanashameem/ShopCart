@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Home - ShopCart' }) %>
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <!-- Hero Section -->
+    <section class="container my-4">
+      <div class="row align-items-center">
+        <div class="col-md-3 text-center">
+          <img src="/images/leftBanner.png" class="img-fluid" alt="Left Banner">
+        </div>
+        <div class="col-md-6 text-center">
+           <img src="/images/banner1.png" class="img-fluid col " alt="Banner 1">
+          <h1 class="fw-bold display-4">ULTIMATE <span class="text-outline">SALE</span></h1>
+          <p class="lead">NEW COLLECTION</p>
+          <a href="/login" class="rounded px-4 py-2 text-decoration-none bg-dark " style="background-color: black;color: white;">SHOP NOW</a>
+          <img src="/images/banner2.png" class="img-fluid col mt-4" alt="Banner 2">
+        </div>
+        <div class="col-md-3 text-center">
+          <img src="/images/rightBanner.png" class="img-fluid" alt="Right Banner">
+        </div>
+      </div>
+
+     
+    </section>
+
+    <!-- Explore by Category -->
+    <section class="container text-center my-5">
+      <h3 class="fw-bold">EXPLORE BY CATEGORY</h3>
+      <div class="btn-group my-3">
+        <button class="btn btn-dark">Women</button>
+        <button class="btn btn-outline-dark">Men</button>
+      </div>
+      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
+       <!-- <% let categories = ['T-Shirts', 'Jeans', 'Shorts', 'Sports Bra', 'Kurti']; %>
+        <% categories.forEach((item, i) => { %>
+          <div class="col text-center">
+            <img src="/images/category-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
+            <h6><%= item %></h6>
+          </div>
+        <% }) %> -->
+
+        <div class="col text-center">
+            <img src="/images/T-shirt.png" class="img-fluid rounded mb-2" >
+            <h6>T-Shirts</h6>
+          </div>
+          <div class="col text-center">
+            <img src="/images/Jeans.png" class="img-fluid rounded mb-2" >
+            <h6>Jeans</h6>
+          </div>
+          <div class="col text-center">
+            <img src="/images/Shorts.png" class="img-fluid rounded mb-2" >
+            <h6>Shorts</h6>
+          </div>
+          <div class="col text-center">
+            <img src="/images/SportsBra.png" class="img-fluid rounded mb-2" >
+            <h6>Sports Bra</h6>
+          </div>
+          <div class="col text-center">
+            <img src="/images/Kurti.png" class="img-fluid rounded mb-2" >
+            <h6>Kurti</h6>
+          </div>
+      </div>
+    </section>
+
+    <!-- Top Trends -->
+    <section class="container text-center my-5">
+      <h3 class="fw-bold">TOP TRENDS</h3>
+      <div class="btn-group my-3">
+        <button class="btn btn-dark">Women</button>
+        <button class="btn btn-outline-dark">Men</button>
+      </div>
+      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
+       <!--<% let trends = ['T-Shirts', 'Shirt', 'Jeans', 'Jackets', 'Power Hoodie']; %>
+        <% trends.forEach((item, i) => { %>
+          <div class="col text-center">
+            <img src="/images/trend-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
+            <h6><%= item %></h6>
+          </div>
+        <% }) %>--> 
+
+        <div class="col text-center">
+            <img src="/images/Tshirt.png" class="img-fluid rounded mb-2" >
+            <h6>T-Shirts</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Shirt.png" class="img-fluid rounded mb-2" >
+            <h6>Shirts</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Jean.png" class="img-fluid rounded mb-2" >
+            <h6>Jeans</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Jacket.png" class="img-fluid rounded mb-2" >
+            <h6>Jackets</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Hoodie.png" class="img-fluid rounded mb-2" >
+            <h6> Power Hoodie</h6>
+        </div>
+      </div>
+    </section>
+
+    <!-- New Arrivals -->
+    <section class="container text-center my-5">
+      <h3 class="fw-bold">NEW ARRIVALS</h3>
+      <div class="btn-group my-3">
+        <button class="btn btn-dark">Women</button>
+        <button class="btn btn-outline-dark">Men</button>
+      </div>
+      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
+       <!-- <% let arrivals = ['T-Shirt', 'Stripo T-Shirt', 'Shorts', 'BR Leather Jacket', 'Power Hoodie']; %>
+        <% arrivals.forEach((item, i) => { %>
+          <div class="col text-center">
+            <img src="/images/arrival-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
+            <h6><%= item %></h6>
+          </div>
+        <% }) %> -->
+        <div class="col text-center">
+            <img src="/images/WTShirt.png" class="img-fluid rounded mb-2" >
+            <h6> T-Shirt</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Stripo.png" class="img-fluid rounded mb-2" >
+            <h6> Stripo T-Shirt</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Short.png" class="img-fluid rounded mb-2" >
+            <h6> Shorts</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/LeatherJacket.png" class="img-fluid rounded mb-2" >
+            <h6> BR Leather Jacket</h6>
+        </div>
+        <div class="col text-center">
+            <img src="/images/Casuals.png" class="img-fluid rounded mb-2" >
+            <h6> Casuals</h6>
+        </div>
+        
+      </div>
+    </section>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

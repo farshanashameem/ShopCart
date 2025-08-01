@@ -1,0 +1,41 @@
+<!--Sweet Alert for Admin-->
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+  <script>
+    function  confirmAction(formElement,actionType,username){
+        
+        const messages={
+            block:`Are you sure want to block ${username}?`,
+            unblock:`Are you sure want to unblock ${username}?`,
+            delete:`Are you sure want to delete ${username} permanently?
+                    This cannot be undone! `
+        };
+        const titles={
+            block:'Block user',
+            unblock:'Unblock user',
+            delete:'Delete user'
+        };
+    
+
+
+        Swal.fire({
+        icon: 'warning',
+        title: titles[actionType],
+        text: messages[actionType],
+        showCancelButton:true,
+        confirmButtonColor:'#3085d6',
+        cancelButtonColor:'#d33',
+        confirmButtonText:`Yes,${actionType}`,
+        cancelButtonText:'Cancel'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                if(typeof formElement==='string'){
+                    document.getElementById(formElement).submit();
+                }else{
+                    formElement.submit();
+                }
+            }
+        });
+}
+  </script>
