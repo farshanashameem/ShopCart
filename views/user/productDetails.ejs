@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'ShopCart | Product Details' }) %>
+
+    <body>
+        <%- include('../partials/navbar') %>
+
+            <div class="container py-5">
+                <div class="row g-5">
+                    <!-- Left Images -->
+                    <div class="col-lg-6">
+                        <div class="row g-3 product-images">
+                            <% if (images && images.length> 0) { %>
+                                <% images.forEach(image=> { %>
+                                    <div class="col-6">
+                                        <img src="<%= image %>" class="img-fluid product-img" alt="product image">
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <p>No images available</p>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- Right Content -->
+                    <div class="col-lg-6">
+                        <% if (product) { %>
+                            <h5 class="fw-bold">
+                                <%= product.name %>
+                            </h5>
+                            <p class="text-muted">
+                                <%= product.productType %>
+                            </p>
+
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2 fw-bold">★ 4.4</span>
+                                <span class="fw-bold fs-5">
+
+                                    <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
+
+
+                                </span>
+                            </div>
+
+                            <!-- Sizes -->
+                            <% if (variants.length> 0) { %>
+                                <div class="mb-3">
+                                    <label class="form-label">Select a Size</label>
+                                    <div class="size-btn d-flex flex-wrap">
+                                        <% let shownSizes=new Set(); %>
+                                            <% variants.forEach((variant, i)=> {
+                                                if (!shownSizes.has(variant.size)) {
+                                                shownSizes.add(variant.size); %>
+                                                <input type="radio" class="btn-check" name="size" id="size<%= i %>"
+                                                    autocomplete="off">
+                                                <label class="btn btn-outline-dark me-2 mb-2" for="size<%= i %>">
+                                                    <%= variant.size %>
+                                                </label>
+                                                <% } }) %>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex flex-column flex-md-row gap-2 mb-4">
+                                    <button class="btn btn-outline-dark w-100">Add to Wishlist</button>
+                                    <button class="btn btn-dark w-100">Add to Cart</button>
+                                </div>
+
+                                <!-- Description Tabs -->
+                                <ul class="nav nav-tabs" id="descTab" role="tablist">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"
+                                            data-bs-target="#desc" type="button">Description</button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" id="review-tab" data-bs-toggle="tab"
+                                            data-bs-target="#review" type="button">Review</button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content" id="descTabContent">
+                                    <div class="tab-pane fade show active p-3" id="desc">
+                                        <p>
+                                            <%= product.description %>
+                                        </p>
+                                        <p><strong>Size & Fit:</strong></p>
+                                        <ul>
+                                            <% let shownFits=new Set(); %>
+                                                <% variants.forEach((variant)=> {
+                                                    if (!shownFits.has(variant.fitId.name)) {
+                                                    shownFits.add(variant.fitId.name); %>
+                                                    <li>
+                                                        <%= variant.fitId.name %>
+                                                    </li>
+                                                    <% } }) %>
+                                        </ul>
+                                    </div>
+                                    <div class="tab-pane fade p-3" id="review">
+                                        <p>No reviews yet.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Colors -->
+                                <div class="mt-4">
+                                    <p class="fw-bold mb-2">Available Colours:</p>
+                                    <div class="d-flex align-items-center flex-wrap">
+                                        <% let shownColors=new Set(); %>
+                                            <% variants.forEach((variant)=> {
+                                                if (!shownColors.has(variant.colorId.name)) {
+                                                shownColors.add(variant.colorId.name); %>
+                                                <span class="product-color-dot me-2 mb-2"
+                                                    style="background-color:<%= variant.colorId.hexCode %>;"
+                                                    title="<%= variant.colorId.name %>"></span>
+                                                <% } }) %>
+                                    </div>
+                                </div>
+                                <% } else { %>
+                                    <p>No variants available</p>
+                                    <% } %>
+                                        <% } else { %>
+                                            <p class="text-danger">Product not found.</p>
+                                            <% } %>
+                    </div>
+                </div>
+
+                <!-- Related Products -->
+                <hr class="my-5" />
+                <h4 class="mb-4">You May Also Like</h4>
+                <div class="row g-4">
+                    <% if (relatedProducts && relatedProducts.length> 0) { %>
+                        <% relatedProducts.forEach(prod=> { %>
+                            <div class="col-md-3">
+                                <div class="card related-card h-100">
+                                    <% if (prod.firstVariantImages && prod.firstVariantImages.length> 0) { %>
+                                        <img src="<%= prod.firstVariantImages[0] %>" alt="<%= prod.name %>"
+                                             class="img-fluid product-img" />
+                                        <% } else { %>
+                                            <p>No image available</p>
+                                            <% } %>
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <%= prod.name %>
+                                                    </h6>
+                                                    <p class="card-text text-muted"> <del>₹<%= prod.basePrice %></del>₹<%= prod.discountPrice %>
+                                                    </p>
+                                                </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                                <% } else { %>
+                                    <p>No related products found.</p>
+                                    <% } %>
+                </div>
+            </div>
+
+            <%- include('../partials/footer') %>
+
+
+
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+
+</html>

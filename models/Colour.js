@@ -12,6 +12,10 @@ const colourSchema=new mongoose.Schema({
         required:true,
         trim:true,
         unique:true
+    },
+    isActive:{
+        type:Boolean,
+        default:true
     }
 });
 

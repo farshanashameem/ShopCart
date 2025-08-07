@@ -1,0 +1,371 @@
+const ProductType = require('../models/productType');
+const Products = require('../models/Products');
+const ProductVariant = require('../models/productVariant');
+const Review = require('../models/reviews');
+const productType = require('../models/productType');
+const Fit = require('../models/Fit');
+const Colour = require('../models/Colour');
+const productVariant = require('../models/productVariant');
+
+const DEFAULT_IMAGE = '/images/default-product.png'; // Fallback image path
+
+// Helper: Get first variant with images for product IDs
+async function getFirstVariantsForProducts(productIds) {
+  // Fetch variants for multiple products at once (could optimize with aggregation later)
+  const variants = await ProductVariant.find({
+    productId: { $in: productIds },
+    isActive: true,
+    images: { $exists: true, $ne: [] }
+  }).lean();
+
+  // Map productId to variant (first one found)
+  const variantMap = new Map();
+  for (const variant of variants) {
+    if (!variantMap.has(variant.productId.toString())) {
+      variantMap.set(variant.productId.toString(), variant);
+    }
+  }
+  return variantMap;
+}
+
+// Helper: Calculate average rating for products
+async function getAvgRatingsForProducts(products) {
+  const ratings = {};
+
+  // Fetch all reviews for given product IDs at once
+  const productIds = products.map(p => p._id);
+  const reviews = await Review.aggregate([
+    { $match: { productId: { $in: productIds } } },
+    {
+      $group: {
+        _id: '$productId',
+        avgRating: { $avg: '$rating' }
+      }
+    }
+  ]);
+
+  for (const { _id, avgRating } of reviews) {
+    ratings[_id.toString()] = avgRating;
+  }
+
+  return ratings;
+}
+
+exports.getHomePage = async (req, res) => {
+  try {
+    const genders = ['male', 'female'];
+
+    const categoryData = {};
+    const topTrends = {};
+    const newArrivals = {};
+
+    for (const gender of genders) {
+      // === CATEGORIES BY GENDER ===
+      const categories = await ProductType.find({ isActive: true });
+
+      // Find one product per category matching gender
+      const productsByCategory = await Promise.all(
+        categories.map(cat =>
+          Products.findOne({
+            productTypeId: cat._id,
+            genderId: gender,
+            isActive: true
+          })
+        )
+      );
+
+      // Filter valid products
+      const validProducts = productsByCategory.filter(Boolean);
+      const productIds = validProducts.map(p => p._id.toString());
+
+      // Get variants for those products
+      const variantMap = await getFirstVariantsForProducts(productIds);
+
+      // Build categoryData with image fallback
+      categoryData[gender] = categories
+        .map(cat => {
+          const product = validProducts.find(p => p.productTypeId.toString() === cat._id.toString());
+          if (!product) return null;
+          const variant = variantMap.get(product._id.toString());
+          if (!variant || !variant.images.length) return null;
+          return {
+            categoryName: cat.name,
+            image: variant.images[0]
+          };
+        })
+        .filter(Boolean);
+
+      // === TOP TRENDS ===
+      const products = await Products.find({ genderId: gender, isActive: true }).lean();
+      const avgRatings = await getAvgRatingsForProducts(products);
+
+      // Attach avgRating to products
+      const productsWithRatings = products
+        .map(p => ({
+          ...p,
+          avgRating: avgRatings[p._id.toString()] || 0
+        }))
+        .filter(p => p.avgRating > 0)
+        .sort((a, b) => b.avgRating - a.avgRating)
+        .slice(0, 10);
+
+      const trendProductIds = productsWithRatings.map(p => p._id.toString());
+      const trendVariantMap = await getFirstVariantsForProducts(trendProductIds);
+
+      topTrends[gender] = productsWithRatings
+        .map(p => {
+          const variant = trendVariantMap.get(p._id.toString());
+          if (!variant || !variant.images.length) return null;
+          return {
+            productName: p.name,
+            image: variant.images[0]
+          };
+        })
+        .filter(Boolean);
+
+      // === NEW ARRIVALS ===
+      const newestProducts = await Products.find({ genderId: gender, isActive: true })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean();
+
+      const newestProductIds = newestProducts.map(p => p._id.toString());
+      const newestVariantMap = await getFirstVariantsForProducts(newestProductIds);
+
+      newArrivals[gender] = newestProducts
+        .map(p => {
+          const variant = newestVariantMap.get(p._id.toString());
+          if (!variant || !variant.images.length) return null;
+          return {
+            productName: p.name,
+            image: variant.images[0]
+          };
+        })
+        .filter(Boolean);
+    }
+
+    res.render('user/home', {
+      categories: categoryData,
+      trends: topTrends,
+      arrivals: newArrivals
+    });
+  } catch (err) {
+    console.error('Error in getHomePage:', err);
+    res.status(500).send('Internal Server Error');
+  }
+};
+
+
+exports.getProductPage = async (req, res) => {
+  try {
+    const genderParam = req.params.gender || 'all';
+    const genderMap = {
+      'women': 'female',
+      'men': 'male'
+    };
+    const gender = genderMap[genderParam] || null;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
+
+    const categoriesQuery = { isActive: true };
+    if (gender === 'female' || gender === 'male') categoriesQuery.gender = gender;
+    let categories;
+    if (!gender) {
+      const categoryIds = await Products.distinct("productTypeId", {
+        isActive: true
+      });
+      categories = await productType.find({ isActive: true }).lean(); console.log(categories);
+    } else {
+      const categoryIds = await Products.distinct("productTypeId", {
+        genderId: gender,
+        isActive: true
+      });
+      categories = await productType.find({
+        _id: { $in: categoryIds },
+        isActive: true
+      });
+    }
+
+
+    const fit = await Fit.find({ isActive: true });
+    const colors = await Colour.find({ isActive: true });
+    const sort = req.query.sort || null;
+
+    const selectedCategories = typeof req.query.category === 'string' ? req.query.category.split(',') : Array.isArray(req.query.category) ? req.query.category : req.query.category ? [req.query.category] : [];
+    const selectedFits = typeof req.query.fit === 'string' ? req.query.fit.split(',') : Array.isArray(req.query.fit) ? req.query.fit : req.query.fit ? [req.query.fit] : [];
+    const selectedColors = typeof req.query.color === 'string' ? req.query.color.split(',') : Array.isArray(req.query.color) ? req.query.color : req.query.color ? [req.query.color] : [];
+    const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : null;
+
+    const variantQuery = { isActive: true };
+    if (selectedFits.length > 0) variantQuery.fitId = { $in: selectedFits };
+    if (selectedColors.length > 0) variantQuery.colorId = { $in: selectedColors };
+    if (maxPrice) variantQuery.discountPrice = { $lte: maxPrice };
+
+    const matchedVariants = await ProductVariant.find(variantQuery).lean();
+    const matchedProductIds = [...new Set(matchedVariants.map(v => v.productId.toString()))];
+
+    const productQuery = { isActive: true };
+    if (gender) productQuery.genderId = gender;
+    if (selectedCategories.length > 0) productQuery.productTypeId = { $in: selectedCategories };
+    if (matchedProductIds.length > 0) productQuery._id = { $in: matchedProductIds };
+
+    if (
+      selectedCategories.length === 0 &&
+      selectedFits.length + selectedColors.length === 0 &&
+      !maxPrice
+    ) {
+      // no extra filtering
+    } else {
+      if (matchedProductIds.length === 0) {
+        return res.render('user/allProducts', {
+          categories,
+          fit,
+          colour: colors,
+          products: [],
+          selectedFits,
+          selectedColors,
+          selectedCategories,
+          maxPrice,
+          currentPage: page,
+          totalPages: 1,
+          sort,
+          queryParams: { ...req.query }
+        });
+      }
+    }
+
+    const totalProducts = await Products.countDocuments(productQuery);
+    const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
+
+    const products = await Products.find(productQuery)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const productIds = products.map(p => p._id);
+
+    const variants = await ProductVariant.find({
+      productId: { $in: productIds },
+      isActive: true
+    })
+      .sort({ createdAt: 1 })
+      .lean();
+
+    const variantMap = {};
+    variants.forEach(variant => {
+      const pid = variant.productId.toString();
+      if (!variantMap[pid]) {
+        variantMap[pid] = {
+          firstImage: variant.images?.[0],
+          basePrices: [variant.basePrice],
+          discountPrices: [variant.discountPrice]
+        };
+      } else {
+        variantMap[pid].basePrices.push(variant.basePrice);
+        variantMap[pid].discountPrices.push(variant.discountPrice);
+      }
+    });
+
+    const actualProducts = products.map(product => {
+      const pid = product._id.toString();
+      const variantInfo = variantMap[pid] || {};
+      return {
+        ...product,
+        firstImage: variantInfo.firstImage,
+        minPrice: variantInfo.discountPrices ? Math.min(...variantInfo.discountPrices) : 0,
+        maxPrice: variantInfo.basePrices ? Math.max(...variantInfo.basePrices) : 0
+      };
+    });
+
+    if (sort === 'LowToHigh') {
+      actualProducts.sort((a, b) => a.minPrice - b.minPrice);
+    } else if (sort === 'HighToLow') {
+      actualProducts.sort((a, b) => b.minPrice - a.minPrice);
+    }
+
+    const queryParams = { ...req.query };
+    delete queryParams.page;
+
+    res.render('user/allProducts', {
+      categories,
+      fit,
+      colour: colors,
+      products: actualProducts,
+      selectedFits,
+      selectedColors,
+      selectedCategories,
+      maxPrice,
+      currentPage: page,
+      totalPages,
+      sort,
+      queryParams
+    });
+
+  } catch (err) {
+    console.error('Error loading product page with filters:', err);
+    res.status(500).send('Server Error');
+  }
+};
+
+exports.getProductDetails = async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const product = await Products.findOne({ _id: id, isActive: true }).lean();
+    if (!product) return res.redirect('/products');
+
+    const variants = await productVariant.find({ productId: id }).populate('colorId fitId size').lean();
+
+    const relatedProducts = await Products.find({
+      productTypeId: product.productTypeId,
+      _id: { $ne: id },
+      isActive: true
+    }).limit(4).lean();
+
+     const relatedDatas = await Promise.all(
+    relatedProducts.map(async (prod) => {
+      const firstVariant = await ProductVariant.findOne({
+        productId: prod._id,
+        isActive: true
+      })
+      .sort({ createdAt: 1 })
+      .lean();
+
+      return {
+        ...prod,
+        firstVariantImages: firstVariant ? firstVariant.images : [],
+        basePrice:firstVariant ? firstVariant.basePrice :0,
+        discountPrice:firstVariant ? firstVariant.discountPrice : 0
+      };
+    })
+  );
+
+
+
+    const images = variants[0]?.images || [];
+    const basePrice = variants[0]?.basePrice || 0;
+    const discountPrice = variants[0]?.discountPrice || 0;
+
+    res.render('user/productDetails', {
+      product,
+      variants,
+      relatedProducts,
+      images, basePrice,
+      discountPrice,
+       relatedProducts: relatedDatas
+    });
+  } catch (err) {
+    console.error('Product Details Error:', err.message);
+    res.status(500).render('error/500');
+  }
+};
+
+
+
+
+
+
+
+

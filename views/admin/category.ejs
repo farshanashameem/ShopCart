@@ -8,22 +8,11 @@
 
         <!-- Main Content -->
             <div class="col-md-8 d-flex flex-column m-4">
-                <div class="row d-flex flex-row-reverse mb-3">
-                    <a href="#" class="p-2 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add category</a>
-                </div>
                 <div class="row text-center mb-4">
                     <h2><b>Category Management</b></h2>
                 </div>
                 <div class=" row text-start d-flex flex-row">
-                    <h3 class="col-md-2"><b>Gender</b></h3>
-                    <form method="GET" action="/admin/products" class="col-md-3 gender ">
-                        <select name="gender" onchange="this.form.submit()" class="form-select w-auto bg-dark addLink p-2">
-                            <option value="" class=" bg-dark addLink p-2">All Genders</option>
-                            <option value="Men" class=" bg-dark addLink p-2">Men</option>
-                            <option value="Women" class=" bg-dark addLink p-2">Women</option>
-                            <option value="Not Specific" class=" bg-dark addLink p-2">Not Specific</option>
-                        </select>
-                    </form>
+                      <h2 class="m-3"><b>Product Category</b></h2>   
 
                      <div class="table-wrapper">
                         <table class="table table-bordered table-striped cat-table mt-4">
@@ -38,14 +27,23 @@
                             <% productTypes.forEach(type => { %>
                               <tr>
                                 <td><%= type.name %></td>
-                                <td>—</td> 
+                                <td><%= type.stock %></td> 
                                 <td>
-                                  <a href="/admin/editPType/<%= type._id %>" class="ms-2 me-2">
-                                    <img src="/images/edit.png" alt="edit" height="24px" width="24px">
-                                  </a>
-                                  <a href="/admin/deletePType/<%= type._id %>" class="ms-2 me-2">
-                                     <img src="/images/delete.png" alt="edit" height="24px" width="24px">
-                                  </a>
+                                  <form method="GET" action="/admin/editPType/<%= type._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                      <img src="/images/edit.png" alt="edit" height="24px" width="24px">
+                                    </button>
+                                  </form>
+
+                                 <form method="post" action="/admin/deletePType/<%= type._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                    <img src="/images/<%= type.isActive ? 'delete.png' : 'restore.png' %>"
+                                        title="<%= type.isActive ? 'delete' : 'restore' %>"
+                                        alt="<%= type.isActive ? 'delete' : 'restore' %>" 
+                                        style="height: 24px; width: 24px; cursor: pointer;">
+
+                                    </button>
+                                  </form>
                                 </td>
                               </tr>
                             <% }) %>
@@ -54,12 +52,13 @@
                         </table>
                      </div>
                   <div class="row d-flex flex-row-reverse mb-3">
-                    <a href="/admin/addPType" class="p-2 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Product Type</a>
+                    <a href="/admin/addPType" class="p-2 m-3 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Product Type</a>
                   </div>
                       
                 </div>
 
                 <!-- Adding Fit-->
+                  <h2 class="m-3"><b>Product Fits</b></h2> 
                  <div class="table-wrapper">
                         <table class="table table-bordered table-striped cat-table mt-4">
                     <thead class="table-dark">
@@ -73,14 +72,22 @@
                         <% fits.forEach(fit => { %>
                           <tr>
                             <td><%= fit.name %></td>
-                            <td>—</td>
+                            <td><%= fit.stock %></td>
                             <td>
-                              <a href="/admin/editFit/<%= fit._id %>" class="me-2 ms-2">
-                                <img src="/images/edit.png" alt="edit" height="24px" width="24px">
-                              </a>
-                              <a href="/admin/deleteFit/<%= fit._id %>" class="me-2 ms-2">
-                                <img src="/images/delete.png" alt="edit" height="24px" width="24px">
-                              </a>
+                              <form method="GET" action="/admin/editFit/<%= fit._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                      <img src="/images/edit.png" alt="edit" height="24px" width="24px">
+                                    </button>
+                                  </form>
+
+                                 <form method="post" action="/admin/deleteFit/<%= fit._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                     <img src="/images/<%= fit.isActive ? 'delete.png' : 'restore.png' %>"
+                                        title="<%= fit.isActive ? 'delete' : 'restore' %>"
+                                        alt="<%= fit.isActive ? 'delete' : 'restore' %>" 
+                                        style="height: 24px; width: 24px; cursor: pointer;">
+                                    </button>
+                                  </form>
                             </td>
                           </tr>
                         <% }) %>
@@ -89,10 +96,11 @@
                   </table>
                  </div>
                   <div class="row d-flex flex-row-reverse mb-3">
-                    <a href="/admin/addFit" class="p-2 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Fit</a>
+                    <a href="/admin/addFit" class="p-2 m-3 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Fit</a>
                   </div>
               
                    <!-- Adding Colour-->
+                     <h2 class="m-3"><b>Product Colours</b></h2> 
                    <div class="table-wrapper">
                       <table class="table table-bordered table-striped cat-table mt-4">
                         <thead class="table-dark">
@@ -113,14 +121,22 @@
                                   <%= colour.hexCode %>
                                 </span>
                               </td>
-                              <td>—</td>
+                              <td><%= colour.stock %></td>
                               <td>
-                                <a href="/admin/editColour/<%= colour._id %>" class="ms-2 me-2">
-                                  <img src="/images/edit.png" alt="edit" height="24px" width="24px">
-                                </a>
-                                <a href="/admin/deleteColour/<%= colour._id %>" class="ms-2 me-2">
-                                   <img src="/images/delete.png" alt="edit" height="24px" width="24px">
-                                </a>
+                                <form method="GET" action="/admin/editColour/<%= colour._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                      <img src="/images/edit.png" alt="edit" height="24px" width="24px">
+                                    </button>
+                                  </form>
+
+                                 <form method="post" action="/admin/deleteColour/<%= colour._id %>" class="ms-2 me-2 d-inline">
+                                    <button type="submit" class="btn p-0 border-0 bg-transparent">
+                                   <img src="/images/<%= colour.isActive ? 'delete.png' : 'restore.png' %>"
+                                        title="<%= colour.isActive ? 'delete' : 'restore' %>"
+                                        alt="<%= colour.isActive ? 'delete' : 'restore' %>" 
+                                        style="height: 24px; width: 24px; cursor: pointer;">
+                                    </button>
+                                  </form>
                               </td>
                             </tr>
                           <% }) %>
@@ -129,7 +145,7 @@
                       </table>
                    </div>
                   <div class="row d-flex flex-row-reverse mb-3">
-                    <a href="/admin/addColour" class="p-2 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Colour</a>
+                    <a href="/admin/addColour" class="p-2 m-3 text-center bg-dark float-right text-decoration-none col-md-3 addLink">Add Colour</a>
                   </div>
               
             </div>
@@ -145,5 +161,9 @@
 
     <!-- Bootstrap & Icons -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+   <%- include('../partials/successAlert') %>
+   
   </body>
 </html>

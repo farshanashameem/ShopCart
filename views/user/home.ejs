@@ -1,149 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include('../partials/head', { title: 'Home - ShopCart' }) %>
+<%- include('../partials/head', { title: 'Home - ShopCart' }) %>
+
   <body>
     <%- include('../partials/navbar') %>
 
-    <!-- Hero Section -->
-    <section class="container my-4">
-      <div class="row align-items-center">
-        <div class="col-md-3 text-center">
-          <img src="/images/leftBanner.png" class="img-fluid" alt="Left Banner">
+      <!-- Hero Section -->
+      <section class="container my-4">
+        <div class="row align-items-center">
+          <div class="col-3 text-center">
+            <img src="/images/leftBanner.png" class="img-fluid" alt="Left Banner">
+          </div>
+          <div class="col-6 text-center">
+            <img src="/images/banner1.png" class="img-fluid col " alt="Banner 1">
+            <h1 class="fw-bold display-4">ULTIMATE <span class="text-outline">SALE</span></h1>
+            <p class="lead">NEW COLLECTION</p>
+            <a href="/login" class="rounded px-4 py-2 text-decoration-none bg-dark "
+              style="background-color: black;color: white;">SHOP NOW</a>
+            <img src="/images/banner2.png" class="img-fluid col mt-4" alt="Banner 2">
+          </div>
+          <div class="col-3 text-center">
+            <img src="/images/rightBanner.png" class="img-fluid" alt="Right Banner">
+          </div>
         </div>
-        <div class="col-md-6 text-center">
-           <img src="/images/banner1.png" class="img-fluid col " alt="Banner 1">
-          <h1 class="fw-bold display-4">ULTIMATE <span class="text-outline">SALE</span></h1>
-          <p class="lead">NEW COLLECTION</p>
-          <a href="/login" class="rounded px-4 py-2 text-decoration-none bg-dark " style="background-color: black;color: white;">SHOP NOW</a>
-          <img src="/images/banner2.png" class="img-fluid col mt-4" alt="Banner 2">
-        </div>
-        <div class="col-md-3 text-center">
-          <img src="/images/rightBanner.png" class="img-fluid" alt="Right Banner">
-        </div>
-      </div>
 
-     
-    </section>
 
-    <!-- Explore by Category -->
-    <section class="container text-center my-5">
-      <h3 class="fw-bold">EXPLORE BY CATEGORY</h3>
-      <div class="btn-group my-3">
-        <button class="btn btn-dark">Women</button>
-        <button class="btn btn-outline-dark">Men</button>
-      </div>
-      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
-       <!-- <% let categories = ['T-Shirts', 'Jeans', 'Shorts', 'Sports Bra', 'Kurti']; %>
-        <% categories.forEach((item, i) => { %>
-          <div class="col text-center">
-            <img src="/images/category-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
-            <h6><%= item %></h6>
-          </div>
-        <% }) %> -->
+      </section>
 
-        <div class="col text-center">
-            <img src="/images/T-shirt.png" class="img-fluid rounded mb-2" >
-            <h6>T-Shirts</h6>
-          </div>
-          <div class="col text-center">
-            <img src="/images/Jeans.png" class="img-fluid rounded mb-2" >
-            <h6>Jeans</h6>
-          </div>
-          <div class="col text-center">
-            <img src="/images/Shorts.png" class="img-fluid rounded mb-2" >
-            <h6>Shorts</h6>
-          </div>
-          <div class="col text-center">
-            <img src="/images/SportsBra.png" class="img-fluid rounded mb-2" >
-            <h6>Sports Bra</h6>
-          </div>
-          <div class="col text-center">
-            <img src="/images/Kurti.png" class="img-fluid rounded mb-2" >
-            <h6>Kurti</h6>
-          </div>
-      </div>
-    </section>
+      <!-- Explore by Category -->
+      <section class="container text-center my-5">
+        <h3 class="fw-bold">EXPLORE BY CATEGORY</h3>
+        <div class="btn-group my-3">
+          <button class="btn btn-dark" onclick="switchCategory('female')">Women</button>
+          <button class="btn btn-outline-dark" onclick="switchCategory('male')">Men</button>
+        </div>
 
-    <!-- Top Trends -->
-    <section class="container text-center my-5">
-      <h3 class="fw-bold">TOP TRENDS</h3>
-      <div class="btn-group my-3">
-        <button class="btn btn-dark">Women</button>
-        <button class="btn btn-outline-dark">Men</button>
-      </div>
-      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
-       <!--<% let trends = ['T-Shirts', 'Shirt', 'Jeans', 'Jackets', 'Power Hoodie']; %>
-        <% trends.forEach((item, i) => { %>
-          <div class="col text-center">
-            <img src="/images/trend-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
-            <h6><%= item %></h6>
+        <% ['female', 'male' ].forEach(gender=> { %>
+          <div class="position-relative category-section" id="category-<%= gender %>"
+            style="<%= gender === 'female' ? '' : 'display:none;' %>">
+
+            <!-- Left arrow -->
+            <button class="scroll-btn left" onclick="slideCategory('<%= gender %>', -1)">&#8249;</button>
+
+            <!-- Slide container -->
+            <div class="category-slider-wrapper">
+              <div id="category-slider-<%= gender %>" class="category-slider">
+                <% if (categories[gender]) { %>
+                  <% categories[gender].forEach(cat=> { %>
+                    <div class="item-card text-center">
+                      <div class="category-img-wrapper">
+                        <img src="<%= cat.image %>" alt="<%= cat.categoryName %>">
+                      </div>
+                      <h6 class="mt-2">
+                        <%= cat.categoryName %>
+                      </h6>
+                    </div>
+
+                    <% }) %>
+                      <% } %>
+              </div>
+            </div>
+
+            <!-- Right arrow -->
+            <button class="scroll-btn right" onclick="slideCategory('<%= gender %>', 1)">&#8250;</button>
           </div>
-        <% }) %>--> 
+          <% }) %>
+      </section>
 
-        <div class="col text-center">
-            <img src="/images/Tshirt.png" class="img-fluid rounded mb-2" >
-            <h6>T-Shirts</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Shirt.png" class="img-fluid rounded mb-2" >
-            <h6>Shirts</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Jean.png" class="img-fluid rounded mb-2" >
-            <h6>Jeans</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Jacket.png" class="img-fluid rounded mb-2" >
-            <h6>Jackets</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Hoodie.png" class="img-fluid rounded mb-2" >
-            <h6> Power Hoodie</h6>
-        </div>
-      </div>
-    </section>
 
-    <!-- New Arrivals -->
-    <section class="container text-center my-5">
-      <h3 class="fw-bold">NEW ARRIVALS</h3>
-      <div class="btn-group my-3">
-        <button class="btn btn-dark">Women</button>
-        <button class="btn btn-outline-dark">Men</button>
-      </div>
-      <div class="row row-cols-2 row-cols-md-5 g-4 mt-2">
-       <!-- <% let arrivals = ['T-Shirt', 'Stripo T-Shirt', 'Shorts', 'BR Leather Jacket', 'Power Hoodie']; %>
-        <% arrivals.forEach((item, i) => { %>
-          <div class="col text-center">
-            <img src="/images/arrival-<%= i + 1 %>.jpg" class="img-fluid rounded mb-2" alt="<%= item %>">
-            <h6><%= item %></h6>
+
+      <!-- Top Trends 
+      <section class="container text-center my-5">
+        <h3 class="fw-bold">TOP TRENDS</h3>
+        <div class="btn-group my-3">
+          <button class="btn btn-dark" onclick="switchTrends('female')">Women</button>
+          <button class="btn btn-outline-dark" onclick="switchTrends('male')">Men</button>
+        </div>
+
+        <% ['female', 'male' ].forEach(gender=> { %>
+          <div class="position-relative trend-section" id="trend-<%= gender %>"
+            style="<%= gender === 'female' ? '' : 'display:none;' %>">
+            <button class="scroll-btn left" onclick="scrollItems('trends-<%= gender %>', -1)">&#8249;</button>
+            <div id="trends-<%= gender %>" class="scroll-container">
+              <% if (trends[gender]) { %>
+                <% trends[gender].forEach(item=> { %>
+                  <div class="item-card text-center">
+                    <img src="<%= item.image %>" class="img-fluid rounded mb-2" alt="<%= item.productName %>">
+                    <h6>
+                      <%= item.productName %>
+                    </h6>
+                  </div>
+                  <% }) %>
+                    <% } %>
+            </div>
+            <button class="scroll-btn right" onclick="scrollItems('trends-<%= gender %>', 1)">&#8250;</button>
           </div>
-        <% }) %> -->
-        <div class="col text-center">
-            <img src="/images/WTShirt.png" class="img-fluid rounded mb-2" >
-            <h6> T-Shirt</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Stripo.png" class="img-fluid rounded mb-2" >
-            <h6> Stripo T-Shirt</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Short.png" class="img-fluid rounded mb-2" >
-            <h6> Shorts</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/LeatherJacket.png" class="img-fluid rounded mb-2" >
-            <h6> BR Leather Jacket</h6>
-        </div>
-        <div class="col text-center">
-            <img src="/images/Casuals.png" class="img-fluid rounded mb-2" >
-            <h6> Casuals</h6>
-        </div>
-        
-      </div>
-    </section>
+          <% }) %>
+      </section>-->
 
-    <%- include('../partials/footer') %>
-     <!-- Bootstrap Bundle with Popper -->
-     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+      <!-- New Arrivals -->
+      <section class="container text-center my-5">
+        <h3 class="fw-bold">NEW ARRIVALS</h3>
+        <div class="btn-group my-3">
+          <button class="btn btn-dark" onclick="switchArrivals('female')">Women</button>
+          <button class="btn btn-outline-dark" onclick="switchArrivals('male')">Men</button>
+        </div>
+
+
+        <% ['female', 'male' ].forEach(gender=> { %>
+          <div class="position-relative arrival-section" id="arrival-<%= gender %>"
+            style="<%= gender === 'female' ? '' : 'display:none;' %>">
+
+            <!-- Left arrow -->
+            <button class="scroll-btn left" onclick="slideArrival('<%= gender %>', -1)">&#8249;</button>
+
+            <!-- Slide container -->
+            <div class="category-slider-wrapper">
+              <div id="arrival-slider-<%= gender %>" class="category-slider">
+                <% if (arrivals[gender]) { %>
+                  <% arrivals[gender].forEach(item=> { %>
+                    <div class="item-card text-center">
+                      <div class="category-img-wrapper">
+                        <img src="<%= item.image %>" class="img-fluid rounded mb-2" alt="<%= item.productName %>">
+                      </div>
+                      <h6 class="mt-2">
+                        <%= item.productName %>
+                      </h6>
+                    </div>
+
+                    <% }) %>
+                      <% } %>
+              </div>
+            </div>
+
+            <!-- Right arrow -->
+            <button class="scroll-btn right" onclick="slideArrival('<%= gender %>', 1)">&#8250;</button>
+          </div>
+          <% }) %>
+
+
+
+
+      </section>
+
+
+      <%- include('../partials/footer') %>
+        <!-- Bootstrap Bundle with Popper -->
+        <script src="/js/scroll.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   </body>
+
 </html>

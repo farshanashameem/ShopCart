@@ -3,61 +3,39 @@ const User = require('../models/userModel');
 
 //protecting routes using middleware
 module.exports={
-  isUserLoggedIn: async (req, res, next) => {
+ isUserLoggedIn :async (req, res, next) => {
   const sessionUser = req.session.user;
-  const passportUser = req.user;
-  const isPassportAuth = req.isAuthenticated && req.isAuthenticated();
+  if (!sessionUser) {
+    return res.redirect('/login');
+  }
 
-  // ✅ SESSION USER CASE
-  if (sessionUser) {
-    try {
-      console.log("sessionUser.id:", sessionUser.id);
-      const freshUser = await User.findById(sessionUser.id);
-      if (!freshUser) {
-        req.flash('error', 'User Blocked');
-        return req.session.destroy(() => {
-          console.log("no user");
-          
-          return res.redirect('/login');
-        });
-      } 
-      else if (freshUser.isBlocked) {
-        req.flash('error', 'User Blocked');
-        return req.session.destroy(() => {
-          console.log("user blocked.going back to login page");
-          
-          return res.redirect('/login');
-        });
-      }else {
-        // Optionally update session data to keep fresh info
-        req.session.user = freshUser;
-        console.log(req.session.user);
-        return next();
-      }
-    } catch (err) {
-      console.error(err);
+  try {
+    
+    const freshUser = await User.findById(sessionUser._id); // or sessionUser.id if stored as `.id`
+    
+    if (!freshUser) {
+      req.flash('error', 'User not found');
+      delete req.session.user;
       return res.redirect('/login');
     }
-  }
 
-  // ✅ PASSPORT USER CASE
-  if (isPassportAuth) {
-    if (!passportUser) {
-      req.logout(() => res.redirect("/login"));
-    } else if (passportUser.isBlocked) {
+    if (freshUser.isBlocked) {
       req.flash('error', 'User Blocked');
-      req.logout(() => {
-        
-        return res.redirect('/login');
-      });
-    } else {
-      return next();
+      delete req.session.user;
+      return res.redirect('/login');
     }
+
+    // Optional: refresh session data
+    req.session.user = freshUser;
+
+    next();
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong');
+    res.redirect('/login');
   }
-return res.redirect('/login');
- 
-}
-,
+ },
+
 
 
  
@@ -72,9 +50,12 @@ return res.redirect('/login');
 
     isAdminLoggedIn:(req,res,next)=>{
         if(req.session.admin){
+            res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            res.set('Pragma', 'no-cache');
+            res.set('Expires', '0');
             next();
         }else{
-            res.redirect("/admin");//login page of admin
+            res.redirect("/admin/login");//login page of admin
         }
     },
 

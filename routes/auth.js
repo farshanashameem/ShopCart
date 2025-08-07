@@ -11,38 +11,18 @@ router.get(
   passport.authenticate("google", {
     failureRedirect: "/login",
     failureFlash: true,
+    session:false
   }),
   (req, res, next) => {
-    if (req.user._isExisting) {
-     
-      req.flash("error", "User already exists. Please log in.");
-      return res.redirect("/login");
 
-    } else {
-      // New user signup successful - user is already logged in by Passport,
-      // so redirect to home or wherever you want.
-      req.flash("success", "Signup successful! Please log in to continue.");
+     req.session.user = req.user;
+      // New user signup successful - user is already logged in by Passport,  
       return res.redirect("/home");
-    }
+    
   }
 );
 
 
-// Logout
-router.get("/logout", (req, res, next) => {
-  req.logout(function (err) {
-    if (err) return next(err);
 
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Session destruction error:", err);
-        return res.redirect("/");
-      }
 
-      res.clearCookie("connect.sid"); // Optional: clear session cookie
-      res.redirect("/login");
-    });
-  });
-});
-
-module.exports = router;
+module.exports = router; 

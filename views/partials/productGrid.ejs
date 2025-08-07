@@ -1,0 +1,28 @@
+<!-- Product Grid -->
+<div class="col-9">
+    <div class="row  row-cols-3 g-4">
+        <% products.forEach(product=> { %>
+            <div class="col-4"><a href="/details/<%= product._id %>" class="text-decoration-none">
+
+                <div class="product-card " style="color: rgb(122, 46, 2);">
+                    <img src="<%= product.firstImage %>" alt="<%= product.name %>" class="img-fluid w-100 rounded mb-2">
+                    <h5><b>
+                            <%= product.name %>
+                        </b>
+                    </h5>
+                    <h6>
+                        <%= product.description %>
+                    </h6>
+                    <p>Price: <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %>
+                    </p>
+                </div>
+            </a>
+                
+            </div>
+            <% }) %>
+    </div>
+
+    
+
+
+</div>

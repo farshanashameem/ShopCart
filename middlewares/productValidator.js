@@ -5,10 +5,10 @@ const productValidationRules = [
 
   body('description').trim().notEmpty().withMessage('Description is required'),
 
-  body('basePrice').notEmpty().withMessage('Base Price is required')
+  body('variants.*.basePrice').notEmpty().withMessage('Base Price is required')
     .isNumeric().withMessage('Base Price must be a number'),
 
-  body('discountPrice').notEmpty().withMessage('Discount Price is required')
+  body('variants.*.discountPrice').notEmpty().withMessage('Discount Price is required')
     .isNumeric().withMessage('Discount Price must be a number'),
 
   body('genderId').notEmpty().withMessage('Gender is required'),
@@ -28,6 +28,7 @@ const productValidationRules = [
     if (!req.files || req.files.length === 0) {
       throw new Error('At least one image is required');
     }
+    
     return true;
   })
 ];

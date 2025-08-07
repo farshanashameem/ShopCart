@@ -17,11 +17,6 @@ exports.getLoginPage=(req,res)=>{
   res.render("user/login", { successMessage });
 }
 
-//Home page of user
-exports.getHomePage=(req,res)=>{
-    res.render("user/home");
-}
-
 //Sign Up Page
 exports.getSignUpPage=(req,res)=>{
     res.render('user/signup',{errors: {},old: {}} );
@@ -227,7 +222,7 @@ exports.loginUser = async (req, res) => {
 
     //  create session
     req.session.user = {
-      id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       mobile: user.mobile,

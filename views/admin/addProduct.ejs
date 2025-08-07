@@ -40,25 +40,11 @@
                     <div>Add Image</div>
                   </div>
                 <% } %>
-              </div>
+              </div> 
             </div>
             <% if (errors?.images) { %>
               <div class="text-danger mt-1"><%= errors.images %></div>
             <% } %>
-          </div>
-
-          <!-- Prices -->
-          <div class="row g-3 mb-3">
-            <div class="col-md-4">
-              <label class="form-label">Base Price</label>
-              <input type="number" class="form-control" name="basePrice" value="<%= oldInput?.basePrice || '' %>">
-              <% if (errors?.basePrice) { %><div class="text-danger"><%= errors.basePrice %></div><% } %>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Discount Price</label>
-              <input type="number" class="form-control" name="discountPrice" value="<%= oldInput?.discountPrice || '' %>">
-              <% if (errors?.discountPrice) { %><div class="text-danger"><%= errors.discountPrice %></div><% } %>
-            </div>
           </div>
 
           <!-- General Dropdowns -->
@@ -95,7 +81,7 @@
                   <% variants.forEach((variant, index) => { %>
                     <div class="row g-3 mb-3 variant-group">
 
-                      <div class="col-md-3">
+                      <div class="col-md-4">
                         <label class="form-label">Fit</label>
                         <select class="form-select" name="variants[<%= index %>][fitId]">
                           <option disabled selected>Select fit</option>
@@ -108,7 +94,7 @@
                         <% } %>
                       </div>
 
-                      <div class="col-md-3">
+                      <div class="col-md-4">
                         <label class="form-label">Color</label>
                         <select class="form-select" name="variants[<%= index %>][colorId]">
                           <option disabled selected>Select Colour</option>
@@ -121,7 +107,7 @@
                         <% } %>
                       </div>
 
-                      <div class="col-md-3">
+                      <div class="col-md-4">
                         <label class="form-label">Size</label>
                         <select class="form-select" name="variants[<%= index %>][size]">
                           <option disabled selected>Select Size</option>
@@ -135,6 +121,22 @@
                       </div>
 
                       <div class="col-md-3">
+                        <label class="form-label">Base Price</label>
+                        <input type="number" class="form-control" name="variants[<%= index %>][basePrice]" value="<%= variant.basePrice || '' %>">
+                        <% if (errors?.[`variants[${index}].basePrice`]) { %>
+                          <div class="text-danger"><%= errors[`variants[${index}].basePrice`] %></div>
+                        <% } %>
+                      </div>
+
+                      <div class="col-md-3">
+                        <label class="form-label">Discount Price</label>
+                        <input type="number" class="form-control" name="variants[<%= index %>][discountPrice]" value="<%= variant.discountPrice || '' %>">
+                        <% if (errors?.[`variants[${index}].discountPrice`]) { %>
+                          <div class="text-danger"><%= errors[`variants[${index}].discountPrice`] %></div>
+                        <% } %>
+                      </div>
+
+                      <div class="col-md-3">
                         <label class="form-label">Stock</label>
                         <input type="number" class="form-control" name="variants[<%= index %>][stock]" value="<%= variant.stock || '' %>">
                         <% if (errors?.[`variants[${index}].stock`]) { %>
@@ -142,6 +144,13 @@
                         <% } %>
                       </div>
                     </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                      <% if (index >= variants.length) { %> 
+                        <button type="button" class="btn btn-danger remove-variant-btn">Remove</button>
+                      <% } %>
+                    </div>
+
                   <% }); %>
                 </div>
 

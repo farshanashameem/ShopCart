@@ -9,7 +9,21 @@
         <!-- Main Content -->
 
         <div class="col-md-9 mt-5">
-  <h2 class="mb-4">Product Management</h2>
+          <h2 class="mb-4">Product Management</h2>
+
+          <b>Filter by Gender:</b>
+        <form id="genderFilterForm" method="GET" action="/admin/products" class="mb-3 col-4">
+          <div class="d-flex align-items-center gap-2">
+            
+            <select name="gender" id="genderSelect" class="form-select" onchange="this.form.submit()">
+              <option value="">All</option>
+              <option value="male" <%= selectedGender === 'male' ? 'selected' : '' %>>Male</option>
+              <option value="female" <%= selectedGender === 'female' ? 'selected' : '' %>>Female</option>
+              <option value="unisex" <%= selectedGender === 'unisex' ? 'selected' : '' %>>Unisex</option>
+            </select>
+          </div>
+        </form>
+
 
   <!-- Search Form -->
    <div class="d-flex flex-row">

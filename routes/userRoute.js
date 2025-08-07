@@ -2,6 +2,7 @@ const express=require("express");
 const router=express.Router();
 const userController = require('../controllers/userController');
 const auth = require('../middlewares/auth');
+const homePage=require('../controllers/homePage');
 const { validationResult } = require("express-validator");
 const { signupValidationRules, changePasswordValidationRules } = require('../middlewares/validateSignUp');
 
@@ -9,11 +10,10 @@ const { signupValidationRules, changePasswordValidationRules } = require('../mid
 
 //=======public routes==========//
 
-router.get('/',auth.isUserLoggedOut,userController.getNoLoggedHome);       //nologged home 
+router.get('/',auth.isUserLoggedOut,homePage.getHomePage);       //nologged home 
 router.get("/login",auth.isUserLoggedOut,userController.getLoginPage);      //login page(showing only if logged out)
-router.get("/home",auth.isUserLoggedIn,userController.getHomePage);         //home page of user
+router.get("/home",auth.isUserLoggedIn,homePage.getHomePage);         //home page of user
 router.get('/signup',auth.isUserLoggedOut,userController.getSignUpPage);    //signup page for user
-
 router.post("/login",auth.isUserLoggedOut, userController.loginUser);       //login
 
 
@@ -34,18 +34,23 @@ router.get('/changePassword',auth.isUserLoggedOut,userController.getCahngePasswo
 router.get('/resend-otp',auth.isUserLoggedOut, userController.resendPasswordOtp);                //reseting password
 router.post('/change-password',auth.isUserLoggedOut,changePasswordValidationRules, userController.updatePassword);          //post request to change password
 
+//======Product pages=====//
+router.get('/products', auth.isUserLoggedIn, homePage.getProductPage); // All products
+router.get('/products/:gender', auth.isUserLoggedIn, homePage.getProductPage); 
+router.get('/details/:id',auth.isUserLoggedIn,homePage.getProductDetails);
 
 
 
-//logout
-router.get('/logout', (req, res, next) => {
-  req.logout(function(err) {
-    if (err) { return next(err); }
-    req.session.destroy(() => {
-      res.redirect('/'); 
-    });
-  });
+
+
+//log out
+router.get('/logout', (req, res) => {
+  
+    delete req.session.user;
+    res.redirect('/');
+  
 });
+
 
 
 module.exports=router;

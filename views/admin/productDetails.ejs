@@ -10,8 +10,8 @@
           <h2 class="mb-4">Product Details</h2>
 
           <!-- Back Button -->
-          <a href="/admin/products" class="btn btn-dark mb-4">&larr; Back to Products</a>
-
+          <a href="/admin/products" class="btn p-2 bg-dark mb-3" style="color: White;">&larr; Back to Products</a>
+          <a href="/admin/editProducts/<%= product._id%>" class="btn p-2 bg-dark mb-3 float-end" style="color: White;"><i class="bi bi-pencil me-2"></i>Edit</a>
           <div class="card shadow-sm rounded-4 p-4">
                 <div class="row">
                     <!-- Left: Product info -->
@@ -28,13 +28,22 @@
                     </div>
 
                     <!-- Right: Product image -->
-                    <div class="col-md-4 text-center">
-                    <% if (variant.images && variant.images.length > 0) { %>
-                        <img src="/uploads/products/<%= variant.images[0] %>" alt="Product Image" class="img-fluid rounded shadow-sm" style="max-height: 250px;">
-                    <% } else { %>
-                        <p class="text-muted">No image available</p>
-                    <% } %>
-                    </div>
+                   
+                   <%variants.forEach((variant, index) => { %>
+                      <% if (index === 0) { %>
+                        <div class="col-md-4 text-center">
+                          <% if (variant.images && variant.images.length > 0) { %>
+                            <% variant.images.forEach(image => { %>
+                              <img src="<%= image %>" alt="Product Image" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;max-width: 80px;">
+                            <% }); %>
+                            <% } else { %>
+                            <p class="text-muted">No image available</p>
+                          <% } %>
+                        </div>
+                      <% } %>
+                    <% }); %>
+
+
                 </div>
 
                 <hr />

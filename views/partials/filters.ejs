@@ -1,0 +1,141 @@
+<form action="<%= formAction %>" method="get" id="filter" class="col-3">
+    <!-- Filters Sidebar -->
+    <div class="col-12 filters">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>FILTERS & SORT</strong>
+            <a href="/products" class="text-decoration-none small p-1 btn " style="color: rgb(253, 252, 252);background-color: rgb(243, 5, 5) !important;">Clear All</a>
+        </div>
+
+        <div class="accordion" id="filtersAccordion">
+            <!-- Sort By -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                        data-bs-target="#sortByCollapse">
+                        Sort By
+                    </button>
+                </h2>
+                <div id="sortByCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <label><input type="radio" name="sort" value="LowToHigh"> Price - Low to High</label><br>
+                        <label><input type="radio" name="sort" value="HighToLow"> Price - High to Low</label><br>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Size -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#sizeCollapse">
+                        Size
+                    </button>
+                </h2>
+                <div id="sizeCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <label><input type="checkbox" name="size" value="XS"> XS</label><br>
+                        <label><input type="checkbox" name="size" value="S"> S</label><br>
+                        <label><input type="checkbox" name="size" value="M"> M</label><br>
+                        <label><input type="checkbox" name="size" value="L"> L</label><br>
+                        <label><input type="checkbox" name="size" value="XL"> XL</label><br>
+                        <label><input type="checkbox" name="size" value="XXL"> XXL</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Types -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                        data-bs-target="#productTypeCollapse">
+                        Product Types
+                    </button>
+                </h2>
+                <div id="productTypeCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <% categories.forEach(cat=> { %>
+                            <label> <input type="checkbox" name="category" value="<%= cat._id %>"
+                                    <%=selectedCategories.includes(cat._id.toString()) ? 'checked' : '' %>>
+                                <%= cat.name %>
+                            </label><br>
+                            <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fit -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#fitCollapse">
+                        Fit
+                    </button>
+                </h2>
+                <div id="fitCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <% fit.forEach(item=> { %>
+                            <label><input type="checkbox" name="fit" value="<%= item._id %>"
+                                  <%=selectedFits.includes(item._id.toString()) ? 'checked' : '' %>>
+                                <%= item.name %>
+                            </label><br>
+                            <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colour -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                        data-bs-target="#colourCollapse">
+                        Colour
+                    </button>
+                </h2>
+                <div id="colourCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <% colour.forEach(item=> { %>
+                            <label><input type="checkbox" name="color" value="<%= item._id %>"
+                                  <%=selectedColors.includes(item._id.toString()) ? 'checked' : '' %>>
+                                <%= item.name %>
+                            </label><br>
+                            <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                        data-bs-target="#genderCollapse">
+                        Gender
+                    </button>
+                </h2>
+                <div id="genderCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <label><input type="checkbox" name="gender" value="men"> Men</label><br>
+                        <label><input type="checkbox" name="gender" value="women"> Women</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Slider -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
+                        data-bs-target="#priceCollapse">
+                        Price
+                    </button>
+                </h2>
+                <div id="priceCollapse" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <label for="priceRange" class="form-label">
+                            Up to: $<span id="priceValue">100</span>
+                        </label>
+                        <input type="range"name="maxPrice" class="form-range" min="0" max="50000" step="10" id="priceRange">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm mt-3">Apply</button>
+    </div>
+
+</form>
