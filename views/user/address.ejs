@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Home - ShopCart' }) %>
+
+    <body>
+        <%- include('../partials/navbar') %>
+
+            <div class="profile-container m-4">
+                <div class="row">
+                    <!-- Hamburger button for small screens -->
+                    <button class="btn btn-dark d-md-none mb-3" type="button" data-bs-toggle="offcanvas"
+                        data-bs-target="#userSidebar" aria-controls="userSidebar">
+                        <i class="bi bi-list"></i> Menu
+                    </button>
+
+                    <!-- Sidebar -->
+                    <div class="offcanvas offcanvas-start d-md-flex flex-column user-dashboard p-0" tabindex="-1"
+                        id="userSidebar">
+                        <!-- Header for mobile close button -->
+                        <div class="offcanvas-header d-md-none">
+                            <h5 class="offcanvas-title">Menu</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                        </div>
+                        <div class="offcanvas-body p-0">
+                            <div class="user-greeting mb-3">
+                                <div class="image "><img src="images/admin.png" class="profile-image border-round"
+                                        alt=""></div>
+                                Hello Farshana
+                            </div>
+                            <ul class="nav flex-column user-list">
+                                <li class="nav-item ">
+                                    <i class="bi bi-person-circle me-3"></i>
+                                    <a href="/profile" class="text-decoration-none bg-transparent">Profile</a>
+                                </li>
+                                <li class="nav-item mb-3 ">
+                                    <i class="bi bi-card-checklist me-3"></i>
+                                    <a href="#" class="text-decoration-none bg-transparent">My Orders</a>
+                                </li>
+                                <li class="nav-item mb-3">
+                                    <i class="bi bi-wallet-fill me-3"></i>
+                                    <a href="#" class="text-decoration-none bg-transparent">Wallet</a>
+                                </li>
+                                <li class="nav-item mb-3 current">
+                                    <i class="bi bi-person-vcard me-3 "></i>
+                                    <a href="/address" class="text-decoration-none bg-transparent">Address</a>
+                                </li>
+                                <li class="nav-item mb-3">
+                                    <i class="bi bi-cash-coin me-3"></i>
+                                    <a href="#" class="text-decoration-none bg-transparent">Refer and Earn</a>
+                                </li>
+                                <li class="nav-item mb-3">
+                                    <i class="bi bi-person-x me-3"></i>
+                                    <a href="#" class="text-decoration-none bg-transparent">Delete Account</a>
+                                </li>
+                                <li class="nav-item mb-3">
+                                    <i class="bi bi-box-arrow-left me-3"></i>
+                                    <a href="#" class="text-decoration-none bg-transparent">Logout</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="addressbar bg-light col-9 p-5 m-3 ">
+                        <!-- Add address Button -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-primary" id="showAddressBtn">
+                                + ADD A NEW ADDRESS
+                            </button>
+                        </div>
+
+                        <div class="addAddress me-2 d-none" id="addressBar">
+                            <form id="addressForm" action="<%= address ? '/updateAddress/' + address._id : '/addAddress' %>"
+                                method="POST" class="p-4">
+
+                                
+                             <input type="text" name="name" placeholder="Full Name"
+                                class="col-md-5 col-sm-12 border-round"
+                                 value="<%= old?.name || address?.name || '' %>">
+                                <% if (errors?.name) { %>
+                                    <p class="text-danger m-0">
+                                        <%= errors.name %>
+                                    </p>
+                                    <% } %>
+
+                                        <!-- Phone -->
+                             <input type="text" name="phone" placeholder="10 Digit phone number"
+                                class="col-md-5 col-sm-12 border-round"
+                                value="<%= old?.phone || address?.phone || '' %>">
+                                        <% if (errors?.phone) { %>
+                                            <p class="text-danger m-0">
+                                                <%= errors.phone %>
+                                            </p>
+                                            <% } %>
+
+                                 <!-- Pincode -->
+                             <input type="number" name="pin" placeholder="Pin Code"
+                                class="col-md-5 col-sm-12 border-round"
+                                 value="<%= old?.pin || address?.pin || '' %>">
+                                         <% if (errors?.pin) { %>
+                                            <p class="text-danger m-0">
+                                            <%= errors.pin %>
+                                             </p>
+                                         <% } %>
+
+                                 <!-- Locality -->
+                             <input type="text" name="locality" placeholder="Locality"
+                                    class="col-md-5 col-sm-12 border-round"
+                                     value="<%= old?.locality || address?.locality || '' %>">
+                                        <% if (errors?.locality) { %>
+                                         <p class="text-danger m-0">
+                                           <%= errors.locality %>
+                                         </p>
+                                        <% } %>
+
+                                <!-- Address -->
+                             <textarea name="address" id="address"
+                               class="col-10 border-round"
+                               placeholder="Address (Area and Street)"><%= old?.address || address?.address || '' %></textarea>
+                                  <% if (errors?.address) { %>
+                                    <p class="text-danger m-0">
+                                        <%= errors.address %>
+                                    </p>
+                                    <% } %>
+
+                                        <!-- City -->
+                             <input type="text" name="city"
+                                placeholder="City/District/Town"
+                                class="col-md-5 col-sm-12 border-round"
+                                value="<%= old?.city || address?.city || '' %>">
+                                     <% if (errors?.city) { %>
+                                        <p class="text-danger m-0">
+                                        <%= errors.city %>
+                                       </p>
+                                     <% } %>
+
+                                     <!-- State -->
+                             <select name="state" id="state"
+                               class="col-md-5 col-sm-12">
+                               <option value="">-- Select State --
+                                </option>
+                                <option value="AN" <%=(old?.state==="AN" ||address?.state==="AN" )? "selected" : "" %>> Andaman and Nicobar Islands</option>
+                                <option value="AP" <%=(old?.state==="AP" ||address?.state==="AP" ) ? "selected" : "" %>>Andhra Pradesh</option>
+                                <option value="AR" <%=(old?.state==="AR" ||address?.state==="AR" )? "selected" : "" %>>Arunachal Pradesh</option>
+                                <option value="AS" <%=(old?.state==="AS" || address?.state==="AS" )  ? "selected" : "" %>>Assam </option>
+                                <option value="BR" <%=(old?.state==="BR" || address?.state==="BR" ) ? "selected" : "" %>>Bihar </option>
+                                <option value="CH" <%=(old?.state==="CH" || address?.state==="CH" ) ? "selected" : "" %>>Chandigarh </option>
+                                <option value="CG" <%=(old?.state==="CG" || address?.state==="CG" )  ? "selected" : "" %>  >Chhattisgarh</option>
+                                <option value="DN" <%=(old?.state==="DN" || address?.state==="DN" ) ? "selected" : "" %>>Dadra and Nagar Haveli and Daman and Diu </option>
+                                <option value="DL" <%=(old?.state==="DL" || address?.state==="DL" ) ? "selected" : "" %>>Delhi </option>
+                                <option value="GA" <%=(old?.state==="GA" || address?.state==="GA" ) ? "selected" : "" %>>Goa </option>
+                                <option value="GJ" <%=(old?.state==="GJ" || address?.state==="GJ" ) ? "selected" : "" %>>Gujarat </option>
+                                <option value="HR" <%=(old?.state==="HR" || address?.state==="HR" ) ? "selected" : "" %>>Haryana </option>
+                                <option value="HP" <%=(old?.state==="HP" || address?.state==="HP" ) ? "selected" : "" %>>Himachal Pradesh</option>
+                                <option value="JK" <%=(old?.state==="JK" ||  address?.state==="JK" ) ? "selected" : "" %>>Jammu and Kashmir</option>
+                                <option value="JH" <%=(old?.state==="JH" || address?.state==="JH" )  ? "selected" : "" %>>Jharkhand </option>
+                                <option value="KA" <%=(old?.state==="KA" || address?.state==="KA" ) ? "selected" : "" %>>Karnataka </option>
+                                <option value="KL" <%=(old?.state==="KL" || address?.state==="KL" ) ? "selected" : "" %>>Kerala  </option>
+                                <option value="LA" <%=(old?.state==="LA" || address?.state==="LA" ) ? "selected" : "" %>>Ladakh </option>
+                               <option value="LD" <%=(old?.state==="LD" || address?.state==="LD" ) ? "selected" : "" %>>Lakshadweep </option>
+                               <option value="MP" <%=(old?.state==="MP" || address?.state==="MP" ) ? "selected" : "" %>>Madhya Pradesh</option>
+                                <option value="MH" <%=(old?.state==="MH" || address?.state==="MH" ) ? "selected" : "" %>>Maharashtra </option>
+                                 <option value="MN" <%=(old?.state==="MN" || address?.state==="MN" ) ? "selected" : "" %>>Manipur </option>
+                                <option value="ML" <%=(old?.state==="ML" || address?.state==="ML" ) ? "selected" : "" %>>Meghalaya </option>
+                                <option value="MZ" <%=(old?.state==="MZ" || address?.state==="MZ" ) ? "selected" : "" %>>Mizoram </option>
+                                <option value="NL" <%=(old?.state==="NL" || address?.state==="NL" ) ? "selected" : "" %>>Nagaland </option>
+                                <option value="OD" <%=(old?.state==="OD" || address?.state==="OD" ) ? "selected" : "" %>>Odisha </option>
+                               <option value="PY" <%=(old?.state==="PY" || address?.state==="PY" ) ? "selected" : "" %>>Puducherry  </option>
+                                <option value="PB" <%=(old?.state==="PB" || address?.state==="PB" ) ? "selected" : "" %>>Punjab </option>
+                                <option value="RJ" <%=(old?.state==="RJ" || address?.state==="RJ" ) ? "selected" : "" %>>Rajasthan </option>
+                                 <option value="SK" <%=(old?.state==="SK" || address?.state==="SK" ) ? "selected" : "" %>>Sikkim </option>
+                                <option value="TN" <%=(old?.state==="TN" || address?.state==="TN" ) ? "selected" : "" %>>Tamil Nadu </option>
+                                <option value="TS" <%=(old?.state==="TS" || address?.state==="TS" ) ? "selected" : "" %>>Telangana </option>
+                                <option value="TR" <%=(old?.state==="TR" || address?.state==="TR" ) ? "selected" : "" %>>Tripura  </option>
+                                <option value="UP" <%=(old?.state==="UP" || address?.state==="UP" ) ? "selected" : "" %>>Uttar Pradesh</option>
+                                <option value="UK" <%=(old?.state==="UK" || address?.state==="UK" ) ? "selected" : "" %>>Uttarakhand </option>
+                                 <option value="WB" <%=(old?.state==="WB" || address?.state==="WB" ) ? "selected" : "" %>>West Bengal </option>
+                         </select>
+                           <% if (errors?.state) { %>
+                                <p class="text-danger m-0">
+                               <%= errors.state %>
+                              </p>
+                            <% } %>
+                                                                                
+                          <!-- Landmark -->
+                       <input type="text" name="landmark" placeholder="Landmark (optional)" class="col-md-5 col-sm-12 border-round"
+                             value="<%= old?.landmark || address?.landmark || '' %>">
+                              <% if (errors?.landmark) { %>
+                                 <p class="text-danger m-0">
+                                    <%= errors.landmark %>
+                                 </p>
+                                 <% } %>
+                                                                                
+                         <!-- Alternate Phone -->
+                        <input type="number" name="altnumber" placeholder="Alternate Phone"
+                            class="col-md-5 col-sm-12 border-round" value="<%= old?.altnumber || address?.altnumber || '' %>">
+                               <% if (errors?.altnumber) { %>
+                                 <p class="text-danger m-0">
+                                    <%= errors.altnumber %>
+                                  </p>
+                                <% } %>
+                                                                                
+                          <!-- Address Type -->
+                         <div class="mt-3">
+                            <label>Address Type</label><br>
+                            <input type="radio" id="home" name="addressType" value="home" <%=(old?.addressType==="home"|| address?.addressType==="home" ) ? "checked" : "" %>>
+                             <label for="home">Home</label>
+                            <input type="radio" id="office" name="addressType" value="office"
+                               <%=(old?.addressType==="office" || address?.addressType==="office" ) ? "checked" : "" %>>
+                            <label for="office">Office</label>
+
+                             <% if (errors?.addressType) { %>
+                                 <p class="text-danger m-0">
+                                    <%= errors.addressType %>
+                                  </p>
+                                <% } %>
+                          </div>
+                                                                                
+                          <!-- Buttons -->
+                         <button type="button" class="btn btn-outline-primary col-md-3 col-sm-12 me-3"id="addAddressBtn">SAVE</button>
+                        <button type="button" class="btn btn-outline-danger col-md-3 col-sm-12" id="cancelBtn">Cancel</button>
+                     </form>
+                        </div>
+
+                        <!-- Address List -->
+                        <div class="addressList mt-4">
+                            <% if (addresses.length===0) { %>
+                                <p>No address added yet.</p>
+                                <% } else { %>
+                                    <% addresses.forEach(address=> { %>
+                                        <div class="mb-3 p-3 border rounded position-relative"
+                                            id="address-<%= address._id %>"
+                                            data-id="<%= address._id %>"
+                                            data-name="<%= address.name %>"
+                                            data-phone="<%= address.phoneNumber %>"
+                                            data-pin="<%= address.pincode %>"
+                                            data-locality="<%= address.locality %>"
+                                            data-address="<%= address.address %>"
+                                            data-city="<%= address.city %>"
+                                            data-state="<%= address.state %>"
+                                            data-landmark="<%= address.landmark || '' %>"
+                                            data-altnumber="<%= address.alternateNumber || '' %>"
+                                            data-type="<%= address.type %>">
+
+
+                                            <div class="dropdown position-absolute top-0 end-0 m-2">
+                                                 <button class="btn btn-light btn-sm" type="button" id="dropdownMenuButton<%= address._id %>" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 20px;">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                 </button>
+                                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton<%= address._id %>">
+                                                <li><a class="dropdown-item edit-address" data-id="<%= address._id %>">Edit</a></li>
+                                                <li><a class="dropdown-item text-danger delete-address" data-id="<%= address._id %>">Delete</a></li>
+                                                </ul>
+                                            </div>
+
+                                            <p class="p-1 mb-2 bg-secondary text-white text-start rounded" style="width:auto; display:inline-block;">
+                                                <%= address.type %>
+                                            </p>
+                                            <p>
+                                                    <%= address.name %>
+                                                <br>
+                                                    <%= address.address %>, <br><%= address.locality %>,<br> <%= address.city %>
+                                                <br>
+                                                    <%= address.state %>
+                                                <br>
+                                                    <%= address.pincode %>
+                                                <br>
+                                                    <%= address.phoneNumber %>
+                                                <br>
+                                                <% if (address.landmark) { %>
+                                                    <strong>Landmark:</strong>
+                                                        <%= address.landmark %>
+                                                    <br>
+                                                    <% } %>
+                                                        <% if (address.alternateNumber) { %>
+                                                            <strong>Alternate Phone:</strong>
+                                                                <%= address.alternateNumber %>
+                                                            
+                                                            <% } %>
+                                            </p>
+                                        </div>
+                                        <% }) %>
+                                            <% } %>
+                        </div>
+                    </div>
+
+
+
+
+
+                </div>
+            </div>
+
+
+            <%- include('../partials/footer') %>
+                <!-- Bootstrap Bundle with Popper -->
+
+
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="/js/addressForm.js"></script>
+               
+
+    </body>
+
+</html>

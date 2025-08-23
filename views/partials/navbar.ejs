@@ -1,6 +1,8 @@
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color: rgb(244, 236, 227);">
   <div class="container">
-    <a class="navbar-brand fw-bold fs-4" href="/"><img src="/images/ShopCart.png" class="w-50 h-25" alt=""></a>
+    <a class="navbar-brand fw-bold fs-4" href="/">
+      <img src="/images/ShopCart.png" class="img-fluid logo-img" alt="ShopCart Logo">
+    </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
@@ -12,7 +14,7 @@
         <li class="nav-item"><a class="nav-link" href="/products/men">Men</a></li>
         <li class="nav-item"><a class="nav-link" href="/products/women">Women</a></li>
         <li class="nav-item"><a class="nav-link" href="/products">All Products</a></li>
-        <li class="nav-item"><a class="nav-link" href="/new-arrivals">New Arrivals</a></li>
+        <!-- <li class="nav-item"><a class="nav-link" href="/new-arrivals">New Arrivals</a></li>-->
 
         <% if (!user) { %>
           <!-- Show Sign In / Sign Up if not logged in -->
@@ -20,25 +22,25 @@
           <li class="nav-item">
             <a href="/signup" class="ms-2 text-decoration-none rounded p-2 bg-dark text-white">Sign Up</a>
           </li>
-        <% } else { %>
-          <!-- Show icons if logged in -->
-          <li class="nav-item">
-            <a class="nav-link" href="/wishlist"><i class="bi bi-heart fs-5"></i></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cart"><i class="bi bi-cart fs-5"></i></a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle fs-5"></i>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/profile">Profile</a></li>
-              <li><a class="dropdown-item" href="/orders">My Orders</a></li>
-              <li><a class="dropdown-item" href="/logout">Logout</a></li>
-            </ul>
-          </li>
-        <% } %>
+          <% } else { %>
+            <!-- Show icons if logged in -->
+            <li class="nav-item">
+              <a class="nav-link" href="/wishlist"><i class="bi bi-heart fs-5"></i></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/cart"><i class="bi bi-cart fs-5"></i></a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle fs-5"></i>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                <li><a class="dropdown-item" href="/orders">My Orders</a></li>
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+              </ul>
+            </li>
+            <% } %>
       </ul>
     </div>
 

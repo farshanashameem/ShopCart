@@ -2,9 +2,9 @@
 <html lang="en">
 <%- include('../partials/head', { title: 'ShopCart | Product Details' }) %>
 
-    <body>
+    <body  data-product-id="<%= product._id %>">
         <%- include('../partials/navbar') %>
-
+s
             <div class="container py-5">
                 <div class="row g-5">
                     <!-- Left Images -->
@@ -13,12 +13,19 @@
                             <% if (images && images.length> 0) { %>
                                 <% images.forEach(image=> { %>
                                     <div class="col-6">
-                                        <img src="<%= image %>" class="img-fluid product-img" alt="product image">
+                                        <div class="product-image-container">
+                                            <img src="<%= image %>" 
+                                                alt="Product Image" 
+                                                class="product-image product-img">
+                                            <span class="close-btn">&times;</span>
+                                            <div class="magnifierLens"></div>
+                                        </div>
                                     </div>
-                                    <% }) %>
-                                        <% } else { %>
-                                            <p>No images available</p>
-                                            <% } %>
+                                <% }) %>
+                                <% }
+                                    else { %>
+                                        <p>No images available</p>
+                                    <% } %>
                         </div>
                     </div>
 
@@ -51,20 +58,22 @@
                                             <% variants.forEach((variant, i)=> {
                                                 if (!shownSizes.has(variant.size)) {
                                                 shownSizes.add(variant.size); %>
-                                                <input type="radio" class="btn-check" name="size" id="size<%= i %>"
-                                                    autocomplete="off">
-                                                <label class="btn btn-outline-dark me-2 mb-2" for="size<%= i %>">
-                                                    <%= variant.size %>
-                                                </label>
+                                                <input type="radio" class="btn-check" name="size" id="size<%= i %>" 
+                                                    autocomplete="off" value="<%= variant.size %>">
+                                                    <label class="btn btn-outline-dark me-2 mb-2" for="size<%= i %>">
+                                                        <%= variant.size %>
+                                                    </label>
+
                                                 <% } }) %>
                                     </div>
                                 </div>
 
                                 <!-- Buttons -->
                                 <div class="d-flex flex-column flex-md-row gap-2 mb-4">
-                                    <button class="btn btn-outline-dark w-100">Add to Wishlist</button>
-                                    <button class="btn btn-dark w-100">Add to Cart</button>
+                                    <button id="wishlistBtn" class="btn btn-outline-dark w-100" disabled>Add to Wishlist</button>
+                                    <button id="cartBtn" class="btn btn-dark w-100" disabled>Add to Cart</button>
                                 </div>
+
 
                                 <!-- Description Tabs -->
                                 <ul class="nav nav-tabs" id="descTab" role="tablist">
@@ -103,14 +112,20 @@
                                 <div class="mt-4">
                                     <p class="fw-bold mb-2">Available Colours:</p>
                                     <div class="d-flex align-items-center flex-wrap">
-                                        <% let shownColors=new Set(); %>
-                                            <% variants.forEach((variant)=> {
+                                       <% let shownColors = new Set(); %>
+                                            <% variants.forEach((variant, i) => {
                                                 if (!shownColors.has(variant.colorId.name)) {
-                                                shownColors.add(variant.colorId.name); %>
-                                                <span class="product-color-dot me-2 mb-2"
-                                                    style="background-color:<%= variant.colorId.hexCode %>;"
-                                                    title="<%= variant.colorId.name %>"></span>
-                                                <% } }) %>
+                                                    shownColors.add(variant.colorId.name); %>
+                                                    <input type="radio" class="btn-check" name="color" id="color<%= i %>" 
+                                                        value="<%= variant.colorId._id %>" autocomplete="off">
+                                                    <label class="color-label me-2 mb-2" for="color<%= i %>" 
+                                                        style="cursor:pointer;">
+                                                        <span class="product-color-dot" 
+                                                            style="background-color:<%= variant.colorId.hexCode %>;" 
+                                                            title="<%= variant.colorId.name %>"></span>
+                                                    </label>
+                                            <% } }) %>
+
                                     </div>
                                 </div>
                                 <% } else { %>
@@ -131,8 +146,10 @@
                             <div class="col-md-3">
                                 <div class="card related-card h-100">
                                     <% if (prod.firstVariantImages && prod.firstVariantImages.length> 0) { %>
-                                        <img src="<%= prod.firstVariantImages[0] %>" alt="<%= prod.name %>"
+                                       <a href="/details/<%= prod._id %>" class="text-decoration-none">
+                                         <img src="<%= prod.firstVariantImages[0] %>" alt="<%= prod.name %>"
                                              class="img-fluid product-img" />
+                                       </a>
                                         <% } else { %>
                                             <p>No image available</p>
                                             <% } %>
@@ -155,7 +172,8 @@
             <%- include('../partials/footer') %>
 
 
-
+                <script src="/js/imageMagnifier.js"></script>
+                <script src="/js/adding.js"></script>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     </body>
 

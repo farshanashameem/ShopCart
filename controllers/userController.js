@@ -2,51 +2,51 @@ const bcrypt = require("bcrypt");
 const validator = require("validator");
 const { validationResult } = require("express-validator");
 const User = require("../models/userModel");
-const generateOTP= require('../utils/generateOTP');
+const generateOTP = require('../utils/generateOTP');
 const sendOTPMail = require('../utils/sendOTPMail');
 
 //noLoggedHome
-exports.getNoLoggedHome=(req,res)=>{
-    res.render('user/noLoggedhome');
+exports.getNoLoggedHome = (req, res) => {
+  res.render('user/noLoggedhome');
 }
 
 //Login page
-exports.getLoginPage=(req,res)=>{
+exports.getLoginPage = (req, res) => {
   const successMessage = req.session.successMessage;
   delete req.session.successMessage; // Clear it after showing once
   res.render("user/login", { successMessage });
 }
 
 //Sign Up Page
-exports.getSignUpPage=(req,res)=>{
-    res.render('user/signup',{errors: {},old: {}} );
+exports.getSignUpPage = (req, res) => {
+  res.render('user/signup', { errors: {}, old: {} });
 }
 
 //OTP for signUp page
-exports.getOtpForSignUpPage=(req,res)=>{
-    res.render('user/otp-signup');
+exports.getOtpForSignUpPage = (req, res) => {
+  res.render('user/otp-signup');
 }
 
 //get reset password page
-exports.getResetPasswordPage=(req,res)=>{
-    res.render('user/reset-password');
+exports.getResetPasswordPage = (req, res) => {
+  res.render('user/reset-password');
 }
 
 //get OTP for password page
-exports.getOtpForPasswordPage=(req,res)=>{
-    res.render('user/otp-password',{remainingTime: 60});
+exports.getOtpForPasswordPage = (req, res) => {
+  res.render('user/otp-password', { remainingTime: 60 });
 }
 
 //get Change password page
-exports.getCahngePasswordPage=(req,res)=>{
-    res.render('user/change-password');
+exports.getCahngePasswordPage = (req, res) => {
+  res.render('user/change-password');
 }
 
 //signup validation
 exports.signUpUser = async (req, res) => {
   try {
-    
-     const name = req.body.name?.trim();
+
+    const name = req.body.name?.trim();
     const email = req.body.email?.trim();
     const mobile = req.body.mobile?.trim();
     const password = req.body.password;
@@ -77,7 +77,7 @@ exports.signUpUser = async (req, res) => {
 
     // Generate OTP
     const OTP = generateOTP();
-    await sendOTPMail(email,OTP);
+    await sendOTPMail(email, OTP);
 
     req.session.tempUser = {
       name,
@@ -94,7 +94,8 @@ exports.signUpUser = async (req, res) => {
     console.error("Signup error:", err);
     return res.render("user/signup", {
       error: { general: "Internal server error" },
-      old: req.body
+      old: req.body,
+      errors: {}
     });
   }
 };
@@ -105,12 +106,12 @@ exports.resendOtp = async (req, res) => {
     const sessionUser = req.session.tempUser;
 
     if (!sessionUser) {
-      return res.render("user/signup",{error:"error ,  Session expired. Please sign up again."});
+      return res.render("user/signup", { error: "error ,  Session expired. Please sign up again." });
     }
 
     const OTP = generateOTP();
-    const email=sessionUser.email;
-    await sendOTPMail(email,OTP);
+    const email = sessionUser.email;
+    await sendOTPMail(email, OTP);
 
 
     req.session.tempUser.OTP = OTP;
@@ -133,26 +134,26 @@ exports.verifySignUpOtp = async (req, res) => {
     const sessionUser = req.session.tempUser;
 
     if (!sessionUser) {
-      return res.render("user/signup", {
-        error: "Session expired. Please sign up again."
+      return res.render("user/changeMail", {
+        error: "Session expired. Please try again."
       });
     }
 
     const otpAge = Date.now() - sessionUser.otpCreatedAt;
     if (otpAge > 60 * 1000) {
       req.session.tempUser = null;
-      return res.render("user/signup", {
-        error: "OTP expired. Please sign up again.",
-         old: {},
-         errors: {}
+      return res.render("user/changeMail", {
+        error: "OTP expired. Please try again.",
+        old: {},
+        errors: {}
       });
     }
 
     if (enteredOtp !== sessionUser.OTP.toString()) {
       return res.render("user/otp-signup", {
         error: "Incorrect OTP. Please try again.",
-         old: {},
-         errors: {},
+        old: {},
+        errors: {},
         remainingTime: 60 - Math.floor(otpAge / 1000)
       });
     }
@@ -172,13 +173,13 @@ exports.verifySignUpOtp = async (req, res) => {
     req.session.tempUser = null;
 
     req.session.successMessage = "Signup successful! Please log in to continue.";
-     return res.redirect("/login");
+    return res.redirect("/login");
   } catch (err) {
     console.error("OTP verification error:", err);
     return res.render("user/signup", {
       error: "Internal server error.",
-       old: {},
-       errors: {}
+      old: {},
+      errors: {}
     });
   }
 };
@@ -187,12 +188,12 @@ exports.verifySignUpOtp = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const email = req.body.email?.trim();
-    const password=req.body.password?.trim();
+    const password = req.body.password?.trim();
     const old = { email, password };
     // Basic validation
     if (!email || !password) {
       req.flash("error", "All fields are required.");
-      return res.render("user/login",{old});
+      return res.render("user/login", { old });
     }
 
     // Find user by email
@@ -211,12 +212,12 @@ exports.loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      
-      return res.render("user/login",{old,error:"Invalid email or password."});
+
+      return res.render("user/login", { old, error: "Invalid email or password." });
     }
 
     //check if user blocked or not
-    if(user.isBlocked){
+    if (user.isBlocked) {
       return res.render("user/login", { old, error: "User Blocked" });
     }
 
@@ -226,7 +227,7 @@ exports.loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       mobile: user.mobile,
-      isBlocked:user.isBlocked
+      isBlocked: user.isBlocked
     };
     return res.redirect("/home");
 
@@ -239,11 +240,11 @@ exports.loginUser = async (req, res) => {
 
 //======OTP for reseting the password======//
 exports.passwordForOTP = async (req, res) => {
-   const email=req.body.email.trim().toLowerCase();
-   if(!email){
-    return res.render('user/reset-password',{error:"Feild should not be empty."})
-   }
-   
+  const email = req.body.email.trim().toLowerCase();
+  if (!email) {
+    return res.render('user/reset-password', { error: "Feild should not be empty." })
+  }
+
   try {
     const user = await User.findOne({ email });
 
@@ -252,8 +253,8 @@ exports.passwordForOTP = async (req, res) => {
     }
 
     // Generate 4-digit OTP
-   const OTP =generateOTP();
-   await sendOTPMail(email,OTP);
+    const OTP = generateOTP();
+    await sendOTPMail(email, OTP);
 
     req.session.tempUser = {
       email: email,
@@ -261,13 +262,13 @@ exports.passwordForOTP = async (req, res) => {
       otpCreatedAt: Date.now()
     };
 
-   
+
 
     // Go to OTP entry page
-    return res.render('user/otp-password',{email});
+    return res.render('user/otp-password', { email });
   } catch (err) {
     console.error(err);
-    res.render('user/login',{error:"Internal server error."})
+    res.render('user/login', { error: "Internal server error." })
   }
 };
 
@@ -275,7 +276,7 @@ exports.verifyOTPForPasswordReset = (req, res) => {
   try {
     const enteredOtp = req.body.otp?.join('');
     const sessionUser = req.session.tempUser;
-    const email=sessionUser.email;
+    const email = sessionUser.email;
     if (!sessionUser) {
       return res.render("user/reset-password", {
         error: "Session expired."
@@ -298,15 +299,15 @@ exports.verifyOTPForPasswordReset = (req, res) => {
       });
     }
 
-    
 
-  
-     return res.redirect("/changePassword");
+
+
+    return res.redirect("/changePassword");
   } catch (err) {
     console.error("OTP verification error:", err);
     return res.render("user/reset-password", {
       error: "Internal server error.",
-       
+
     });
   }
 
@@ -315,18 +316,18 @@ exports.verifyOTPForPasswordReset = (req, res) => {
 
 
 exports.resendPasswordOtp = async (req, res) => {
- 
+
   const sessionUser = req.session.tempUser;
   const email = sessionUser.email;
 
   if (!sessionUser) {
-     req.flash('error',"Session expired . Please enter your email.")
+    req.flash('error', "Session expired . Please enter your email.")
     return res.redirect('/resetPassword'); // If session expired or email missing
   }
 
   try {
-   const OTP =generateOTP();
-   await sendOTPMail(email,OTP);
+    const OTP = generateOTP();
+    await sendOTPMail(email, OTP);
 
 
     // Save new OTP 

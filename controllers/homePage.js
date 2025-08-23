@@ -6,12 +6,13 @@ const productType = require('../models/productType');
 const Fit = require('../models/Fit');
 const Colour = require('../models/Colour');
 const productVariant = require('../models/productVariant');
+const mongoose = require('mongoose');
 
-const DEFAULT_IMAGE = '/images/default-product.png'; // Fallback image path
 
-// Helper: Get first variant with images for product IDs
+
+// Get first variant with images for product IDs
 async function getFirstVariantsForProducts(productIds) {
-  // Fetch variants for multiple products at once (could optimize with aggregation later)
+  // Fetch variants for multiple products at once
   const variants = await ProductVariant.find({
     productId: { $in: productIds },
     isActive: true,
@@ -54,13 +55,11 @@ async function getAvgRatingsForProducts(products) {
 exports.getHomePage = async (req, res) => {
   try {
     const genders = ['male', 'female'];
-
     const categoryData = {};
     const topTrends = {};
     const newArrivals = {};
 
     for (const gender of genders) {
-      // === CATEGORIES BY GENDER ===
       const categories = await ProductType.find({ isActive: true });
 
       // Find one product per category matching gender
@@ -89,6 +88,7 @@ exports.getHomePage = async (req, res) => {
           const variant = variantMap.get(product._id.toString());
           if (!variant || !variant.images.length) return null;
           return {
+            categoryId: cat._id.toString(), 
             categoryName: cat.name,
             image: variant.images[0]
           };
@@ -137,6 +137,7 @@ exports.getHomePage = async (req, res) => {
           const variant = newestVariantMap.get(p._id.toString());
           if (!variant || !variant.images.length) return null;
           return {
+             id: p._id.toString(),
             productName: p.name,
             image: variant.images[0]
           };
@@ -175,7 +176,7 @@ exports.getProductPage = async (req, res) => {
       const categoryIds = await Products.distinct("productTypeId", {
         isActive: true
       });
-      categories = await productType.find({ isActive: true }).lean(); console.log(categories);
+      categories = await productType.find({ isActive: true }).lean(); 
     } else {
       const categoryIds = await Products.distinct("productTypeId", {
         genderId: gender,
@@ -230,6 +231,7 @@ exports.getProductPage = async (req, res) => {
           currentPage: page,
           totalPages: 1,
           sort,
+          genderParam,
           queryParams: { ...req.query }
         });
       }
@@ -287,7 +289,7 @@ exports.getProductPage = async (req, res) => {
 
     const queryParams = { ...req.query };
     delete queryParams.page;
-
+    console.log(genderParam);
     res.render('user/allProducts', {
       categories,
       fit,
@@ -300,6 +302,7 @@ exports.getProductPage = async (req, res) => {
       currentPage: page,
       totalPages,
       sort,
+      genderParam,
       queryParams
     });
 
@@ -307,25 +310,28 @@ exports.getProductPage = async (req, res) => {
     console.error('Error loading product page with filters:', err);
     res.status(500).send('Server Error');
   }
-};
+}; 
+
 
 exports.getProductDetails = async (req, res) => {
   try {
     const id = req.params.id;
 
     const product = await Products.findOne({ _id: id, isActive: true }).lean();
+    const gender=product.genderId;
     if (!product) return res.redirect('/products');
 
     const variants = await productVariant.find({ productId: id }).populate('colorId fitId size').lean();
 
     const relatedProducts = await Products.find({
       productTypeId: product.productTypeId,
+      genderId:gender,
       _id: { $ne: id },
       isActive: true
     }).limit(4).lean();
 
      const relatedDatas = await Promise.all(
-    relatedProducts.map(async (prod) => {
+      relatedProducts.map(async (prod) => {
       const firstVariant = await ProductVariant.findOne({
         productId: prod._id,
         isActive: true
@@ -347,11 +353,11 @@ exports.getProductDetails = async (req, res) => {
     const images = variants[0]?.images || [];
     const basePrice = variants[0]?.basePrice || 0;
     const discountPrice = variants[0]?.discountPrice || 0;
-
+console.log(relatedProducts);
     res.render('user/productDetails', {
       product,
       variants,
-      relatedProducts,
+      
       images, basePrice,
       discountPrice,
        relatedProducts: relatedDatas

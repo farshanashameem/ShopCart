@@ -5,7 +5,7 @@ const auth = require('../middlewares/auth');
 const upload=require('../middlewares/multer');
 const { validationResult } = require('express-validator');
 const { productValidationRules }= require('../middlewares/productValidator');
-
+const productController=require('../controllers/productController');
 
 // Admin Login Page
 router.get('/login', auth.isAdminLoggedOut, adminController.loadLogin);
@@ -22,7 +22,7 @@ router.post("/users/block/:id",auth.isAdminLoggedIn, adminController.toggleBlock
 router.post("/users/delete/:id",auth.isAdminLoggedIn, adminController.deleteUser);
 
 
-//=====Product MAnagement ========//
+//=====Product Management ========//
 router.get('/products',auth.isAdminLoggedIn,adminController.getProductsPage);       //products page
 router.get('/addProducts',auth.isAdminLoggedIn,adminController.getAddProductPage);   //addproduct page
 router.post('/addProduct', auth.isAdminLoggedIn,upload.array("images", 3),productValidationRules, adminController.addProduct);          //Adding product to Database
@@ -63,6 +63,9 @@ router.get('/editColour/:id',auth.isAdminLoggedIn,adminController.getEditColourP
 router.post('/editColour',auth.isAdminLoggedIn,adminController.editColour);
 router.post('/deleteColour/:id',auth.isAdminLoggedIn,adminController.toggleColour);
 
+router.get('/orders',auth.isAdminLoggedIn,productController.getOrderPage);
+router.get('/orders/:id',auth.isAdminLoggedIn,productController.getOrderDetails);
+router.get('/changeStatus/:orderId/:status',auth.isAdminLoggedIn,productController.changeStatus);
 // Admin Logout
 router.get('/logout', (req, res) => {
   delete req.session.admin;

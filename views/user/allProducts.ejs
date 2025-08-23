@@ -6,13 +6,17 @@
         <%- include('../partials/navbar') %>
 
             <section class="container my-5">
-                <h3 class="text-center fw-bold" style="color: rgb(179, 74, 4);">ALL PRODUCTS</h3>
+                <h3 class="text-center fw-bold" style="color: rgb(179, 74, 4);">
+                    <%= genderParam === 'all' ? 'ALL PRODUCTS' : genderParam.toUpperCase() + "'S PRODUCTS" %>
+                </h3>
+
                 <p class="text-center text-muted m-4">
                     Stock up your fashion wardrobe or test a fresh 'fit. Check all products here.
                 </p>
 
                 <div class="row mt-4">
-                   <%-include('../partials/filters',{ formAction: '/products' }) %>
+                <%- include('../partials/filters', { formAction: genderParam ? `/products/${genderParam}` : '/products', genderParam: genderParam }) %>
+
 
                     <%- include('../partials/productGrid') %>
                 </div>

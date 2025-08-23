@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%- include('../partials/head', { title: 'otp for Password' }) %>
+  <%- include('../partials/head', { title: 'otp for Mail change' }) %>
   <body class=" d-flex justify-content-center align-items-center vh-100" >
 
     <div class="container p-4 shadow rounded-4 overflow-hidden " style="max-width: 900px;background-color: rgb(244, 236, 227) !important;">
@@ -21,7 +21,7 @@
             <%}%>
           
 
-          <form action="/verifyOtpForPassword" method="POST">
+          <form action="/verifyOtpForMail" method="POST">
             <div class="d-flex justify-content-center gap-2 mb-3">
               <input type="hidden" name="email" value="<%= email %>">
             <input type="text" name="otp[]" maxlength="1" class="form-control text-center otp-input" required>
@@ -35,10 +35,10 @@
             <p class="mt-3 text-muted" id="resend-container">Resend OTP in <span class="text-start text-muted" id="timer"><%= typeof remainingTime !== 'undefined' ? remainingTime : 60 %></span>seconds.
             </p>
 
-            <a href="/resend-otp" id="resend-link" class="d-none text-primary text-decoration-none">Resend OTP</a>
+            <a href="/resend-otpMail" id="resend-link" class="d-none text-primary text-decoration-none">Resend OTP</a>
             
           <p class="mt-4 text-center text-muted">
-          <a href="#" onclick="event.preventDefault(); window.location.href='/login';">Go back to login page</a>
+          <a href="#" onclick="event.preventDefault(); window.location.href='/profile';">Go back to profile page</a>
           </p>
         </div>
 

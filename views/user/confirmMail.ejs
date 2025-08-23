@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('../partials/head', { title: 'Change password' }) %>
+
+    <body class=" d-flex justify-content-center align-items-center vh-100">
+
+        <div class="container p-4 shadow rounded-4 overflow-hidden a"
+            style="max-width: 900px;background-color: rgb(244, 236, 227) !important;">
+            <div class="row g-0">
+                <!-- Left Section (Form) -->
+                <div class="col-md-6  p-5 d-flex flex-column justify-content-center">
+                    <h2><b>Confirm new Mail ID</b></h2>
+
+                    <% if (error && error.length> 0) { %>
+                        <p class="text-danger">
+                            <%= error %>
+                        </p>
+                        <% } %>
+
+
+                            <form action="/confirmMail" method="POST">
+
+                                <input type="text" name="email" id="email" class="form-control mb-3 position-relative"
+                                    placeholder="Confirm Your new mail id" />
+
+                                <button type="submit" class="btn w-100 rounded-2 py-2 text-white"
+                                    style="background-color: #4e4039;">Send OTP</button>
+                            </form>
+
+                            <p class="mt-4 text-center text-muted">
+                                <a href="/profile" class="text-primary text-decoration-none text-center">Go back to profile
+                                    page</a>
+                            </p>
+                </div>
+
+                <!-- Right Section (Image) -->
+                <div class="col-md-6 d-none d-md-block">
+                    <img src="/images/changeMail.png" alt="Login Visual"
+                        class="img-fluid h-100 w-100 object-fit-cover" style="object-fit: cover;" />
+                </div>
+            </div>
+        </div>
+        <script src="/js/showpassword.js"></script>
+    </body>
+
+</html>

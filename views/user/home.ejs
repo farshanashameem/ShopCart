@@ -48,9 +48,12 @@
                 <% if (categories[gender]) { %>
                   <% categories[gender].forEach(cat=> { %>
                     <div class="item-card text-center">
-                      <div class="category-img-wrapper">
+                    <a href="<%= `/products/${gender === 'female' ? 'women' : 'men'}?category=${cat.categoryId}` %>">
+
+                        <div class="category-img-wrapper">
                         <img src="<%= cat.image %>" alt="<%= cat.categoryName %>">
                       </div>
+                      </a>
                       <h6 class="mt-2">
                         <%= cat.categoryName %>
                       </h6>
@@ -122,9 +125,11 @@
                 <% if (arrivals[gender]) { %>
                   <% arrivals[gender].forEach(item=> { %>
                     <div class="item-card text-center">
-                      <div class="category-img-wrapper">
+                      <a href="/details/<%= item.id %>" class="text-decoration-none">
+                        <div class="category-img-wrapper">
                         <img src="<%= item.image %>" class="img-fluid rounded mb-2" alt="<%= item.productName %>">
                       </div>
+                      </a>
                       <h6 class="mt-2">
                         <%= item.productName %>
                       </h6>
