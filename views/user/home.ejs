@@ -6,26 +6,44 @@
     <%- include('../partials/navbar') %>
 
       <!-- Hero Section -->
-      <section class="container my-4">
-        <div class="row align-items-center">
-          <div class="col-3 text-center">
-            <img src="/images/leftBanner.png" class="img-fluid" alt="Left Banner">
-          </div>
-          <div class="col-6 text-center">
-            <img src="/images/banner1.png" class="img-fluid col " alt="Banner 1">
-            <h1 class="fw-bold display-4">ULTIMATE <span class="text-outline">SALE</span></h1>
-            <p class="lead">NEW COLLECTION</p>
-            <a href="/login" class="rounded px-4 py-2 text-decoration-none bg-dark "
-              style="background-color: black;color: white;">SHOP NOW</a>
-            <img src="/images/banner2.png" class="img-fluid col mt-4" alt="Banner 2">
-          </div>
-          <div class="col-3 text-center">
-            <img src="/images/rightBanner.png" class="img-fluid" alt="Right Banner">
-          </div>
-        </div>
+ <section class="container-fluid mt-0 banner-image ">
+  <div class="row g-0 text-center align-items-stretch" style="border-radius: 0px;">
+    
+    <!-- Left Banner -->
+    <div class="col-md-3 d-none d-md-block banner-image" style="border-radius: 0px;">
+      <img src="/images/leftBanner.png" class="img-fluid w-100 h-100 banner-image" alt="Left Banner" style="object-fit: cover;border-radius: 0px !important;">
+    </div>
+
+    <!-- Center Column -->
+    <div class="col-md-6 d-flex flex-column banner-image">
+      
+      <!-- Top Image -->
+      <img src="/images/banner1.png" class="img-fluid w-100 banner-image" alt="Banner 1" style="border-radius: 0;">
+      
+      <!-- Text Section -->
+      <div class="d-flex flex-column justify-content-center bg-dark text-white py-4 banner-image">
+        <h1 class="fw-bold display-4 text-uppercase m-0">
+          ULTIMATE <span class="text-outline">SALE</span>
+        </h1>
+        <p class="lead mb-3">✨ New Collection ✨</p>
+        <a href="/login" class="btn btn-light px-4 py-2 rounded-pill shadow mx-auto">
+          🛒 Shop Now
+        </a>
+      </div>
+
+      <!-- Bottom Image -->
+      <img src="/images/banner2.png" class="img-fluid w-100 banner-image" alt="Banner 2" style="border-radius: 0;">
+    </div>
+
+    <!-- Right Banner -->
+    <div class="col-md-3 d-none d-md-block banner-image">
+      <img src="/images/rightBanner.png" class="img-fluid w-100 h-100 banner-image" alt="Right Banner" style="object-fit: cover;">
+    </div>
+    
+  </div>
+</section>
 
 
-      </section>
 
       <!-- Explore by Category -->
       <section class="container text-center my-5">

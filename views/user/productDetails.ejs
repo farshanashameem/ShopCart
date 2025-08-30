@@ -4,30 +4,42 @@
 
     <body  data-product-id="<%= product._id %>">
         <%- include('../partials/navbar') %>
-s
+
             <div class="container py-5">
                 <div class="row g-5">
                     <!-- Left Images -->
-                    <div class="col-lg-6">
-                        <div class="row g-3 product-images">
-                            <% if (images && images.length> 0) { %>
-                                <% images.forEach(image=> { %>
-                                    <div class="col-6">
-                                        <div class="product-image-container">
-                                            <img src="<%= image %>" 
-                                                alt="Product Image" 
-                                                class="product-image product-img">
-                                            <span class="close-btn">&times;</span>
-                                            <div class="magnifierLens"></div>
-                                        </div>
-                                    </div>
-                                <% }) %>
-                                <% }
-                                    else { %>
-                                        <p>No images available</p>
-                                    <% } %>
+                    <div class="col-6">
+                        <div class="row">
+                            <!-- Thumbnails -->
+                            <div class="col-3 d-flex flex-lg-column flex-row align-items-start g-2">
+                                <% if (images && images.length > 0) { %>
+                                    <% images.forEach((image, index) => { %>
+                                    <img src="<%= image %>" 
+                                        alt="Thumbnail" 
+                                        class="img-thumbnail mb-2 me-2 thumb-img <%= index === 0 ? 'active' : '' %>" 
+                                        data-index="<%= index %>">
+                                    <% }) %>
+                                <% } else { %>
+                                    <p>No images available</p>
+                                <% } %>
+                            </div>
+
+                            <!-- Main Image -->
+                            <div class="col-9">
+                            <% if (images && images.length > 0) { %>
+                                <div class="main-image-container position-relative">
+                                <img id="mainImage" 
+                                    src="<%= images[0] %>" 
+                                    alt="Main Product" 
+                                    class="img-fluid rounded shadow product-img">
+                                <div id="magnifierLens"></div>
+                                </div>
+                            <% } %>
+                            </div>
                         </div>
                     </div>
+
+
 
                     <!-- Right Content -->
                     <div class="col-lg-6">
@@ -39,11 +51,26 @@ s
                                 <%= product.productType %>
                             </p>
 
-                            <div class="d-flex align-items-center mb-2">
-                                <span class="me-2 fw-bold">★ 4.4</span>
+                            <div class="d-flex flex-column align-items-start mb-2">
+                                <span class="me-2 fw-bold">
+                                    <% if (avgRating > 0) { %>
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <% if (i <= Math.floor(avgRating)) { %>
+                                        ★
+                                        <% } else if (i - avgRating < 1) { %>
+                                        ☆  <!-- optional: you could use half-star icon here -->
+                                        <% } else { %>
+                                        ☆
+                                        <% } %>
+                                    <% } %>
+                                    <%= avgRating %>(<%=count%>)
+                                    <% } else { %>
+                                    ☆☆☆☆☆ (0)
+                                    <% } %>
+                                    </span>
                                 <span class="fw-bold fs-5">
 
-                                    <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
+                                <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
 
 
                                 </span>
@@ -104,7 +131,23 @@ s
                                         </ul>
                                     </div>
                                     <div class="tab-pane fade p-3" id="review">
-                                        <p>No reviews yet.</p>
+                                        <!-- Show existing reviews -->
+                                        <% if (reviews && reviews.length > 0) { %>
+                                        <div class="mb-3">
+                                            <% reviews.forEach(r => { %>
+                                                <div class="border rounded p-2 mb-2">
+                                                    <strong><%= r.userId.name %></strong> <br>
+                                                    <span class="text-warning">
+                                                        <% for (let i = 0; i < r.rating; i++) { %>★<% } %>
+                                                        <% for (let i = r.rating; i < 5; i++) { %>☆<% } %>
+                                                    </span>
+                                                    <p><%= r.comment %></p>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                        <% } else { %>
+                                            <p>No reviews yet.</p>
+                                        <% } %>
                                     </div>
                                 </div>
 
@@ -143,25 +186,27 @@ s
                 <div class="row g-4">
                     <% if (relatedProducts && relatedProducts.length> 0) { %>
                         <% relatedProducts.forEach(prod=> { %>
-                            <div class="col-md-3">
-                                <div class="card related-card h-100">
-                                    <% if (prod.firstVariantImages && prod.firstVariantImages.length> 0) { %>
-                                       <a href="/details/<%= prod._id %>" class="text-decoration-none">
-                                         <img src="<%= prod.firstVariantImages[0] %>" alt="<%= prod.name %>"
-                                             class="img-fluid product-img" />
-                                       </a>
-                                        <% } else { %>
-                                            <p>No image available</p>
-                                            <% } %>
-                                                <div class="card-body">
-                                                    <h6 class="card-title">
-                                                        <%= prod.name %>
-                                                    </h6>
-                                                    <p class="card-text text-muted"> <del>₹<%= prod.basePrice %></del>₹<%= prod.discountPrice %>
-                                                    </p>
-                                                </div>
+                        <div class="col-6 col-md-3">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <% if (prod.firstVariantImages && prod.firstVariantImages.length > 0) { %>
+                                <a href="/details/<%= prod._id %>" class="text-decoration-none">
+                                    <div class="product-image-wrapper">
+                                    <img src="<%= prod.firstVariantImages[0] %>" 
+                                        alt="<%= prod.name %>" 
+                                        class="product-img" />
+                                    </div>
+                                </a>
+                                <% } else { %>
+                                <p class="text-center">No image available</p>
+                                <% } %>
+                                <div class="card-body text-center">
+                                <h6 class="card-title mb-1"><%= prod.name %></h6>
+                                <p class="card-text text-muted mb-0">
+                                    <del>₹<%= prod.basePrice %></del> ₹<%= prod.discountPrice %>
+                                </p>
                                 </div>
                             </div>
+                        </div>
                             <% }) %>
                                 <% } else { %>
                                     <p>No related products found.</p>
@@ -170,11 +215,12 @@ s
             </div>
 
             <%- include('../partials/footer') %>
-
+              <link rel="stylesheet" href="/css/productDetails.css" />
 
                 <script src="/js/imageMagnifier.js"></script>
                 <script src="/js/adding.js"></script>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </body>
 
 </html>

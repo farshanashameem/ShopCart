@@ -51,12 +51,16 @@
         <% if(items.length !== 0) { %>
       <div class="col-lg-4 mt-4 mt-lg-0 p-2" >
         <div class="order-summary p-3 border rounded" style="background-color: rgb(211, 215, 219);">
-          <h5>Order Summary</h5>
+          <h5 class="text-center mb-3"><b>Price Details</b></h5>
           <div id="summary-items">
             <% items.forEach(item => { %>
               <p>
-                <%= item.quantity %>x <%= item.name %> 
-                <span class="float-end">₹<%= item.discountPrice * item.quantity %></span>
+                <%= item.name %> ( <%= item.quantity %> items )
+                <span class="float-end">₹<%= item.basePrice * item.quantity %></span>
+              </p>
+              <p>
+                Discount 
+                <span class="float-end" style="color: green;"> - ₹<%= (item.basePrice - item.discountPrice) * item.quantity %></span>
               </p>
             <% }) %>
           </div>

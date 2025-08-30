@@ -309,7 +309,7 @@ body {
 }
 
 .product-image.enlarged {
-  transform: scale(1.5);
+  transform: scale(3.5);
   z-index: 100;
   /* bring to front */
 }
@@ -902,8 +902,8 @@ input[type="radio"] {
   content: '';
   position: absolute;
   top: 12px; /* aligns with circle center */
-  left: calc(15px / 2);   /* start at center of first circle */
-  right: calc(15px / 2);  /* end at center of last circle */
+  left: 12px;   /* start at center of first circle */
+  right: 12px;  /* end at center of last circle */
   height: 3px;
   background: #ddd;
   z-index: 1;
@@ -914,12 +914,14 @@ input[type="radio"] {
   content: '';
   position: absolute;
   top: 12px;
-  left: calc(15px / 2);   /* same as circle radius */
+  left: 12px;
   height: 3px;
   background: green;
   z-index: 2;
-  width: 0; /* updated dynamically */
+  width: var(--progress-width, 0);
+  transition: width 0.4s ease;
 }
+
 
 .step {
   position: relative;
@@ -1043,4 +1045,64 @@ input[type="radio"] {
   height: 120px;         /* fixed height */
   object-fit: cover;     /* keeps aspect ratio, crops if needed */
   border-radius: 8px;    /* optional: rounded corners */
+}
+
+/* Reset border radius ONLY for banners */
+/* Stronger selector - applies to all elements inside banner section */
+.banner-image,
+.banner-image * {
+  border-radius: 0 !important;
+}
+
+/* Outline text for SALE */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px #fff; /* white outline */
+}
+
+/* Responsive text scaling */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2rem;
+  }
+  .lead {
+    font-size: 1rem;
+  }
+}
+
+
+
+
+/* Hover zoom for images */
+.hover-zoom {
+  transition: transform 0.4s ease;
+}
+.hover-zoom:hover {
+  transform: scale(1.05);
+}
+
+
+.star-rating {
+  direction: rtl; /* right-to-left so clicking works naturally */
+  display: inline-flex;
+  font-size: 1.8rem;
+}
+
+.star-rating input {
+  display: none; /* hide radios */
+}
+
+.star-rating label {
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating input:checked ~ label {
+  color: #ffc107; /* highlight checked star and all before it */
+}
+
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #ffc107;
 }

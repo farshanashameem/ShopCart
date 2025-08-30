@@ -211,10 +211,14 @@
         <div class="order-summary">
             <h3>Order Summary</h3>
             <% cart.items.forEach(item => { %>
-                <div class="summary-item">
-                    <span><%= item.quantity %> x <%= item.name %></span>
-                    <span>₹<%= item.price * item.quantity %></span>
-                </div>
+                 <p>
+                <%= item.name %> ( <%= item.quantity %> items )
+                <span class="float-end">₹<%= item.price * item.quantity %></span>
+              </p>
+              <p>
+                Discount 
+                <span class="float-end" style="color: green;"> - ₹<%= (item.price - item.discountPrice) * item.quantity %></span>
+              </p>
             <% }) %>
             <div class="summary-item">
                 <span>Delivery Charges</span>

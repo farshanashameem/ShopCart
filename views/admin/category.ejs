@@ -19,15 +19,14 @@
                           <thead class="table-dark">
                             <tr>
                               <th>Product Type</th>
-                              <th>Stock</th>
+                              
                               <th>Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             <% productTypes.forEach(type => { %>
                               <tr>
-                                <td><%= type.name %></td>
-                                <td><%= type.stock %></td> 
+                                <td><%= type.name %></td>                               
                                 <td>
                                   <form method="GET" action="/admin/editPType/<%= type._id %>" class="ms-2 me-2 d-inline">
                                     <button type="submit" class="btn p-0 border-0 bg-transparent">
@@ -64,7 +63,7 @@
                     <thead class="table-dark">
                       <tr>
                         <th>Fit</th>
-                        <th>Stock</th>
+                        
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -72,7 +71,6 @@
                         <% fits.forEach(fit => { %>
                           <tr>
                             <td><%= fit.name %></td>
-                            <td><%= fit.stock %></td>
                             <td>
                               <form method="GET" action="/admin/editFit/<%= fit._id %>" class="ms-2 me-2 d-inline">
                                     <button type="submit" class="btn p-0 border-0 bg-transparent">
@@ -107,7 +105,6 @@
                           <tr>
                             <th>Colour</th>
                             <th>Hex Code</th>
-                            <th>Stock</th>
                             <th>Actions</th>
                           </tr>
                         </thead>
@@ -121,7 +118,7 @@
                                   <%= colour.hexCode %>
                                 </span>
                               </td>
-                              <td><%= colour.stock %></td>
+                             
                               <td>
                                 <form method="GET" action="/admin/editColour/<%= colour._id %>" class="ms-2 me-2 d-inline">
                                     <button type="submit" class="btn p-0 border-0 bg-transparent">

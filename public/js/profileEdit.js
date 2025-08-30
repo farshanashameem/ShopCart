@@ -33,4 +33,4 @@ document.getElementById('avatarUpload').addEventListener('change', function(even
 });
 
 
-
+  

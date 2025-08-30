@@ -15,83 +15,181 @@
 <body>
     <%- include('../partials/navbar') %>
 
-        <div class="container my-5">
-            <h2 class="mb-4">My Orders</h2>
+<div class="container my-5">
+    <h2 class="mb-4">My Orders</h2>
 
-            <!-- Loop through orders -->
-            <% orders.forEach(order=> { %>
-                <div class="order-card">
+    <!-- Loop through orders -->
+    <% orders.forEach(order => { %>
+       
+                 <div class="order-card">
                     <!-- Order Item -->
                     <div class="order-item">
-                        <img src="<%= order.image %>" alt="<%= order.name %>">
+                       <a href="/orderedItem/<%= order.id %>" class="text-decoration-none"> <img src="<%= order.image %>" alt="<%= order.name %>">
+                       </a>
                         <div class="order-info">
-                            <h5>
-                                <%= order.name %>
-                            </h5>
-                            <p>Quantity: <%= order.quantity %> | ₹<%= order.price %>
-                            </p>
+                            <h5><%= order.name %></h5>
+                            <p>Quantity: <%= order.quantity %> | ₹<%= order.price %></p>
                         </div>
                     </div>
 
                     <!-- Tracking Bar -->
-                    <div class="track">
-                            <div class="step <%= ['placed','shipped','out-for-delivery','delivered'].includes(order.status) ? 'active' : '' %>">
-                                <div class="circle"></div>
-                                <p>Order Placed</p>
-                                <small><%= order.statusDates.placed ? order.statusDates.placed.toDateString() : '' %></small>
-                            </div>
+                <div class="track" 
+                    data-status="<%= order.status %>" 
+                    data-expected="<%= order.expectedDate ? new Date(order.expectedDate).toDateString() : '' %>" 
+                    data-return="<%= (order.returnStatus === 'approved' || order.returnStatus === 'refunded') && order.returnDate ? new Date(order.returnDate).toDateString() : '' %>" 
+                    data-return-pending="<%= order.returnStatus === 'pending'||order.returnStatus==='approved' || order.returnStatus==='refunded' ? 'true' : 'false' %>">
 
-                            <div class="step <%= ['shipped','out-for-delivery','delivered'].includes(order.status) ? 'active' : '' %>">
-                                <div class="circle"></div>
-                                <p>Shipped</p>
-                                <small><%= order.statusDates.shipped ? order.statusDates.shipped.toDateString() : '' %></small>
-                            </div>
+                        <!-- Placed -->
+                        <div class="step <%= ['placed','shipped','out-for-delivery','delivered'].includes(order.status) || order.returnStatus === 'pending' || order.returnStatus === 'approved' || order.returnStatus === 'refunded' ? 'active' : '' %>">
+                            <div class="circle"></div>
+                            <p>Order Placed</p>
+                            <small><%= order.statusDates.placed ? new Date(order.statusDates.placed).toDateString() : '' %></small>
+                        </div>
 
-                            <div class="step <%= ['out-for-delivery','delivered'].includes(order.status) ? 'active' : '' %>">
-                                <div class="circle"></div>
-                                <p>Out for Delivery</p>
-                                <small><%= order.statusDates["out-for-delivery"] ? order.statusDates["out-for-delivery"].toDateString() : '' %></small>
+                        <!-- Shipped -->
+                        <div class="step <%= ['shipped','out-for-delivery','delivered'].includes(order.status) || order.returnStatus === 'pending' || order.returnStatus === 'approved' || order.returnStatus === 'refunded' ? 'active' : '' %>">
+                            <div class="circle"></div>
+                            <p>Shipped</p>
+                            <small><%= order.statusDates.shipped ? new Date(order.statusDates.shipped).toDateString() : '' %></small>
+                        </div>
 
-                            </div>
+                        <!-- Out for Delivery -->
+                        <div class="step <%= ['out-for-delivery','delivered'].includes(order.status) || order.returnStatus === 'pending' || order.returnStatus === 'approved' || order.returnStatus === 'refunded' ? 'active' : '' %>">
+                            <div class="circle"></div>
+                            <p>Out for Delivery</p>
+                            <small> 
+                            <%= order.statusDates["out-for-delivery"] ? new Date(order.statusDates["out-for-delivery"]).toDateString() : '' %>
 
-                            <div class="step <%= order.status === 'delivered' ? 'active' : '' %>">
-                                <div class="circle"></div>
-                                <p>Delivered</p>
-                                <small><%= order.statusDates.delivered ? order.statusDates.delivered.toDateString() : '' %></small>
-                            </div>
-                    </div>
+                            </small>
+                        </div>
+
+                        <!-- Delivered / Returned -->
+                        <div class="step <%= order.status === 'delivered' || order.returnStatus === 'pending' || order.returnStatus === 'approved' || order.returnStatus === 'refunded' ? 'active' : '' %>">
+                            <div class="circle"></div>
+                            <p>
+                                <% if(order.status === 'delivered') { %>
+                                    Delivered
+                                <% } else if(order.returnStatus === 'pending' || order.returnStatus === 'approved' || order.returnStatus === 'refunded'|| order.returnStatus === 'rejected') { %>
+                                    Returned
+                                <% } else if( order.status==='cancelled'){ %>
+                                    Cancelled
+                                <%} else { %>
+                                    Expected Delivery
+                                <% } %>
+                            </p>
+                            <small>
+                                <% if(order.status === 'delivered') { %>
+                                    <%= order.statusDates.delivered ? new Date(order.statusDates.delivered).toDateString() : '' %>
+                                <% } else if(order.returnStatus === 'pending' ||order.returnStatus === 'approved' || order.returnStatus === 'refunded'|| order.returnStatus === 'rejected') { %>
+                                    <%= order.statusDates.returned ? new Date(order.statusDates.returned).toDateString() : '' %>
+                                <% } else if( order.status==='cancelled'){ %>
+                                    <%= order.statusDates.cancelled ? new Date(order.statusDates.cancelled).toDateString() : '' %>
+                                    <%} else { %>
+                                    <%= order.expectedDate ? new Date(order.expectedDate).toDateString() : '' %>
+                                <% } %>
+                            </small>
+                        </div>
+
+                </div>
 
 
                     <!-- Buttons -->
-                    <div class="d-flex justify-content-end">
-                        <% if(order.status==='placed' ){ %>
-                            <button class="btn-cancel">Cancel Order</button>
-                            <% } else if(order.status==='delivered' ){ %>
-                                <button class="btn-return">Return</button>
-                                <% } %>
+                    <div class="d-flex justify-content-center">
+                        <% if (!['delivered','returned','cancelled'].includes(order.status)) { %>
+                            <button class="btn-cancel btn btn-danger"
+                                data-order-id="<%= order.orderId %>"
+                                data-variant-id="<%= order.variantId %>"
+                                data-product-id="<%= order.productId %>">
+                                Cancel Order
+                            </button>
+                        
+
+                        <% } else if(order.status === 'delivered'){ %>
+                            <button 
+                                class="btn-return btn btn-warning" 
+                                data-order-id="<%= order.orderId %>" 
+                                data-variant-id="<%= order.variantId %>" 
+                                data-product-id="<%= order.productId %>" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#returnModal">
+                                Return
+                            </button>
+                        <% } %>
+
+                        <% if(order.status==='cancelled') { %>
+                            <span class="badge bg-danger">Order cancelled</span>
+                            <%}%>
+
+                        <% if(order.returnStatus === "pending"){ %>
+                            <span class="badge bg-warning">Return Request Pending</span>
+                        <% } else if(order.returnStatus === "approved"){ %>
+                            <span class="badge bg-info">Return request accepted</span>
+                        <% } else if(order.returnStatus === "refunded") { %>
+                            <span class="badge bg-success"> Amount refunded</span>
+                            <% } else if(order.returnStatus === "rejected"){ %>
+                            <span class="badge bg-danger">Return Rejected</span>
+                        <% } %>
                     </div>
                 </div>
-                <% }) %>
+       
+        <!-- end of order-card -->
+    <% }) %>
+</div> <!-- end of container -->
 
                     <div class="pagination">
                         <% if (currentPage> 1) { %>
                             <a href="?page=<%= currentPage - 1 %>">Prev</a>
-                            <% } %>
+                        <% } %>
 
-                                <% for (let i=1; i <=totalPages; i++) { %>
-                                    <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>">
-                                        <%= i %>
-                                    </a>
-                                <% } %>
+                         <% for (let i=1; i <=totalPages; i++) { %>
+                            <a href="?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                         <% } %>
 
-                                        <% if (currentPage < totalPages) { %>
-                                            <a href="?page=<%= currentPage + 1 %>">Next</a>
-                                        <% } %>
+                          <% if (currentPage < totalPages) { %>
+                             <a href="?page=<%= currentPage + 1 %>">Next</a>
+                          <% } %>
                     </div>
 
-        </div>
+        
 
         <%- include('../partials/footer') %>
 </body>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="/js/tracker.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/cancelOrder.js"></script>
+    <%- include('../partials/successAlert')  %>
+
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <form action="/orders/return" method="POST">
+            <div class="modal-header">
+            <h5 class="modal-title">Reason for Return</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+            <input type="hidden" name="orderId" id="modalOrderId">
+            <input type="hidden" name="variantId" id="modalVariantId">
+            <input type="hidden" name="productId" id="modalProductId">
+            
+            <label for="reason">Choose a reason:</label>
+            <select name="reason" class="form-control" required>
+                <option value="">-- Select Reason --</option>
+                <option>Wrong Size</option>
+                <option>Damaged Product</option>
+                <option>Not as Described</option>
+                <option>Other</option>
+            </select>
+            </div>
+            <div class="modal-footer">
+            <button type="submit" class="btn btn-danger">Submit</button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+
 </html>

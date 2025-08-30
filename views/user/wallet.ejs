@@ -28,7 +28,7 @@
                                 Hello Farshana
                             </div>
                             <ul class="nav flex-column user-list">
-                                <li class="nav-item current">
+                                <li class="nav-item ">
                                     <i class="bi bi-person-circle me-3"></i>
                                     <a href="/profile" class="text-decoration-none bg-transparent">Profile</a>
                                 </li>
@@ -36,7 +36,7 @@
                                     <i class="bi bi-card-checklist me-3"></i>
                                     <a href="/orders" class="text-decoration-none bg-transparent">My Orders</a>
                                 </li>
-                                <li class="nav-item mb-3">
+                                <li class="nav-item mb-3 current">
                                     <i class="bi bi-wallet-fill me-3"></i>
                                     <a href="/wallet" class="text-decoration-none bg-transparent">Wallet</a>
                                 </li>
@@ -61,68 +61,46 @@
                     </div>
 
 
-                    <div class="profile-card">
-                        <h2 class="profile-title">PROFILE</h2>
-                        <!-- Form -->
-                        <form class="profile-form" method="post" action="/profileUpdate" enctype="multipart/form-data">
-                            <!-- Avatar -->
-                            <div class="avatar-container">
-                                <img src="<%= user.image  %>" alt="Profile Picture" class="avatar-img"
-                                    id="profileImage">
+                    <div class="profile-card d-flex flex-column justify-content-center align-items-center text-center mx-auto my-5 p-4"
+     style="background: linear-gradient(145deg, #e0f7e0, #c8f0c8); 
+            border-radius: 20px; 
+            width: 100%; 
+            max-width: 380px; 
+            height: 60vh; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+    
+    <!-- Title -->
+    <h4 class="fw-bold mb-4 text-primary" style="font-size: 1.5rem;">
+        <i class="bi bi-wallet-fill me-2"></i> My Wallet
+    </h4>
+    
+    <!-- Wallet Balance -->
+    <div class="wallet-balance mb-4">
+        <h2 class="fw-bold text-success mb-1" style="font-size:2.5rem;">₹ <%= walletAmount || 0 %></h2>
+        <p class="text-muted mb-0">Available Balance</p>
+    </div>
 
-                                <label for="avatarUpload" class="avatar-upload">
-                                    <i class="bi bi-camera-fill"></i>
-                                </label>
+    <!-- Links / Actions -->
+    <div class="d-grid gap-3 mt-3 w-100">
+        <a href="/wallet/transactions" class="btn btn-outline-primary py-2 fw-semibold" 
+           style="transition: 0.3s; border-radius: 12px;">
+            <i class="bi bi-clock-history me-2"></i> Show Transactions
+        </a>
+        <a href="/wallet/transfer" class="btn btn-success py-2 fw-semibold" 
+           style="transition: 0.3s; border-radius: 12px;">
+            <i class="bi bi-bank me-2"></i> Transfer to Bank
+        </a>
+    </div>
+</div>
 
-                                <input type="file" name="profileImage" id="avatarUpload" accept="image/*" hidden>
-                            </div>
+<!-- Optional: Add hover effect with CSS -->
+<style>
+.profile-card a.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+</style>
 
-                            <div class="form-group">
-                                <label>Name:</label>
-                                <div class="input-wrapper">
-                                    <input type="text" name="name" value="<%=old?.name?old.name: user.name%>" readonly>
-                                    <i class="bi bi-pencil-fill edit-icon"></i>
-                                </div>
-                                <% if (errors?.name) { %>
-                                    <p class="text-danger m-0">
-                                        <%= errors.name %>
-                                    </p>
-                                    <% } %>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Email:</label>
-                                <div class="input-wrapper">
-                                    <input type="email" name="email" value="<%= old?.email ? old.email : user.email %>"readonly>
-                                    <i class="bi bi-pencil-fill edit-icon"></i>
-                                </div>
-                                <% if (errors?.email) { %>
-                                    <p class="text-danger m-0">
-                                        <%= errors.email %>
-                                    </p>
-                                    <% } %>
-                            </div> 
-
-                            <div class="form-group">
-                                <label>Phone:</label>
-                                <div class="input-wrapper">
-                                    <input type="tel" name="phone" value="<%=old?.phone?old.phone: user.mobile %>" readonly>
-                                    <i class="bi bi-pencil-fill edit-icon"></i>
-                                </div>
-                                <% if (errors?.phone) { %>
-                                    <p class="text-danger m-0">
-                                        <%= errors.phone %>
-                                    </p>
-                                    <% } %>
-                            </div>
-
-
-
-                            <a href="/updatePassword" class="change-password bg-light ">Change password</a>
-                            <button type="submit" class="save-btn">Save changes</button>
-
-                        </form>
-                    </div>
 
                 </div>
             </div>

@@ -47,11 +47,26 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         })
         .then(res => res.json())
-        .then(data => {
-            alert(data.message || "Added to cart!");
-        })
-        .catch(err => console.error(err));
-    });
+       .then(data => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: data.success ? "success" : "warning",
+                    title: data.message,
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            })
+       .catch(err => {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Something went wrong. Please try again.",
+            });
+        });
+   }); 
+
 
     wishlistBtn.addEventListener("click", () => {
         if (!selectedSize || !selectedColor) return;
@@ -66,10 +81,25 @@ document.addEventListener("DOMContentLoaded", () => {
             })
         })
         .then(res => res.json())
-        .then(data => {
-            alert(data.message || "Added to wishlist!");
+         .then(data => {
+            Swal.fire({
+                toast: true,
+                position: "top-end",
+                icon: data.success ? "success" : "info",
+                title: data.message,
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true
+            });
         })
-        .catch(err => console.error(err));
+
+            .catch(err => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Something went wrong. Please try again.",
+                });
+            });
     });
 });
 

@@ -8,45 +8,50 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-      <ul class="navbar-nav align-items-center gap-3">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Left side nav links -->
+      <ul class="navbar-nav me-auto align-items-center gap-3">
         <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/products/men">Men</a></li>
         <li class="nav-item"><a class="nav-link" href="/products/women">Women</a></li>
         <li class="nav-item"><a class="nav-link" href="/products">All Products</a></li>
-        <!-- <li class="nav-item"><a class="nav-link" href="/new-arrivals">New Arrivals</a></li>-->
+      </ul>
 
+      <!-- Search bar -->
+      <form class="d-flex me-3" id="productFilterForm" action="/search" method="GET">
+        <input class="form-control rounded-pill me-2 "  type="text" name="q"   value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Search products..." aria-label="Search" style="width: 300px;">
+        <button class="btn btn-dark rounded-pill" type="submit"><i class="bi bi-search"></i></button>
+      </form>
+
+      <!-- Right side auth / icons -->
+      <ul class="navbar-nav align-items-center gap-3">
         <% if (!user) { %>
-          <!-- Show Sign In / Sign Up if not logged in -->
           <li class="nav-item"><a class="nav-link" href="/login">Sign In</a></li>
           <li class="nav-item">
             <a href="/signup" class="ms-2 text-decoration-none rounded p-2 bg-dark text-white">Sign Up</a>
           </li>
-          <% } else { %>
-            <!-- Show icons if logged in -->
-            <li class="nav-item">
-              <a class="nav-link" href="/wishlist"><i class="bi bi-heart fs-5"></i></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/cart"><i class="bi bi-cart fs-5"></i></a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                <i class="bi bi-person-circle fs-5"></i>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="/profile">Profile</a></li>
-                <li><a class="dropdown-item" href="/orders">My Orders</a></li>
-                <li><a class="dropdown-item" href="/logout">Logout</a></li>
-              </ul>
-            </li>
-            <% } %>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/wishlist"><i class="bi bi-heart fs-5"></i></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/cart"><i class="bi bi-cart fs-5"></i></a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle fs-5"></i>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <li><a class="dropdown-item" href="/orders">My Orders</a></li>
+              <li><a class="dropdown-item" href="/logout">Logout</a></li>
+            </ul>
+          </li>
+        <% } %>
       </ul>
     </div>
 
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   </div>
-
-
 </nav>

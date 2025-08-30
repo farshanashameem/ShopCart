@@ -1,0 +1,66 @@
+.main-image-container {
+    height: 100%;
+    width: 100%;
+  position: relative;
+  overflow: hidden;
+  max-height: 500px;
+  max-width: 500px;  /* controls height */
+}
+.main-image-container img {
+   height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.thumb-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+.thumb-img:hover {
+  transform: scale(1.05);
+}
+.thumb-img.active {
+  border: 2px solid #28a745;
+}
+
+#magnifierLens {
+  position: absolute;
+  border: 2px solid #28a745;
+  width: 120px;
+  height: 120px;
+  display: none;
+  pointer-events: none;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+}
+
+
+.product-image-wrapper {
+  width: 100%;
+  height: 250px;         /* fixed height for uniformity */
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f8f9fa;   /* light bg if image is smaller */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-img {
+  min-width: 100%;
+  min-height: 100%;
+  object-fit: cover;/* fills the box, crops edges */
+  transition: transform 0.3s ease;
+}
+
+.product-img:hover {
+  transform: scale(1.05);
+}
+
+
+
