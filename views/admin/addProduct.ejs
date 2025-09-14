@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <%- include('../partials/head', { title: 'Add Product' }) %>
@@ -173,9 +169,92 @@
     </footer>
   </div>
 
+  <!-- Cropper Modal -->
+<div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Crop Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="cropperImage" style="max-width:100%;"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" id="cropImageBtn" class="btn btn-dark">Crop & Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let cropper;
+let activeInput; // to remember which input triggered cropping
+const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+const cropperImage = document.getElementById('cropperImage');
+const cropImageBtn = document.getElementById('cropImageBtn');
+
+// Handle image input selection
+document.querySelectorAll('.image-input').forEach((input) => {
+  input.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      activeInput = input; // store reference of current input
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        cropperImage.src = reader.result;
+        cropperModal.show();
+
+        // destroy old cropper if exists
+        if (cropper) cropper.destroy();
+
+        cropper = new Cropper(cropperImage, {
+          aspectRatio: 1,      // square, change if needed
+          viewMode: 2,
+          autoCropArea: 1,
+          responsive: true,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+});
+
+// Crop & Save Button
+cropImageBtn.addEventListener('click', () => {
+  if (!cropper || !activeInput) return;
+
+  const canvas = cropper.getCroppedCanvas({
+    width: 600,   // output size
+    height: 600,
+  });
+
+  canvas.toBlob((blob) => {
+    const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+
+    // Replace the input file with cropped one
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    activeInput.files = dataTransfer.files;
+
+    // Update preview image
+    const preview = activeInput.parentElement.querySelector('.upload-preview');
+    preview.src = URL.createObjectURL(file);
+
+    cropperModal.hide();
+    cropper.destroy();
+    cropper = null;
+  }, 'image/jpeg', 0.9);
+});
+
+</script>
   
   <script src="/js/addproduct.js"></script>
   <script src="/js/image.js"></script>
+  <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
  
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -47,11 +47,15 @@ const orderSchema = new mongoose.Schema({
     min: 0
   },
 
-/*  couponId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Coupon",
+ couponId: {
+    type:String,
     default: null
-  },*/
+  },
+  couponDiscount:{
+    type:Number,
+    default:null
+
+  },
   walletAmountUsed: {
     type: Number,
     default: 0,
@@ -84,7 +88,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["cod", "card", "upi", "wallet"],
+    enum: ["cod", "card", "upi", "wallet","razorpay"],
     required: true
   }
 }, {

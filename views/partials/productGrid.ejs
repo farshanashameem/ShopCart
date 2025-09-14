@@ -1,28 +1,102 @@
 <!-- Product Grid -->
 <div class="col-9">
-    <div class="row  row-cols-3 g-4">
-        <% products.forEach(product=> { %>
-            <div class="col-4"><a href="/details/<%= product._id %>" class="text-decoration-none">
+  <div class="row row-cols-3 g-4">
+    <% products.forEach(product => { %>
+      <div class="col-4">
+        <div class="product-card position-relative" style="color: rgb(122, 46, 2);">
 
-                <div class="product-card " style="color: rgb(122, 46, 2);">
-                    <img src="<%= product.firstImage %>" alt="<%= product.name %>" class="img-fluid w-100 rounded mb-2">
-                    <h5><b>
-                            <%= product.name %>
-                        </b>
-                    </h5>
-                    <h6>
-                        <%= product.description %>
-                    </h6>
-                    <p>Price: <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %>
-                    </p>
-                </div>
-            </a>
-                
-            </div>
-            <% }) %>
-    </div>
+          <!-- Product Image -->
+          <a href="/details/<%= product._id %>" class="text-decoration-none">
+            <img src="<%= product.firstImage %>" alt="<%= product.name %>" class="img-fluid w-100 rounded mb-2">
+          </a>
 
-    
+          <!-- Wishlist Button (only productId stored) -->
+          <button 
+            class="btn position-absolute top-0 end-0 m-2 wishlist-btn" 
+            data-product-id="<%= product._id %>"
+            style="background: transparent; border: none;">
+            <i class="bi bi-heart fs-4"></i>
+          </button>
 
-
+          <!-- Product Details -->
+          <a href="/details/<%= product._id %>" class="text-decoration-none">
+            <h5><b><%= product.name %></b></h5>
+            <h6><%= product.description %></h6>
+            <p>
+              Price: <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %>
+            </p>
+          </a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
 </div>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.querySelectorAll('.wishlist-btn').forEach(btn => {
+    btn.addEventListener('click', async function (e) {
+      e.preventDefault();
+
+      const productId = this.dataset.productId;
+      const icon = this.querySelector('i');
+
+      try {
+        // 1. Fetch first variant of the product
+        const variantRes = await fetch(`/api/products/${productId}/variants`);
+        const variantData = await variantRes.json();
+
+        if (!variantData.success || !variantData.variants.length) {
+          return Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No variants available for this product!'
+          });
+        }
+
+        const firstVariant = variantData.variants[0];
+
+        // 2. Call addToWishlist with productId, size, and color
+        const res = await fetch('/addToWishlist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId,
+            size: firstVariant.size,
+            color: firstVariant.colorId
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          icon.classList.remove('bi-heart');
+          icon.classList.add('bi-heart-fill', 'text-danger');
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Added to Wishlist',
+            text: data.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Notice',
+            text: data.message
+          });
+        }
+      } catch (err) {
+        console.error('Error adding to wishlist:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Something went wrong!',
+          text: 'Could not add to wishlist. Please try again later.'
+        });
+      }
+    });
+  });
+</script>

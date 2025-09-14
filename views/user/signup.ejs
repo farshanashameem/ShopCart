@@ -3,8 +3,8 @@
   <%- include('../partials/head', { title: 'Sign up' }) %>
   <body class=" d-flex justify-content-center align-items-center vh-100" >
 
-    <div class="container p-4 shadow rounded-4 overflow-hidden " style="max-width: 900px;background-color: rgb(244, 236, 227) !important;">
-      <div class="row g-0">
+    <div class="container p-4 shadow rounded-4 overflow-hidden  " style="max-width: 900px;background-color: rgb(244, 236, 227) !important;">
+      <div class="row g-0 mt-4">
         <!-- Left Section (Form) -->
         <div class="col-md-6  p-5 d-flex flex-column justify-content-center">
           <h1><b>Create Account</b></h1>
@@ -20,7 +20,7 @@
 
           
           <form action="/signup" method="POST">
-              <% if(error){%>
+              <% if(error){%>  
                 <div class="mb-3">
                     <p class="text-danger m-0"><%= error %></p>
                 </div>
@@ -44,6 +44,13 @@
                   <input type="email" name="email" class="form-control rounded-2 px-3 py-2" placeholder="Email" value="<%= old?.email || '' %>" />
                   <% if (errors?.email) { %>
                     <p class="text-danger m-0"><%= errors.email %></p>
+                  <% } %>
+                </div>
+
+                <div class="mb-3">
+                  <input type="text" name="referCode" class="form-control rounded-2 px-3 py-2" placeholder="Refer code" value="<%= old?.referCode || '' %>">
+                  <% if (errors?.referCode) { %>
+                    <p class="text-danger m-0"><%= errors.referCode %></p>
                   <% } %>
                 </div>
 

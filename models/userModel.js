@@ -96,6 +96,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null // required only for manual signup
   },
+  referCode: {
+      type: String,
+      unique: true,
+      sparse: true, // allows some users to not have a code
+    },
+    referredBy: {
+      type: String, //  store referrer's referCode 
+      default: null,
+    },
   googleId: {
     type: String,
     default: null // filled only for Google login

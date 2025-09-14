@@ -1,115 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <%- include('../partials/head', { title: 'ShopCart - Checkout' }) %>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 15px; 
-      font-size: 14px;  /* smaller font */
-    }
-    .invoice-box { 
-      width: 80%;   /* narrower */
-      padding: 20px; 
-      border: 1px solid #ccc; 
-      margin: auto; 
-    }
-    h2, h3 { margin: 8px 0; }
-    table { 
-      width: 100%; 
-      line-height: inherit; 
-      text-align: left; 
-      border-collapse: collapse; 
-      font-size: 13px;  /* smaller table text */
-    }
-    table td { padding: 4px; vertical-align: top; }
-    table th { 
-      background: #f5f5f5; 
-      padding: 6px; 
-      font-size: 13px; 
-    }
-    .total { font-weight: bold; }
-    .text-right { text-align: right; }
-    .notes { font-size: 12px; margin-top: 10px; }
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 15px;
+        font-size: 14px;
+        /* smaller font */
+      }
+
+      .invoice-box {
+        width: 80%;
+        /* narrower */
+        padding: 20px;
+        border: 1px solid #ccc;
+        margin: auto;
+      }
+
+      h2,
+      h3 {
+        margin: 8px 0;
+      }
+
+      table {
+        width: 100%;
+        line-height: inherit;
+        text-align: left;
+        border-collapse: collapse;
+        font-size: 13px;
+        /* smaller table text */
+      }
+
+      table td {
+        padding: 4px;
+        vertical-align: top;
+      }
+
+      table th {
+        background: #f5f5f5;
+        padding: 6px;
+        font-size: 13px;
+      }
+
+      .total {
+        font-weight: bold;
+      }
+
+      .text-right {
+        text-align: right;
+      }
+
+      .notes {
+        font-size: 12px;
+        margin-top: 10px;
+      }
 
       @media print {
-      button {
-        display: none;
+        button {
+          display: none;
+        }
+
+        body {
+          margin: 0;
+        }
+
+        .invoice-box {
+          border: none;
+          /* remove border when printing */
+          width: 100%;
+        }
       }
-      body {
-        margin: 0;
-      }
-      .invoice-box {
-        border: none;  /* remove border when printing */
-        width: 100%;
-      }
-    }
-  </style>
+    </style>
 </head>
+
 <body>
-   <%- include('../partials/navbar') %>
+  <%- include('../partials/navbar') %>
 
-  <div class="invoice-box mt-4">
-    <h2>Invoice</h2>
-    <p>Invoice No: <%= orderId %></p>
-    <p>Date: <%= new Date(createdAt).toLocaleDateString() %></p>
+    <div class="invoice-box mt-4">
+      <h2>Invoice</h2>
+      <p>Invoice No: <%= orderId %>
+      </p>
+      <p>Date: <%= new Date(createdAt).toLocaleDateString() %>
+      </p>
 
-    <h3>Bill To:</h3>
-    <p>
-      <%= orders[0].name %><br>
-      <%= orders[0].email %><br>
-      <%= orders[0].address %>
-    </p>
+      <h3>Bill To:</h3>
+      <p>
+        <%= orders[0].name %><br>
+          <%= orders[0].email %><br>
+            <%= orders[0].address %>
+      </p>
 
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>Discount</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% orders.forEach(item => { %>
+      <table border="1">
+        <thead>
           <tr>
-            <td><%= item.description %> (<%= item.size %>, <%= item.color %>)</td>
-            <td><%= item.quantity %></td>
-            <td>₹<%= item.basePrice %></td>
-            <td style="color: green;">₹<%= item.discountPrice %></td>
-            <td>₹<%= item.total %></td>
+            <th style="width: 40%">Description</th>
+            <th style="width: 10%">Qty</th>
+            <th style="width: 15%">Price</th>
+            <th style="width: 15%">Discount</th>
+            <th style="width: 20%">Total</th>
+
           </tr>
-        <% }) %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% orders.forEach(item=> { %>
+            <tr>
+              <td>
+                <%= item.description %> (<%= item.size %>, <%= item.color %>)
+              </td>
+              <td>
+                <%= item.quantity %>
+              </td>
+              <td>₹<%= item.basePrice %>
+              </td>
+              <td style="color: green;">₹<%= item.discountPrice %>
+              </td>
+              <td>₹<%= item.total %>
+              </td>
+            </tr>
+            <% }) %>
+        </tbody>
+      </table>
 
-    <h3 class="text-right">Grand Total: ₹<%= grandTotal %></h3>
+      <h6 class="text-right">Total: ₹<%= grandTotal %>
+      </h6>
+      <h6 class="text-right" style="color: green;">Coupon Discount: -₹<%= discount %>
+      </h6>
+      <h6 class="text-right" style="color: green;">Delivery Charge: +₹<%= deliveryCharge %>
+      </h6>
+      <h3 class="text-right">Grand Total : ₹<%= grandTotal-discount+ deliveryCharge %>
+      </h3>
 
-    <p class="notes"><b>Notes:</b> Thank you for shopping with us!</p>
-  </div>
+      <p class="notes"><b>Notes:</b> Thank you for shopping with us!</p>
+    </div>
 
-  <div class="d-flex justify-content-center mt-3">
-  <button id="downloadBtn" class="btn btn-primary">Download Invoice</button>
-</div>
+    <div class="d-flex justify-content-center mt-3">
+      <button id="downloadBtn" class="btn btn-primary">Download Invoice</button>
+    </div>
 
-  <%- include('../partials/footer') %>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <%- include('../partials/footer') %>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
-  <script>
-    document.getElementById("downloadBtn").addEventListener("click", () => {
-      const element = document.querySelector(".invoice-box"); 
-      const opt = {
-        margin: 0.5,
-        filename: "invoice-<%= orderId %>.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
-      };
-      html2pdf().set(opt).from(element).save();
-    });
-  </script>
+      <script>
+        document.getElementById("downloadBtn").addEventListener("click", () => {
+          const element = document.querySelector(".invoice-box");
+          const opt = {
+            margin: 0.5,
+            filename: "invoice-<%= orderId %>.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
+          };
+          html2pdf().set(opt).from(element).save();
+        });
+      </script>
 </body>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>

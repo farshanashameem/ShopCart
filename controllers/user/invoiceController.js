@@ -7,17 +7,15 @@ const Colour = require("../../models/Colour");
 exports.getInvoicePage = async (req, res) => {
   try {
     const orderId = req.params.orderId;
-
+    const user=await User.findById(req.session.user._id);
     // get all orders with same orderId
     const orderItems = await Orders.find({ orderId });
-
+    const discount = orderItems.reduce((sum, item) => sum + (item.couponDiscount || 0), 0);
     if (!orderItems || orderItems.length === 0) {
       return res.status(404).send("Order not found");
     }
 
-    // fetch user once (same for all items in order)
-    const user = await User.findById(orderItems[0].userId);
-
+    
     // map all products
     const list = await Promise.all(
       orderItems.map(async (item) => {
@@ -35,7 +33,7 @@ exports.getInvoicePage = async (req, res) => {
           email: user.email,
           color: color?.name || "N/A",
           size: variant?.size || "N/A",
-          address: `${address?.street}, ${address?.city}, ${address?.state}, ${address?.pincode}`,
+          address: `${address?.locality}, ${address?.city}, ${address?.state}, ${address?.pincode}`,
           description: product?.description,
           quantity: item.quantity,
           basePrice: variant?.basePrice || 0,
@@ -47,12 +45,15 @@ exports.getInvoicePage = async (req, res) => {
 
     // calculate grand total
     const grandTotal = list.reduce((acc, cur) => acc + cur.total, 0);
+    const deliveryCharge=grandTotal<300?50:0;
 
     res.render("user/invoice", {
       orders: list,
       orderId,
       grandTotal,
       createdAt: orderItems[0].createdAt,
+      discount,
+      deliveryCharge
     });
   } catch (err) {
     console.error(err);

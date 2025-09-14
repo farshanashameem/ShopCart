@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head', { title: 'ShopCart - Payment Failed' }) %>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+    }
+
+    .failed-container {
+      text-align: center;
+      margin: 5% auto;
+      padding: 20px;
+      max-width: 600px;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    /* Failed Icon */
+    .failed-icon {
+      font-size: 80px;
+      color: #dc3545; /* red */
+      margin-bottom: 20px;
+      display: inline-block;
+      animation: shake 0.8s ease-in-out;
+    }
+
+    .failed-message {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #dc3545;
+      animation: fadeInUp 1s ease forwards;
+    }
+
+    .failed-subtext {
+      font-size: 1rem;
+      margin-bottom: 30px;
+      color: #555;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .btn-custom {
+      border: 2px solid #000;
+      padding: 10px 25px;
+      border-radius: 25px;
+      background: transparent;
+      transition: all 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-custom:hover {
+      background: #000;
+      color: #fff;
+      transform: scale(1.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+      .failed-icon {
+        font-size: 60px;
+      }
+      .failed-message {
+        font-size: 1.4rem;
+      }
+      .btn-custom {
+        flex: 1;
+        text-align: center;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+      100% { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="failed-container bg-light shadow rounded">
+    <div class="failed-icon">✘</div>
+    <div class="failed-message">PAYMENT FAILED</div>
+    <div class="failed-subtext">Something went wrong. Please try again or choose a different payment method.</div>
+   
+    <div class="btn-group">
+      <a href="/cart" class="btn-custom text-decoration-none text-dark">🔄 TRY AGAIN</a>
+      <a href="/products" class="btn-custom text-decoration-none text-dark">🛍 CONTINUE SHOPPING</a>
+      
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+</body>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+  history.pushState(null, null, location.href);
+  window.onpopstate = function () {
+    window.location.href = "/checkout";
+  };
+</script>
+</html>

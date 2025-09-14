@@ -55,13 +55,13 @@ body {
   background-color: #ccc;
 }
 .image {
-  padding: 10px;
+ overflow: hidden; /* hide overflow */
+  border-radius: 50%;
 }
 
 .image:hover {
   cursor: pointer;
   background-color: rgb(233, 228, 222);
-  padding: 10px;
   border-radius: 10px;
 }
 
@@ -1105,4 +1105,21 @@ input[type="radio"] {
 .star-rating label:hover,
 .star-rating label:hover ~ label {
   color: #ffc107;
+}
+
+.couponAdd {
+  border:#007bff 1px solid;
+  border-radius: 10px;
+  padding: 10px;
+
+}
+.couponAdd input{
+  outline: none;
+  border: #007bff 1px solid;
+  height: 40px;
+}
+.couponAdd select{
+  outline: none;
+  border: #007bff 1px solid;
+  height: 40px;
 }

@@ -160,7 +160,14 @@ exports.getHomePage = async (req, res) => {
 
 exports.getProductPage = async (req, res) => {
   try {
+    
     const genderParam = req.params.gender || 'all';
+
+    const allowedGenders = ['men', 'women', 'all'];
+    if (!allowedGenders.includes(genderParam)) {
+      return res.status(404).render('error/404');
+    }
+
     const genderMap = {
       'women': 'female',
       'men': 'male'
@@ -375,6 +382,16 @@ exports.getProductDetails = async (req, res) => {
   } catch (err) {
     console.error('Product Details Error:', err.message);
     res.status(500).render('error/500');
+  }
+};
+
+exports.getFirstVariant=async (req, res) => {
+  try {
+    const variants = await productVariant.find({ productId: req.params.productId });
+    res.json({ success: true, variants });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, variants: [] });
   }
 };
 

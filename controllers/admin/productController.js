@@ -282,8 +282,26 @@ exports.editProduct = async (req, res) => {
       ? req.body.variants
       : Object.values(req.body.variants);
 
-    const filesPerVariant = req.files || [];
-    const imagePaths = filesPerVariant.map(file => file.path);
+    const files = req.files || {};
+const existing = req.body.existingImages || {};
+
+// Normalize existing to array form
+let keep = [existing[0], existing[1], existing[2]];
+
+const finalImages = [];
+for (let i = 0; i < 3; i++) {
+  if (files[`images${i}`] && files[`images${i}`][0]) {
+    // new upload replaces this slot
+    finalImages.push(files[`images${i}`][0].path);
+  } else if (keep[i]) {
+    // fallback: keep old one if no replacement
+    finalImages.push(keep[i]);
+  }
+}
+
+
+
+
 
     const submittedVariantIds = [];
 
@@ -303,7 +321,7 @@ exports.editProduct = async (req, res) => {
           basePrice: variant.basePrice,
           discountPrice: variant.discountPrice,
           stock: variant.stock,
-          images: imagePaths,
+          images: finalImages,
           updatedAt: new Date(),
         });
         submittedVariantIds.push(variant._id);
@@ -318,7 +336,7 @@ exports.editProduct = async (req, res) => {
           basePrice: variant.basePrice,
           discountPrice: variant.discountPrice,
           stock: variant.stock,
-          images: imagePaths,
+          images: finalImages,
           updatedAt: new Date(),
         });
         await newVariant.save();

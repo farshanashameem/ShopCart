@@ -33,7 +33,7 @@ exports.addToCart = async (req, res) => {
     try {
 
         const { productId, size, color } = req.body;
-        const user = req.session.user;
+        const user = await User.findById(req.session.user._id).populate("cart.variantId");
         const product=await Products.findById(productId);
         if(!product.isActive)
             return res.json({success:false,message:"Product not available."});
@@ -53,16 +53,20 @@ exports.addToCart = async (req, res) => {
                 return res.json({ success: false, message: "Maximum 5 same items allowed in cart" });
 
             existItem.quantity += 1;
+            variant.stock-=1;
         }
-        else
+        else{
+
             user.cart.push({
                 variantId: variant._id,
                 productId: productId,
                 quantity: 1,
                 addedAt: new Date()
             });
-
-        await user.save();
+            variant.stock-=1; 
+        }
+            
+        await Promise.all([variant.save(), user.save()]);
         res.json({ success: true, message: "Product added to cart" });
 
     } catch (err) {
@@ -76,6 +80,7 @@ exports.getCartpage = async (req, res) => {
     try {
 
         const user = await User.findById(req.session.user._id);
+        
         const items = await Promise.all(
             user.cart.map(async (item) => {
                 const product = await Products.findById(item.productId);
@@ -114,57 +119,70 @@ exports.getCartpage = async (req, res) => {
 }
 
 exports.updateCart = async (req, res) => {
-    try {
+  try {
+    const { variantId, action } = req.params;
+    const user = await User.findById(req.session.user._id);
+    const variant = await productVariant.findById(variantId);
 
-        const variantId = req.params.variantId;
-        const action = req.params.action;
-        const user = await User.findById(req.session.user._id);
-        const variant = await productVariant.findById(variantId);
-        let errorMessage = null;
+    const item = user.cart.find(i => i.variantId.toString() === variantId);
+    if (!item) return res.json({ success: false, message: "Item not found in cart." });
 
-        const item = user.cart.find(item => item.variantId.toString() === variantId);
-        if (action === "add") {
-            if (item.quantity >= 5) errorMessage = "Maximum quantity is 5";
-            else if (variant.stock <= 0) errorMessage = "Out of stock";
-            else {
-                item.quantity += 1;
-                variant.stock -= 1;
-            }
-        } else if (action === "minus") {
-            if (item.quantity <= 1) errorMessage = "Minimum quantity is 1";
-            else {
-                item.quantity -= 1;
-                variant.stock += 1;
-            }
-        }
+    let errorMessage = null;
 
-        await variant.save();
-        await user.save();
-
-        if (errorMessage) {
-            return res.redirect(`/cart?error=${encodeURIComponent(errorMessage)}&vid=${variantId}`);
-        } else {
-            return res.redirect('/cart');
-        }
-
-
-    } catch (err) {
-        console.log(err);
+    if (action === "add") {
+      if (item.quantity >= 5) errorMessage = "Maximum quantity is 5";
+      else if (variant.stock <= 0) errorMessage = "Out of stock";
+      else {
+        item.quantity += 1;
+        variant.stock -= 1;
+      }
+    } else if (action === "minus") {
+      if (item.quantity <= 1) errorMessage = "Minimum quantity is 1";
+      else {
+        item.quantity -= 1;
+        variant.stock += 1;
+      }
     }
-}
+
+    await Promise.all([variant.save(), user.save()]);
+
+    if (errorMessage) return res.json({ success: false, message: errorMessage });
+
+    return res.json({
+      success: true,
+      message: "Cart updated",
+      quantity: item.quantity,
+      total: item.quantity * variant.discountPrice
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Something went wrong." });
+  }
+};
+
 
 exports.Remove = async (req, res) => {
-    try {
+  try {
+    const { variantId } = req.params;
+    const user = await User.findById(req.session.user._id);
+    const item = user.cart.find(i => i.variantId.toString() === variantId);
 
-        const variantId = req.params.variantId;
-        const user = await User.findById(req.session.user._id);
+    if (!item) return res.json({ success: false, message: "Item not found in cart." });
 
-        user.cart = user.cart.filter(item => item.variantId.toString() !== variantId);
-        await user.save();
-
-
-        res.redirect('/cart');
-    } catch (err) {
-        console.log(err);
+    const variant = await productVariant.findById(variantId);
+    if (variant) {
+      variant.stock += item.quantity;
+      await variant.save();
     }
-}
+
+    user.cart = user.cart.filter(i => i.variantId.toString() !== variantId);
+    await user.save();
+
+    return res.json({ success: true, message: "Item removed from cart." });
+
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: "Something went wrong." });
+  }
+};

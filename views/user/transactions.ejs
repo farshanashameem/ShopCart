@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <%- include('../partials/head', { title: 'Wallet transactions' }) %>
+
+  <body>
+    <%- include('../partials/navbar') %>
+
+    <div class="profile-container container-fluid my-4">
+      <div class="row">
+        <!-- Hamburger button for small screens -->
+        <button
+          class="btn btn-dark d-md-none mb-3"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#userSidebar"
+          aria-controls="userSidebar"
+        >
+          <i class="bi bi-list"></i> Menu
+        </button>
+
+        <!-- Sidebar -->
+        <div
+          class="offcanvas offcanvas-start d-md-flex flex-column user-dashboard p-0 bg-light"
+          tabindex="-1"
+          id="userSidebar"
+        >
+          <!-- Header for mobile close button -->
+          <div class="offcanvas-header d-md-none">
+            <h5 class="offcanvas-title">Menu</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="offcanvas"
+            ></button>
+          </div>
+          <div class="offcanvas-body p-0">
+            <div class="user-greeting mb-3 text-center p-3 border-bottom">
+              <div class="image mb-2">
+                <img
+                  src="<%= image %>"
+                  class="profile-image border-round rounded-circle"
+                  alt="Profile"
+                  style="height: 80px; width: 80px; object-fit: cover"
+                />
+              </div>
+              <strong>Hello <%= name %></strong>
+            </div>
+            <ul class="nav flex-column user-list p-3">
+              <li class="nav-item mb-3">
+                <i class="bi bi-person-circle me-2"></i>
+                <a href="/profile" class="text-decoration-none">Profile</a>
+              </li>
+              <li class="nav-item mb-3">
+                <i class="bi bi-card-checklist me-2"></i>
+                <a href="/orders" class="text-decoration-none">My Orders</a>
+              </li>
+              <li class="nav-item mb-3 current">
+                <i class="bi bi-wallet-fill me-2"></i>
+                <a
+                  href="/wallet"
+                  class="text-decoration-none fw-bold text-primary"
+                  >Wallet</a
+                >
+              </li>
+              <li class="nav-item mb-3">
+                <i class="bi bi-person-vcard me-2"></i>
+                <a href="/address" class="text-decoration-none">Address</a>
+              </li>
+              <li class="nav-item mb-3">
+                <i class="bi bi-cash-coin me-2"></i>
+                <a href="/referCode" class="text-decoration-none"
+                  >Refer and Earn</a
+                >
+              </li>
+              <li class="nav-item mb-3">
+                <i class="bi bi-person-x me-2"></i>
+                <a href="#" class="text-decoration-none text-danger"
+                  >Delete Account</a
+                >
+              </li>
+              <li class="nav-item">
+                <i class="bi bi-box-arrow-left me-2"></i>
+                <a href="/logout" class="text-decoration-none">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Wallet Transactions Section -->
+        <div class="col-md-8 col-lg-7 d-flex justify-content-center my-4">
+          <div
+            class="card shadow-lg rounded-4 p-4 w-100"
+            style="
+              max-width: 650px;
+              background: linear-gradient(135deg, #e0f7fa, #ffffff);
+              border: none;
+            "
+          >
+            <!-- Balance Summary -->
+            <div class="text-center mb-4">
+              <h4 class="fw-bold text-primary">
+                <i class="bi bi-wallet2 me-2"></i> Wallet Transactions
+              </h4>
+              <h5 class="fw-semibold text-dark">
+                Available Balance:
+                <span class="badge bg-success px-3 py-2">₹ <%= balance %></span>
+              </h5>
+            </div>
+
+            <% if (!transactions || transactions.length===0) { %>
+            <p class="text-center text-muted">No transactions yet.</p>
+            <% } else { %>
+            <div class="list-group">
+              <% transactions.forEach(transaction=> { %>
+              <div
+                class="list-group-item d-flex justify-content-between align-items-center flex-wrap rounded-3 mb-3 shadow-sm border-0"
+                style="height: 80px;  background: <%= transaction.type === 'credit' ? 'linear-gradient(135deg,#d4fcd4,#eaffea)' : 'linear-gradient(135deg,#ffe0e0,#fff5f5)' %>;"
+              >
+                <div>
+                  <p class="mb-1 fw-semibold text-dark">
+                    <%= transaction.reason %>
+                  </p>
+                  <small class="text-muted">
+                    <%= new Date(transaction.createdAt).toLocaleString() %>
+                  </small>
+                </div>
+                <div class="text-end">
+                  <% if (transaction.type==='credit' ) { %>
+                  <h6 class="fw-bold text-success mb-0">
+                    + ₹ <%= transaction.amount %>
+                  </h6>
+                  <% } else { %>
+                  <h6 class="fw-bold text-danger mb-0">
+                    - ₹ <%= transaction.amount %>
+                  </h6>
+                  <% } %>
+                </div>
+              </div>
+              <% }) %>
+            </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

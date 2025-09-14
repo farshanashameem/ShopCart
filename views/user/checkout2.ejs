@@ -3,125 +3,429 @@
 
 <head>
     <%- include('../partials/head', { title: 'ShopCart - Checkout' }) %>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;  
-                padding: 0;
-            }
-        </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .payment-option {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .payment-option.selected {
+            border-color: #000;
+            background-color: #f8f9fa;
+        }
+        
+        .payment-option img {
+            height: 30px;
+            margin-right: 10px;
+        }
+        
+        .coupon-item {
+            cursor: default;
+        }
+
+        .coupon-item.active {
+            background-color: #d4edda;
+            border: 1px solid #28a745;
+        }
+
+        .apply-coupon {
+            margin-top: 3px;
+            font-size: 0.8em;
+        }
+        
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 
 <body>
     <%- include('../partials/navbar') %>
 
-        <div class="checkout-container ">
+    <div class="checkout-container ">
+        <!-- Loading overlay -->
+        <div id="loadingOverlay">
+            <div class="spinner"></div>
+        </div>
+        
+        <form id="paymentForm" action="/payment" method="POST" class="container">
+            <div class="row">
+                <!-- Payment Methods -->
+                <div class="col-sm-12 col-md-8 text-center border-round p-4 me-2"
+                    style="background-color: rgb(153, 159, 165); border-radius: 5px;">
+                    <div class="payment-methods">
+                        <h2>Select Payment Method</h2>
+                        <% if(error) {%>
+                            <p style="color: red;"><b> <%= error %></b></p>
+                            <%}%>
 
-            <form action="/checkout2" method="POST" class="container">
-                <div class="row">
-                    <!-- Payment Methods -->
-                    <div class="col-sm-12 col-md-8 text-center border-round p-4 me-2"
-                        style="background-color: rgb(153, 159, 165); border-radius: 5px;">
-                        <div class="payment-methods">
-                            <h2>Select Payment Method</h2>
+                        <label class="payment-option selected">
+                            <input type="radio" name="payment" value="razorpay" checked>
+                            <img src="https://sellonboard.com/wp-content/uploads/2021/09/razorpay.png"
+                                alt="Razorpay">
+                            <div class="payment-text">
+                                <strong>Razorpay</strong>
+                            </div>
+                        </label>
 
-                            <label class="payment-option selected">
-                                <input type="radio" name="payment" value="razorpay" checked>
-                                <img src="https://sellonboard.com/wp-content/uploads/2021/09/razorpay.png"
-                                    alt="Razorpay">
-                                <div class="payment-text">
-                                    <strong>Razorpay</strong>
-                                   
-                                </div>
-                            </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="gpay">
+                            <img src="https://telecomtalk.info/wp-content/uploads/2022/12/gpay-how-to-create-or-find-upi.jpg"
+                                alt="GPay">
+                            <div class="payment-text">
+                                <strong>UPI Payment</strong>
+                                <span>Pay by any UPI app</span>
+                            </div>
+                        </label>
 
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="gpay">
-                                <img src="https://telecomtalk.info/wp-content/uploads/2022/12/gpay-how-to-create-or-find-upi.jpg"
-                                    alt="GPay">
-                                <div class="payment-text">
-                                    <strong>UPI Payment</strong>
-                                    <span>Pay by any UPI app</span>
-                                </div>
-                            </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="card">
+                            <img src="https://images.goodreturns.in/webp/img/2020/01/creditcard-23-1461389394-1579856618.jpg"
+                                alt="creditCard">
+                            <div class="payment-text">
+                                <strong>Credit/Debit/ATM Card</strong>
+                                <span>Add any secure card by RBI guidelines</span>
+                            </div>
+                        </label>
 
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="card">
-                                <img src="https://images.goodreturns.in/webp/img/2020/01/creditcard-23-1461389394-1579856618.jpg"
-                                    alt="creditCard">
-                                <div class="payment-text">
-                                    <strong>Credit/Debit/ATM Card</strong>
-                                    <span>Add any secure card by RBI guidelines</span>
-                                </div>
-                            </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="wallet">
+                            <img src="https://toppng.com/uploads/preview/scorecard-bonus-points-or-cashback-wallet-icon-115535181243ekpwxbcp2.png"
+                                alt="">
+                            <div class="payment-text">
+                                <strong>Wallets</strong>
+                                <span>Use your ShopCart wallet</span>
+                            </div>
+                        </label>
 
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="wallet">
-                                <img src="https://toppng.com/uploads/preview/scorecard-bonus-points-or-cashback-wallet-icon-115535181243ekpwxbcp2.png"
-                                    alt="">
-                                <div class="payment-text">
-                                    <strong>Wallets</strong>
-                                    <span>Use your ShopCart wallet</span>
-                                </div>
-                            </label>
-
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="cod">
-                                <div class="payment-text">
-                                    <strong>Cash on Delivery</strong>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Order Summary Section -->
-                    <div id="orderSummary" class="order-summary col-sm-12 col-md-4 p-4 border-round" style="background: #f8f9fa;">
-                        <h3>Order Summary</h3>
-                        <% cart.items.forEach(item=> { %>
-                             <p>
-                                <%= item.name %> ( <%= item.quantity %> items )
-                                <span class="float-end">₹<%= item.price * item.quantity %></span>
-                            </p>
-                            <p>
-                                Discount 
-                                <span class="float-end" style="color: green;"> - ₹<%= (item.price - item.discountPrice) * item.quantity %></span>
-                            </p>
-                            <% }) %>
-
-                                <div class="summary-item d-flex justify-content-between">
-                                    <span>Delivery Charges</span>
-                                    <span style="color: green;">Free</span>
-                                </div>
-                                <div class="summary-item d-flex justify-content-between">
-                                    <span>Platform fee</span>
-                                    <span>₹0</span>
-                                </div>
-
-                                <div class="discount-section d-flex mt-2">
-                                    <input type="text" name="discountCode" placeholder="Discount code"
-                                        class="form-control me-2">
-                                    <button type="button" class="btn btn-dark">Apply</button>
-                                </div>
-
-                                <div class="total mt-3 fw-bold">Total In Rupees: ₹<%= cart.total %>
-                                </div>
-                                
-                                <input type="hidden" name="total" value="<%= cart.total %>">
-                                <input type="hidden" name="addressId" value="<%= chosenAddressId %>">
-
-                                <!-- Continue Button -->
-                                <button type="submit" class="btn btn-dark w-100 mt-3">Continue</button>
-                               
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="cod">
+                            <div class="payment-text">
+                                <strong>Cash on Delivery</strong>
+                            </div>
+                        </label>
                     </div>
                 </div>
-            </form>
 
+                <!-- Order Summary Section -->
+                <div id="orderSummary" class="order-summary col-sm-12 col-md-4 p-4 border-round"
+                    style="background: #f8f9fa;">
+                    <h3>Order Summary</h3>
+                    <% cart.items.forEach(item=> { %>
+                        <p>
+                            <%= item.name %> ( <%= item.quantity %> items )
+                            <span class="float-end">₹<%= item.price * item.quantity %></span>
+                        </p>
+                        <p>
+                            Discount
+                            <span class="float-end" style="color: green;"> - ₹<%= (item.price - item.discountPrice)
+                                    * item.quantity %></span>
+                        </p>
+                    <% }) %>
 
-        </div>
+                    <div class="summary-item d-flex justify-content-between">
+                        <span>Delivery Charges</span>
+                        <span style="color: green;"><%= deliveryCharge %></span>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between">
+                        <span>Platform fee</span>
+                        <span>₹0</span>
+                    </div>
 
-        <%- include('../partials/footer') %>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+                    <!-- Coupon Discount Row (hidden initially) -->
+                    <div id="couponDiscountRow" class="summary-item d-flex justify-content-between"
+                        style="display: none;">
+                        <span>Coupon Discount</span>
+                        <span id="couponDiscount" style="color: green;">-₹0</span>
+                    </div>
+
+                    <div class="discount-section d-flex mt-2">
+                        <input type="text" id="discountCode" name="discountCode" placeholder="Discount code"
+                            class="form-control me-2">
+                        <button type="button" id="showCoupons" class="btn btn-dark">Choose</button>
+                    </div>
+
+                    <!-- Hidden Coupon List -->  
+                    <div id="couponList" class="mt-2" style="display: none;">
+                        <h6>Available Coupons:</h6>
+                        <ul class="list-group">
+                            <% coupons.forEach(c=> { %>
+                                <li class="list-group-item d-flex justify-content-between align-items-center coupon-item"
+                                    data-code="<%= c.code %>" data-discount="<%= c.discount %>">
+
+                                    <div style="flex: 1; max-width: 60%;">
+                                        <strong>
+                                            <%= c.code %>
+                                        </strong><br>
+                                        <small>
+                                            <%= c.category %>
+                                        </small>
+                                    </div>
+
+                                    <div class="text-end" style="min-width: 100px;">
+                                        <span style="color: green; font-size: 0.9em;">Save ₹<%= c.discount
+                                                %></span><br>
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-dark apply-coupon">Apply</button>
+                                    </div>
+                                </li>
+                            <% }) %>
+                        </ul>
+                    </div>
+
+                    <div class="total mt-3 fw-bold">
+                        Total In Rupees: ₹<span id="totalAmount">
+                            <%= cart.total + deliveryCharge %>
+                        </span>
+                    </div>
+
+                    <input type="hidden" id="appliedCoupon" name="appliedCoupon">
+                    <input type="hidden" id="finalTotal" name="total" value="<%= cart.total %>">
+                    <input type="hidden" id="couponDiscountValue" name="couponDiscount" value="0">
+                    <input type="hidden" id="addressId" name="addressId" value="<%= chosenAddressId %>">
+
+                    <!-- Continue Button -->
+                    <button type="button" id="payButton" class="btn btn-dark w-100 mt-3">Continue</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <%- include('../partials/footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ✅ Razorpay script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+   <script>
+    const originalTotal = <%= cart.total %>;
+    let selectedCoupon = null;
+
+    // Payment option selection
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+        });
+    });
+
+    document.getElementById('showCoupons').addEventListener('click', () => {
+        const couponList = document.getElementById('couponList');
+        couponList.style.display = couponList.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.querySelectorAll('.apply-coupon').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const parent = e.target.closest('.coupon-item');
+            const discount = parseInt(parent.dataset.discount);
+            const code = parent.dataset.code;
+
+            // Highlight active coupon
+            if (selectedCoupon) selectedCoupon.classList.remove('active');
+            parent.classList.add('active');
+            selectedCoupon = parent;
+
+            // Show coupon discount row
+            document.getElementById('couponDiscountRow').style.display = 'flex';
+            document.getElementById('couponDiscount').textContent = `-₹${discount}`;
+
+            // Update total
+            let newTotal = Math.max(originalTotal - discount, 0);
+            document.getElementById('totalAmount').textContent = newTotal;
+
+            // Update hidden fields
+            document.getElementById('finalTotal').value = newTotal;
+            document.getElementById('appliedCoupon').value = code;
+            document.getElementById('couponDiscountValue').value = discount;
+            document.getElementById('discountCode').value = code;
+        });
+    });
+
+    // Payment button click
+    document.getElementById('payButton').addEventListener('click', function() {
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        
+        if (paymentMethod === 'razorpay') {
+            // Initiate Razorpay payment
+            initiateRazorpayPayment();
+        } else {
+            // Submit form for COD or other methods
+            document.getElementById('paymentForm').submit();
+        } 
+    });
+
+    // Razorpay payment function
+    function initiateRazorpayPayment() {
+        // Show loading overlay
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        const totalAmount = parseFloat(document.getElementById('finalTotal').value) * 100; // Convert to paise
+        
+        // Get Razorpay key from server-side rendering
+        const razorpayKey = '<%= process.env.RAZORPAY_KEY_ID %>';
+        
+        // Validate Razorpay key
+        if (!razorpayKey || razorpayKey === '') {
+            alert('Payment configuration error. Please try again later.');
+            document.getElementById('loadingOverlay').style.display = 'none';
+            return;
+        }
+        
+        // Create order first on server side
+        fetch('/create-razorpay-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: totalAmount,
+                currency: 'INR'
+            })
+        })
+        .then(response => response.json())
+        .then(order => {
+            const options = {
+                key: razorpayKey,
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+                name: 'ShopCart',
+                description: 'Order Payment',
+                image: '/images/logo.png',
+                handler: function (response) {
+                        if (response.razorpay_payment_id ) {
+                            handlePaymentSuccess(response);
+                        } else {
+                            window.location.href = "/failed";
+                        }
+                    },
+                prefill: {
+                    name: '<%= user.name %>',
+                    email: '<%= user.email %>',
+                    contact: '<%= user.phone || "9999999999" %>'
+                },
+                notes: {
+                    address: 'Customer Address',
+                    order_reference: 'ORDER_<%= Date.now() %>'
+                },
+                theme: {
+                    color: '#000000'
+                },
+                modal:{
+                    ondismiss:function(){
+                        console.log("payment popup closed by user");
+                        window.location.href="/failed";
+                    }
+                }
+                
+            };
+            
+            try {
+                const rzp = new Razorpay(options);
+                
+                // Add error handler
+                rzp.on('payment.failed', function(response) {
+                    console.error('Payment failed:', response.error);
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    
+                    // More detailed error handling
+                    let errorMessage = 'Payment failed. Please try again.';
+                    if (response.error && response.error.description) {
+                        errorMessage = response.error.description;
+                    }
+                    
+                    // Redirect to payment failed page with error message
+                    window.location.href = '/failed';
+                });
+                
+                rzp.open();
+                document.getElementById('loadingOverlay').style.display = 'none';
+            } catch (error) {
+                console.error('Razorpay initialization error:', error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                alert('Error initializing payment. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error creating order:', error);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            alert('Error creating payment order. Please try again.');
+        });
+    }
+
+    // Handle payment success
+    function handlePaymentSuccess(response) {
+        // Show loading overlay again
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        console.log('Payment success response:', response);
+        
+        // Create a form to submit the payment data
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/payment';
+        
+        // Add all necessary fields
+        const fields = {
+            payment: 'razorpay',
+            appliedCoupon: document.getElementById('appliedCoupon').value,
+            couponDiscount: document.getElementById('couponDiscountValue').value,
+            total: document.getElementById('finalTotal').value,
+            addressId: document.getElementById('addressId').value,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature
+        };
+        
+        for (const [key, value] of Object.entries(fields)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+        }
+        
+        // Add the form to the document and submit it
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-
 </html>

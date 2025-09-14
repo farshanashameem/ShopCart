@@ -12,6 +12,8 @@ const invoiceController = require('../controllers/user/invoiceController');
 const returnController=require('../controllers/user/returnController');
 const walletController=require('../controllers/user/walletController');
 const reviewController=require('../controllers/user/reviewController');
+const paymentController=require('../controllers/user/paymentController');
+const referAndEarnController=require('../controllers/user/referAndEarn');
 const auth = require('../middlewares/auth');
 const { validationResult } = require("express-validator");
 const { signupValidationRules, changePasswordValidationRules,editProfileValidation,changePasswordRules,validateAddress } = require('../middlewares/validation');
@@ -49,6 +51,7 @@ router.get('/products', auth.isUserLoggedIn, productPageController.getProductPag
 router.get('/products/:gender', auth.isUserLoggedIn, productPageController.getProductPage);
 router.get('/details/:id', auth.isUserLoggedIn, productPageController.getProductDetails);
 router.get('/search',auth.isUserLoggedIn,productPageController.searchProducts);
+router.get('/api/products/:productId/variants',auth.isUserLoggedIn,productPageController.getFirstVariant);
 
 //======Profile======//
 router.get('/profile', auth.isUserLoggedIn, profileController.getProfilePage);
@@ -79,13 +82,16 @@ router.get('/cart/remove/:variantId',auth.isUserLoggedIn,cartController.Remove);
 
 //==== Payment management ====//
 //router.post("/cart/apply-coupon",auth.isUserLoggedIn,orderController.ApplyCoupon);
-
-router.get('/checkout1',auth.isUserLoggedIn,orderController.getCheckout1);
-router.post('/checkout1/addAddress',auth.isUserLoggedIn,validateAddress,orderController.checkoutAdd);
-router.post('/checkout1/updateAddress/:id',auth.isUserLoggedIn,validateAddress,orderController.checkoutUpdate);
-router.get('/checkout2',auth.isUserLoggedIn,orderController.getCheckout2);
-router.post('/checkout2',auth.isUserLoggedIn,orderController.makePayment);
+  
+router.get('/select-address',auth.isUserLoggedIn,orderController.selectAddress);
+router.post('/select-address/addAddress',auth.isUserLoggedIn,validateAddress,orderController.addAddress);
+router.post('/select-address/updateAddress/:id',auth.isUserLoggedIn,validateAddress,orderController.updateAddress);
+router.get('/payment',auth.isUserLoggedIn,orderController.selectPayment);
+router.post('/payment',auth.isUserLoggedIn,paymentController.makePayment);
+router.get('/success',auth.isUserLoggedIn,orderController.getSuccessPage);
+router.post('/create-razorpay-order', paymentController.createRazorpayOrder);
 router.get('/invoice/:orderId', invoiceController.getInvoicePage);
+router.get('/failed',auth.isUserLoggedIn,orderController.getFailedPage);  
 
 //=== return item ===//
 router.post('/orders/return',auth.isUserLoggedIn,returnController.return);
@@ -101,6 +107,11 @@ router.post('/review/add',auth.isUserLoggedIn,reviewController.addOrEditReview);
 
 //=== wallet ===//
 router.get('/wallet',auth.isUserLoggedIn,walletController.getWalletPage);
+router.get('/wallet/transactions',auth.isUserLoggedIn,walletController.getTransactions);
+
+//=== refer and earn ===//
+router.get('/referCode',auth.isUserLoggedIn,referAndEarnController.getReferCode);
+
 
 //log out/
 router.get('/logout', (req, res) => {

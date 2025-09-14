@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #fafafa;
+      color: #333;
+    }
+
+    /* Sidebar menu */
+    .sidebar {
+      position: fixed;
+      left: 40px;
+      top: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      font-size: 14px;
+    }
+    .sidebar a {
+      text-decoration: none;
+      color: #333;
+      transition: 0.3s;
+    }
+    .sidebar a:hover {
+      color: #c08b52;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      padding: 30px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 600;
+    }
+    .menu {
+      width: 22px;
+      height: 2px;
+      background: #333;
+      position: relative;
+    }
+    .menu::before,
+    .menu::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 2px;
+      background: #333;
+      left: 0;
+    }
+    .menu::before { top: -6px; }
+    .menu::after { top: 6px; }
+
+    /* Center 404 section */
+    .center {
+      text-align: center;
+      margin-top: 80px;
+    }
+    .center h1 {
+      font-size: 140px;
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      margin: 0;
+      position: relative;
+      display: inline-block;
+    }
+    .center h1 span {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: url('https://i.ibb.co/pZndKfH/fashion-model.jpg') no-repeat center/cover;
+      width: 160px;
+      height: 220px;
+      z-index: -1;
+      border-radius: 8px;
+    }
+    .center p {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      margin: 15px 0 30px;
+      color: #c08b52;
+      font-style: italic;
+    }
+    .center a {
+      display: inline-block;
+      padding: 12px 28px;
+      border: 1px solid #c08b52;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 14px;
+      color: #c08b52;
+      transition: 0.3s;
+    }
+    .center a:hover {
+      background: #c08b52;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>CONTACT</div>
+    <h1>Mimosa</h1>
+    <div class="menu"></div>
+  </header>
+
+  <div class="sidebar">
+    <a href="#">Boots</a>
+    <a href="#">Coats</a>
+    <a href="#">Dresses</a>
+    <a href="#">Jackets</a>
+    <a href="#">Skirts</a>
+  </div>
+
+  <div class="center">
+    <h1>4<span></span>4</h1>
+    <p>Page not found</p>
+    <a href="/">BACK TO HOMEPAGE</a>
+  </div>
+
+</body>
+</html>

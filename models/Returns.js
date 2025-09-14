@@ -5,8 +5,6 @@ const productVariant = require('./productVariant');
 
 const returnSchema=new mongoose.Schema({
 
-    
-
     orderId:{
         type:String,
         required:true

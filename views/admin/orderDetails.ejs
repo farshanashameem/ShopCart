@@ -48,7 +48,7 @@
           <% } else if(order.status === "returned"){ %>
              <div class="returned-info p-2 pe-4 ps-4 mb-3" style="background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:10px;box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                 <p class="text-warning fw-bold mb-1">↩️ Order Returned</p>
-                <p class="mb-0">Reason: <%= order.reason %></p>
+                <p class="mb-0">Reason: <%= order.reason %></p>  
               </div>
               <% if(order.returnedStatus && order.returnedStatus ==='pending') { %>
                      <div class="ms-4 mt-3">
@@ -58,6 +58,7 @@
                           <input type="hidden" name="variantId" id="" value="<%= order.variantId %>">
                           <input type="hidden" name="userId" value="<%= order.userId %>">
                           <input type="hidden" name="total" id="" value="<%= order.price * order.quantity %>">
+                           <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
                           <button type="submit" class="btn btn-success ms-4 return-action" data-action="approved" data-orderid="<%= order._id %>">Accept</button>
                         <button type="submit" class="btn btn-danger ms-4 return-action" data-action="rejected" data-orderid="<%= order._id %>">Reject</button>
                         </form>               
@@ -70,6 +71,7 @@
                           <input type="hidden" name="variantId" id="" value="<%= order.variantId %>">
                           <input type="hidden" name="userId" value="<%= order.userId %>">
                            <input type="hidden" name="total" id="" value="<%= order.price * order.quantity %>">
+                           <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
                           <button type="submit" class="btn btn-success ms-4 return-action" data-action="refunded" data-orderid="<%= order._id %>">Refund</button>                  
                         </form> 
                 
@@ -110,13 +112,16 @@
         
       </div>
 
-      <div class="card" style="margin-top: 15px;">
+     <div class="card" style="margin-top: 15px;">
         <h4>Price Details</h4>
         <p>Price (1 item): ₹<%= order.price %></p>
         <p>Total price: ₹<%= order.price * order.quantity %></p>
+        <p>Coupon discount: -₹<%= order.couponDiscount ? order.couponDiscount : 0 %></p>
+        <p>Grand Total: ₹ <%= (order.price * order.quantity) - (order.couponDiscount ? order.couponDiscount : 0) %></p>
         <p>Delivery Charges: <span style="color: green;">FREE</span></p>
         <p>Platform fee: 0</p>
       </div>
+
     </div>
   </div>
      <footer class="text-center py-4 small text-muted border-top mt-4" style="font-weight: 700;">

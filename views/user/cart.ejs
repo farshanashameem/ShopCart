@@ -31,14 +31,18 @@
                 <p class="text-success small">In stock • Free Delivery</p>
                 
                 <div class="d-flex align-items-center">
-                  <a href="/cart/update/<%=item.variantId%>/minus" class="btn btn-sm btn-outline-secondary me-2 update-qty " >-</a>
-                  <input type="text" class="form-control form-control-sm text-center qty-input" style="width:50px;" value="<%=item.quantity%>" readonly>
-                  <a href="/cart/update/<%=item.variantId%>/add" class="btn btn-sm btn-outline-secondary ms-2 update-qty" >+</a>
-                  <a href="/cart/remove/<%=item.variantId%>" class="btn btn-sm btn-danger ms-3 remove-item bg-danger">Remove</a>
-                   <% if (query.error && query.vid === item.variantId.toString()) { %>
-                     <p class="text-danger small mt-1"><%= query.error %></p>
-                   <% } %>
+                    <button class="btn btn-sm btn-outline-secondary me-2 update-qty" 
+                            data-id="<%=item.variantId%>" data-action="minus">-</button>
+                    <input type="text" class="form-control form-control-sm text-center qty-input" 
+                          style="width:50px;" value="<%=item.quantity%>" readonly>
+                    <button class="btn btn-sm btn-outline-secondary ms-2 update-qty" 
+                            data-id="<%=item.variantId%>" data-action="add">+</button>
+                    <button class="btn btn-sm btn-danger ms-3 remove-item" 
+                            data-id="<%=item.variantId%>">Remove</button>
                 </div>
+
+
+
               </div>
             </div>
           <% }) %>
@@ -65,21 +69,20 @@
             <% }) %>
           </div>
           <hr>
-          <p class="text-success">Delivery Charges <span class="float-end">Free</span></p>
-          <p>Platform Fee <span class="float-end">₹0</span></p>
-          <div class="input-group my-2">
-            <input type="text" id="couponCode" class="form-control form-control-sm" placeholder="Discount code">
-            <button class="btn btn-danger btn-sm" id="applyCoupon">Apply</button>
-          </div>
+          
+          
+
           <p class="total fw-bold">Total: <span class="float-end" id="cartTotal">₹<%= items.reduce((sum,i)=>sum+(i.discountPrice*i.quantity),0) %></span></p>
-          <a href="/checkout1" class="btn btn-dark w-100 mt-2 bg-dark">Continue</a>
+          <a href="/select-address" class="btn btn-dark w-100 mt-2 bg-dark">Continue</a>
         </div>
       </div>
       <%}%>
     </div>
   </div>
 
- 
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/cart.js"></script>
+
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </html>

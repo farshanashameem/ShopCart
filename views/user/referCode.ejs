@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<%- include('../partials/head', { title: 'Wallet' }) %>
+<%- include('../partials/head', { title: 'Home - ShopCart' }) %>
 
     <body>
         <%- include('../partials/navbar') %>
 
             <div class="profile-container m-4">
-                <div class="row">
+                <div class="row">  
                     <!-- Hamburger button for small screens -->
                     <button class="btn btn-dark d-md-none mb-3" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#userSidebar" aria-controls="userSidebar">
@@ -14,7 +14,7 @@
                     </button>
 
                     <!-- Sidebar -->
-                    <div class="offcanvas offcanvas-start d-md-flex flex-column user-dashboard p-0 bg-light" tabindex="-1"
+                    <div class="offcanvas offcanvas-start d-md-flex flex-column user-dashboard p-0" tabindex="-1"
                         id="userSidebar">
                         <!-- Header for mobile close button -->
                         <div class="offcanvas-header d-md-none">
@@ -23,9 +23,9 @@
                         </div>
                         <div class="offcanvas-body p-0">
                             <div class="user-greeting mb-3">
-                                <div class="image "><img src="<%=image %>" class="profile-image border-round "
-                                        alt="" style="height: 100%; width:100%; object-fit: cover;" ></div>
-                                Hello <%=name %>
+                                <div class="image "><img src="images/admin.png" class="profile-image border-round"
+                                        alt=""></div>
+                                Hello <%= name %>
                             </div>
                             <ul class="nav flex-column user-list">
                                 <li class="nav-item ">
@@ -60,7 +60,8 @@
                         </div>
                     </div>
 
-<div class="profile-card d-flex flex-column justify-content-center align-items-center text-center mx-auto my-5 p-4"
+
+                    <div class="profile-card d-flex flex-column justify-content-center align-items-center text-center mx-auto my-5 p-4"
      style="background: linear-gradient(145deg, #e0f7e0, #c8f0c8); 
             border-radius: 20px; 
             width: 100%; 
@@ -70,26 +71,16 @@
     
     <!-- Title -->
     <h4 class="fw-bold mb-4 text-primary" style="font-size: 1.5rem;">
-        <i class="bi bi-wallet-fill me-2"></i> My Wallet
+        <i class="bi bi-wallet-fill me-2"></i> My Referal Code
     </h4>
     
     <!-- Wallet Balance -->
     <div class="wallet-balance mb-4">
-        <h2 class="fw-bold text-success mb-1" style="font-size:2.5rem;">₹ <%= walletAmount || 0 %></h2>
-        <p class="text-muted mb-0">Available Balance</p>
+        <h2 class="fw-bold text-success mb-1" style="font-size:2.5rem;"><%= code || 0 %></h2>
+       
     </div>
 
-    <!-- Links / Actions -->
-    <div class="d-grid gap-3 mt-3 w-100">
-        <a href="/wallet/transactions" class="btn btn-outline-primary py-2 fw-semibold" 
-           style="transition: 0.3s; border-radius: 12px;">
-            <i class="bi bi-clock-history me-2"></i> Show Transactions
-        </a>
-        <a href="/wallet/transfer" class="btn btn-success py-2 fw-semibold" 
-           style="transition: 0.3s; border-radius: 12px;">
-            <i class="bi bi-bank me-2"></i> Transfer to Bank
-        </a>
-    </div>
+   
 </div>
 
 <!-- Optional: Add hover effect with CSS -->

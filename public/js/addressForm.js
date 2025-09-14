@@ -12,7 +12,7 @@ showBtn.addEventListener("click", () => {
     addressForm.reset(); // Clear previous inputs
     addressBar.classList.remove("d-none");
 });
-
+  
 // Hide form
 cancelBtn.addEventListener("click", () => {
     addressBar.classList.add("d-none");

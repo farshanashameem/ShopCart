@@ -43,7 +43,7 @@ exports.addToWishlist = async (req, res) => {
             item.variantId.equals(variant._id)
         );
         if (existItem)
-            res.json({ success: false, message: "This item already present in wishlist" })
+           return res.json({ success: false, message: "This item already present in wishlist" })
         if (!existItem) {
 
             user.wishlist.push({
@@ -54,7 +54,7 @@ exports.addToWishlist = async (req, res) => {
             });
         }
         await user.save();
-        res.json({ success: true, message: "Product added to wishlist" });
+        return res.json({ success: true, message: "Product added to wishlist" });
 
     } catch (err) {
         console.log(err);
@@ -81,6 +81,7 @@ exports.getWishlistPage = async (req, res) => {
                     image: variant.images[0],
                     size: variant.size,
                     color: variant.colorId,
+                    stock:variant.stock
                 };
             })
         );
@@ -93,82 +94,77 @@ exports.getWishlistPage = async (req, res) => {
     }
 };
 
+// Add item from wishlist to cart
 exports.addFromWishlist = async (req, res) => {
     try {
-        const productId = req.params.productId;
-        const variantId = req.params.variantId;
+        const { productId, variantId } = req.params;
         const user = await User.findById(req.session.user._id);
+        const pdtVariant = await productVariant.findOne({ productId, _id: variantId });
 
-        const pdtVariant = await productVariant.findOne({ productId: productId, _id: variantId });
-
-        const item = user.wishlist.find(
-            item =>
-                item.productId.toString() === productId &&
-                item.variantId.toString() === variantId
-        );
-
-        user.wishlist = user.wishlist.filter(
-            item =>
-                !(
-                    item.productId.toString() === productId &&
-                    item.variantId.toString() === variantId
-                )
-        );
-
-        const cartItem = user.cart.find(
-            item =>
-                item.productId.toString() === productId &&
-                item.variantId.toString() === variantId
-        );
-        if (pdtVariant.stock === 0) {
-            return res.redirect(`/wishlist?outOfStock=${productId}`);
+        if (!pdtVariant) {
+            return res.json({ success: false, message: "Variant not found." });
         }
+
+        // Check stock
+        if (pdtVariant.stock === 0) {
+            return res.json({ success: false, message: "This product is out of stock." });
+        }
+
+        // Remove from wishlist
+        user.wishlist = user.wishlist.filter(
+            item => !(item.productId.toString() === productId && item.variantId.toString() === variantId)
+        );
+
+        // Check if already in cart
+        const cartItem = user.cart.find(
+            item => item.productId.toString() === productId && item.variantId.toString() === variantId
+        );
+
         if (cartItem) {
             cartItem.quantity += 1;
-            pdtVariant.stock -= 1;
         } else {
             user.cart.push({ productId, variantId, quantity: 1 });
-            pdtVariant.stock -= 1;
         }
+
+        // Reduce stock
+        pdtVariant.stock -= 1;
 
         await user.save();
         await pdtVariant.save();
-        return res.redirect("/wishlist");
-    } catch (err) {
-        console.log(err);
-    }
-}
 
+        return res.json({ success: true, message: "Item moved to cart." });
+
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false, message: "Something went wrong." });
+    }
+};
+
+
+// Delete from wishlist
 exports.deleteFromWishlist = async (req, res) => {
     try {
-
-        const productId = req.params.productId;
-        const variantId = req.params.variantId;
+        const { productId, variantId } = req.params;
         const user = await User.findById(req.session.user._id);
 
         const item = user.wishlist.find(
-            item =>
-                item.productId.toString() === productId &&
-                item.variantId.toString() === variantId
+            item => item.productId.toString() === productId && item.variantId.toString() === variantId
         );
-        if (!item) {
-            console.log("no such item present in wishlist.");
-            return res.redirect('/wishlist?error=itemNotFound');
 
+        if (!item) {
+            return res.json({ success: false, message: "Item not found in wishlist." });
         }
 
-
+        // Remove from wishlist
         user.wishlist = user.wishlist.filter(
-            item =>
-                !(
-                    item.productId.toString() === productId &&
-                    item.variantId.toString() === variantId
-                )
+            item => !(item.productId.toString() === productId && item.variantId.toString() === variantId)
         );
+
         await user.save();
-        return res.redirect('/wishlist');
+        return res.json({ success: true, message: "Item removed from wishlist." });
 
     } catch (err) {
-        console.log(err);
+        console.error(err);
+        res.json({ success: false, message: "Something went wrong." });
     }
-}
+};

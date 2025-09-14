@@ -8,10 +8,14 @@ const fitController=require('../controllers/admin/fitController');
 const colorController=require('../controllers/admin/colorController');
 const orderController=require('../controllers/admin/orderController');
 const returnController=require('../controllers/admin/returnController');
+const couponController=require('../controllers/admin/couponController');
+const referralController=require('../controllers/admin/refferalController');
+const salesReport=require('../controllers/admin/salesReport');
 const auth = require('../middlewares/auth');
 const upload=require('../middlewares/multer');
 const { validationResult } = require('express-validator');
 const { productValidationRules }= require('../middlewares/productValidator');  
+const { couponValidationRules }=require('../middlewares/couponValidator');
 
 
 //======login management======//
@@ -21,7 +25,7 @@ router.get('/home', auth.isAdminLoggedIn, loginController.loadHome);      // Adm
 
 //=======user management page========//
 router.get('/users',auth.isAdminLoggedIn,userController.getUsersPage);
-router.post("/users/block/:id",auth.isAdminLoggedIn, userController.toggleBlockUser);
+router.post("/users/block/:id",auth.isAdminLoggedIn, userController.toggleBlockUser);  
 router.post("/users/delete/:id",auth.isAdminLoggedIn, userController.deleteUser);
 
 
@@ -32,7 +36,11 @@ router.post('/addProduct', auth.isAdminLoggedIn,upload.array("images", 3),produc
 router.post('/products/:id/toggle',auth.isAdminLoggedIn, productController.toggleProductStatus);    //soft delete and restore the product
 router.get('/product/:id', auth.isAdminLoggedIn,productController.getProductDetail);   //Full details about the product
 router.get('/editProducts/:id',auth.isAdminLoggedIn,productController.getEditProductPage);    //edit product page
-router.post('/editProduct',auth.isAdminLoggedIn,upload.array("images", 3),productValidationRules,productController.editProduct);
+router.post('/editProduct',auth.isAdminLoggedIn, upload.fields([
+    { name: 'images0', maxCount: 1 },
+    { name: 'images1', maxCount: 1 },
+    { name: 'images2', maxCount: 1 },
+  ]),productValidationRules,productController.editProduct);
 
 
 
@@ -67,12 +75,25 @@ router.get('/changeStatus/:orderId/:status',auth.isAdminLoggedIn,orderController
 
 //=== return Management ===//
 router.post('/returns',auth.isUserLoggedIn,returnController.updateReturnStatus);
+router.get('/returns',auth.isAdminLoggedIn,returnController.getReturnPage);
 
+
+//===  coupon management ===//
+router.get('/coupons',auth.isAdminLoggedIn,couponController.getCouponPage);
+router.post('/addCoupon',couponValidationRules,auth.isAdminLoggedIn,couponController.addCoupon);
+router.put('/editCoupon/:id',auth.isAdminLoggedIn,couponValidationRules,couponController.editCoupon);
+router.patch('/coupons/toggle/:id',auth.isAdminLoggedIn,couponController.toggleCoupon);
+
+//=== Referral page ===//
+router.get('/referals',auth.isAdminLoggedIn,referralController.getRefferalPage);
+
+//=== Sales Report ===//
+router.get('/salesReport',auth.isAdminLoggedIn,salesReport.getSalesReport);
 
 // Admin Logout
 router.get('/logout', (req, res) => {
   delete req.session.admin;
   res.redirect('/admin/login');
 });
-
+  
 module.exports=router;

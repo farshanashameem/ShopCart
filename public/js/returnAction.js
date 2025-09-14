@@ -8,6 +8,7 @@ document.querySelectorAll('.return-action').forEach(btn => {
     const userId = this.closest("form").querySelector("input[name='userId']").value;
     const variantId = this.closest("form").querySelector("input[name='variantId']").value;
     const total= this.closest("form").querySelector("input[name='total']").value;
+    const discount=this.closest("form").querySelector("input[name='discount']").value;
 
     Swal.fire({
       title: 'Are you sure?',
@@ -22,7 +23,7 @@ document.querySelectorAll('.return-action').forEach(btn => {
         fetch(`/admin/returns`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId, productId, variantId, userId,total, action }) // 👈 send action too
+          body: JSON.stringify({ orderId, productId, variantId, userId,total,discount, action }) // 👈 send action too
         })
         .then(res => res.json())
         .then(data => {

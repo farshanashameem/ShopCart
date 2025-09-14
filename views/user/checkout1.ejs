@@ -219,22 +219,29 @@
                 Discount 
                 <span class="float-end" style="color: green;"> - ₹<%= (item.price - item.discountPrice) * item.quantity %></span>
               </p>
-            <% }) %>
+            
             <div class="summary-item">
                 <span>Delivery Charges</span>
-                <span style="color: green;"> Free</span>
+                <span style="color: green;">
+                    <% if ( item.discountPrice * item.quantity < 300) { %>
+                    ₹50
+                    <% } else { %>
+                    Free
+                    <% } %>
+                </span>
             </div>
+            
             <div class="summary-item">
                 <span>Platform fee</span>
                 <span>₹ 0</span>
             </div>
 
-            <div class="discount-section">
-                <input type="text" placeholder="Discount code">
-                <button type="button">Apply</button>
-            </div>
 
-            <div class="total mb-3">Total In Rupees: ₹<%= cart.total %></div>
+            <div class="total mb-3">
+                Total In Rupees: ₹
+                <%= (item.discountPrice * item.quantity < 300) ? (cart.total + 50) : cart.total %>
+            </div>
+            <% }) %>
            <button type="button" id="continueBtn" class="continue-btn bg-dark ps-4 pe-4 mt-3 d-block w-100 text-center">
                 Continue
             </button>
@@ -256,14 +263,14 @@
         });
 function showAddressBar() {
     const form = document.getElementById('addressForm');
-    form.action = '/checkout1/addAddress';  // default action for adding
+    form.action = '/select-address/addAddress';  // default action for adding
     form.reset();                 // clear all fields
     document.getElementById('addressBar').classList.remove('d-none');
 }
 
 function editAddress(address) {
     const form = document.getElementById('addressForm');
-    form.action = '/checkout1/updateAddress/' + address._id;
+    form.action = '/select-address/updateAddress/' + address._id;
 
     // Fill form fields with address data
     form.name.value = address.name || '';
@@ -300,7 +307,7 @@ document.getElementById('continueBtn').addEventListener('click', () => {
     const addressId = selectedRadio.value;
 
     // Option 1: Redirect to next page with addressId as query param
-    window.location.href = `/checkout2?addressId=${addressId}`;
+    window.location.href = `/payment?addressId=${addressId}`;
 });
 
     </script>

@@ -72,7 +72,7 @@
    
     <div class="btn-group">
       <a href="/orders" class="btn-custom text-decoration-none text-dark">VIEW ORDERS</a>
-      <a href="/products" class="btn-custom text-decoration-none text-dark">CONTINUE SHOPPING</a>
+      <a href="/products" class="btn-custom text-decoration-none text-dark">CONTINUE SHOPPING</a> <br>
        <a href="/invoice/<%= orderId %>"  type="button" class="btn btn-dark mt-3">Invoice</a>
     </div>
   </div>
@@ -80,4 +80,10 @@
   <%- include('../partials/footer') %>
 </body>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script>
+  history.pushState(null, null, location.href);
+  window.onpopstate = function () {
+    window.location.href = "/orders";
+  };
+</script>
 </html>

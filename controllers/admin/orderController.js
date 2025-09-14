@@ -110,6 +110,7 @@ exports.getOrderDetails = async (req, res) => {
       address: address || {},
       productId:order.productId,
       variantId:order.variantId,
+      couponDiscount:order.couponDiscount,
       returnedStatus:returnItem?returnItem.status:null
     };
      const successMessage = req.session.successMessage;
@@ -136,7 +137,9 @@ exports.changeStatus = async (req, res) => {
 
     //  Update status
     item.status = req.params.status;
-
+    if(item.status==='delivered'){
+      item.paymentStatus="paid"
+    }
     //  Push into history
     item.statusHistory.push({
       status: req.params.status,
