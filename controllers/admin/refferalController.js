@@ -19,16 +19,26 @@ exports.getRefferalPage = async (req, res) => {
       })
     );
 
+      // pagination setup
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const totalPages = Math.ceil(items.length / limit);
+
+    // slice array for current page
+    const paginatedItems = items.slice((page - 1) * limit, page * limit);
+
     // Safely calculate totals
     const totalRefferals = referrals.reduce((sum, acc) => sum + (acc.referredCount || 0), 0);
     const totalRewards = referrals.reduce((sum, acc) => sum + (acc.rewardAmount || 0), 0);
     const totalReferredUsers = referrals.length;
 
     return res.render("admin/referals", {
-      items,
+      items:paginatedItems,
       totalRefferals,
       totalRewards,
       totalReferredUsers,
+      totalPages,
+      currentPage: page
     });
   } catch (err) {
     console.error("Error in getRefferalPage:", err);

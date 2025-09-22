@@ -130,6 +130,7 @@
                             <div class="payment-text">
                                 <strong>Wallets</strong>
                                 <span>Use your ShopCart wallet</span>
+                                <p> Balance : <%= user.wallet %></p>
                             </div>
                         </label>
 
@@ -279,118 +280,253 @@
     });
 
     // Payment button click
-    document.getElementById('payButton').addEventListener('click', function() {
-        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-        
-        if (paymentMethod === 'razorpay') {
-            // Initiate Razorpay payment
-            initiateRazorpayPayment();
-        } else {
-            // Submit form for COD or other methods
+document.getElementById('payButton').addEventListener('click', function() {
+    const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+    const totalAmount = parseFloat(document.getElementById('finalTotal').value);
+    const walletBalance = parseFloat('<%= user.wallet %>');
+    
+    if (paymentMethod === 'wallet') {
+        if (walletBalance >= totalAmount) {
+            // Wallet has sufficient balance - proceed with wallet payment
             document.getElementById('paymentForm').submit();
-        } 
-    });
+        } else {
+            // Wallet has insufficient balance - use hybrid approach
+            const remainingAmount = totalAmount - walletBalance;
+            initiateHybridPayment(walletBalance, remainingAmount);
+        }
+    } else if (paymentMethod === 'razorpay') {
+        // Regular Razorpay payment
+        initiateRazorpayPayment(totalAmount);
+    } else {
+        // Other payment methods (COD, etc.)
+        document.getElementById('paymentForm').submit();
+    } 
+});
 
-    // Razorpay payment function
-    function initiateRazorpayPayment() {
-        // Show loading overlay
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        const totalAmount = parseFloat(document.getElementById('finalTotal').value) * 100; // Convert to paise
-        
-        // Get Razorpay key from server-side rendering
+// Hybrid payment function (wallet + Razorpay)
+function initiateHybridPayment(walletAmount, razorpayAmount) {
+    // Show loading overlay
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Create order for the Razorpay portion
+    fetch('/create-razorpay-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: razorpayAmount * 100, // Convert to paise
+            currency: 'INR'
+        })
+    })
+    .then(response => response.json())
+    .then(order => {
         const razorpayKey = '<%= process.env.RAZORPAY_KEY_ID %>';
         
-        // Validate Razorpay key
         if (!razorpayKey || razorpayKey === '') {
             alert('Payment configuration error. Please try again later.');
             document.getElementById('loadingOverlay').style.display = 'none';
             return;
         }
         
-        // Create order first on server side
-        fetch('/create-razorpay-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const options = {
+            key: razorpayKey,
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.id,
+            name: 'ShopCart',
+            description: 'Partial Payment (Wallet + Razorpay)',
+            image: '/images/logo.png',
+            handler: function (response) {
+                if (response.razorpay_payment_id) {
+                    handleHybridPaymentSuccess(response, walletAmount);
+                } else {
+                    window.location.href = "/failed";
+                }
             },
-            body: JSON.stringify({
-                amount: totalAmount,
-                currency: 'INR'
-            })
-        })
-        .then(response => response.json())
-        .then(order => {
-            const options = {
-                key: razorpayKey,
-                amount: order.amount,
-                currency: order.currency,
-                order_id: order.id,
-                name: 'ShopCart',
-                description: 'Order Payment',
-                image: '/images/logo.png',
-                handler: function (response) {
-                        if (response.razorpay_payment_id ) {
-                            handlePaymentSuccess(response);
-                        } else {
-                            window.location.href = "/failed";
-                        }
-                    },
-                prefill: {
-                    name: '<%= user.name %>',
-                    email: '<%= user.email %>',
-                    contact: '<%= user.phone || "9999999999" %>'
-                },
-                notes: {
-                    address: 'Customer Address',
-                    order_reference: 'ORDER_<%= Date.now() %>'
-                },
-                theme: {
-                    color: '#000000'
-                },
-                modal:{
-                    ondismiss:function(){
-                        console.log("payment popup closed by user");
-                        window.location.href="/failed";
-                    }
+            prefill: {
+                name: '<%= user.name %>',
+                email: '<%= user.email %>',
+                contact: '<%= user.phone || "9999999999" %>'
+            },
+            notes: {
+                address: 'Customer Address',
+                order_reference: 'ORDER_<%= Date.now() %>'
+            },
+            theme: {
+                color: '#000000'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log("Payment popup closed by user");
+                    window.location.href = "/failed";
+                }
+            }
+        };
+        
+        try {
+            const rzp = new Razorpay(options);
+            
+            rzp.on('payment.failed', function(response) {
+                console.error('Payment failed:', response.error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                let errorMessage = 'Payment failed. Please try again.';
+                if (response.error && response.error.description) {
+                    errorMessage = response.error.description;
                 }
                 
-            };
+                window.location.href = '/failed';
+            });
             
-            try {
-                const rzp = new Razorpay(options);
-                
-                // Add error handler
-                rzp.on('payment.failed', function(response) {
-                    console.error('Payment failed:', response.error);
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    
-                    // More detailed error handling
-                    let errorMessage = 'Payment failed. Please try again.';
-                    if (response.error && response.error.description) {
-                        errorMessage = response.error.description;
-                    }
-                    
-                    // Redirect to payment failed page with error message
-                    window.location.href = '/failed';
-                });
-                
-                rzp.open();
-                document.getElementById('loadingOverlay').style.display = 'none';
-            } catch (error) {
-                console.error('Razorpay initialization error:', error);
-                document.getElementById('loadingOverlay').style.display = 'none';
-                alert('Error initializing payment. Please try again.');
-            }
-        })
-        .catch(error => {
-            console.error('Error creating order:', error);
+            rzp.open();
             document.getElementById('loadingOverlay').style.display = 'none';
-            alert('Error creating payment order. Please try again.');
-        });
-    }
+        } catch (error) {
+            console.error('Razorpay initialization error:', error);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            alert('Error initializing payment. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating order:', error);
+        document.getElementById('loadingOverlay').style.display = 'none';
+        alert('Error creating payment order. Please try again.');
+    });
+}
 
-    // Handle payment success
+// Handle hybrid payment success
+function handleHybridPaymentSuccess(response, walletAmount) {
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    console.log('Hybrid payment success response:', response);
+    
+    // Create a form to submit the payment data
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/payment';
+    
+    // Add all necessary fields including wallet amount
+    const fields = {
+        payment: 'wallet', // Indicate this is a wallet-based payment
+        appliedCoupon: document.getElementById('appliedCoupon').value,
+        couponDiscount: document.getElementById('couponDiscountValue').value,
+        total: document.getElementById('finalTotal').value,
+        addressId: document.getElementById('addressId').value,
+        razorpayPaymentId: response.razorpay_payment_id,
+        razorpayOrderId: response.razorpay_order_id,
+        razorpaySignature: response.razorpay_signature,
+        walletAmount: walletAmount // Add the wallet amount used
+    };
+    
+    for (const [key, value] of Object.entries(fields)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+    
+    // Add the form to the document and submit it
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Regular Razorpay payment function (updated to accept amount parameter)
+function initiateRazorpayPayment(amount) {
+    // Show loading overlay
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    const totalAmount = amount * 100; // Convert to paise
+    
+    // Get Razorpay key from server-side rendering
+    const razorpayKey = '<%= process.env.RAZORPAY_KEY_ID %>';
+    
+    // Validate Razorpay key
+    if (!razorpayKey || razorpayKey === '') {
+        alert('Payment configuration error. Please try again later.');
+        document.getElementById('loadingOverlay').style.display = 'none';
+        return;
+    }
+    
+    // Create order first on server side
+    fetch('/create-razorpay-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            amount: totalAmount,
+            currency: 'INR'
+        })
+    })
+    .then(response => response.json())
+    .then(order => {
+        const options = {
+            key: razorpayKey,
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.id,
+            name: 'ShopCart',
+            description: 'Order Payment',
+            image: '/images/logo.png',
+            handler: function (response) {
+                if (response.razorpay_payment_id) {
+                    handlePaymentSuccess(response);
+                } else {
+                    window.location.href = "/failed";
+                }
+            },
+            prefill: {
+                name: '<%= user.name %>',
+                email: '<%= user.email %>',
+                contact: '<%= user.phone || "9999999999" %>'
+            },
+            notes: {
+                address: 'Customer Address',
+                order_reference: 'ORDER_<%= Date.now() %>'
+            },
+            theme: {
+                color: '#000000'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log("Payment popup closed by user");
+                    window.location.href = "/failed";
+                }
+            }
+        };
+        
+        try {
+            const rzp = new Razorpay(options);
+            
+            rzp.on('payment.failed', function(response) {
+                console.error('Payment failed:', response.error);
+                document.getElementById('loadingOverlay').style.display = 'none';
+                
+                let errorMessage = 'Payment failed. Please try again.';
+                if (response.error && response.error.description) {
+                    errorMessage = response.error.description;
+                }
+                
+                window.location.href = '/failed';
+            });
+            
+            rzp.open();
+            document.getElementById('loadingOverlay').style.display = 'none';
+        } catch (error) {
+            console.error('Razorpay initialization error:', error);
+            document.getElementById('loadingOverlay').style.display = 'none';
+            alert('Error initializing payment. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating order:', error);
+        document.getElementById('loadingOverlay').style.display = 'none';
+        alert('Error creating payment order. Please try again.');
+    });
+}
+
+// Handle payment success
     function handlePaymentSuccess(response) {
         // Show loading overlay again
         document.getElementById('loadingOverlay').style.display = 'flex';

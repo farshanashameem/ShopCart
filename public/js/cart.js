@@ -33,3 +33,29 @@
       }
     });
   });
+
+document.getElementById("continueBtn")?.addEventListener("click", async function (e) {
+  e.preventDefault(); // stop normal navigation
+
+  const res = await fetch("/cart/validate", { method: "GET" });
+  const result = await res.json();
+
+  if (!result.success && result.invalidItems) {
+    let message = "Some items are not available:\n\n";
+    result.invalidItems.forEach(item => {
+      message += `${item.name} (Requested: ${item.requested}, Available: ${item.available})\n`;
+    });
+
+    Swal.fire({
+      icon: "error",
+      title: "Stock Issue",
+      text: message,
+    });
+  } else if (result.success) {
+    // proceed to address page
+    window.location.href = "/select-address";
+  } else {
+    Swal.fire({ icon: "error", title: "Oops", text: result.message });
+  }
+});
+

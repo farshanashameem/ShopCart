@@ -86,7 +86,15 @@ exports.getWishlistPage = async (req, res) => {
             })
         );
 
-        res.render('user/wishlist', { wishlistItems: wishlistItems.filter(i => i !== null) });
+         // pagination setup
+    const page = parseInt(req.query.page) || 1;
+    const limit = 3;
+    const totalPages = Math.ceil(wishlistItems.length / limit);
+
+    // slice array for current page
+    const paginatedItems = wishlistItems.slice((page - 1) * limit, page * limit);
+
+        res.render('user/wishlist', { wishlistItems:paginatedItems,totalPages, currentPage: page });
 
     } catch (err) {
         console.error(err);

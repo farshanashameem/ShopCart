@@ -14,6 +14,7 @@ const walletController=require('../controllers/user/walletController');
 const reviewController=require('../controllers/user/reviewController');
 const paymentController=require('../controllers/user/paymentController');
 const referAndEarnController=require('../controllers/user/referAndEarn');
+const failedcontroller=require('../controllers/user/failedController');
 const auth = require('../middlewares/auth');
 const { validationResult } = require("express-validator");
 const { signupValidationRules, changePasswordValidationRules,editProfileValidation,changePasswordRules,validateAddress } = require('../middlewares/validation');
@@ -79,10 +80,10 @@ router.post('/addtoCart',auth.isUserLoggedIn,cartController.addToCart);
 router.get('/cart',auth.isUserLoggedIn,cartController.getCartpage);
 router.get('/cart/update/:variantId/:action',auth.isUserLoggedIn,cartController.updateCart);
 router.get('/cart/remove/:variantId',auth.isUserLoggedIn,cartController.Remove);
+router.get('/cart/validate',auth.isUserLoggedIn,cartController.validateCart);
 
 //==== Payment management ====//
-//router.post("/cart/apply-coupon",auth.isUserLoggedIn,orderController.ApplyCoupon);
-  
+
 router.get('/select-address',auth.isUserLoggedIn,orderController.selectAddress);
 router.post('/select-address/addAddress',auth.isUserLoggedIn,validateAddress,orderController.addAddress);
 router.post('/select-address/updateAddress/:id',auth.isUserLoggedIn,validateAddress,orderController.updateAddress);
@@ -92,15 +93,18 @@ router.get('/success',auth.isUserLoggedIn,orderController.getSuccessPage);
 router.post('/create-razorpay-order', paymentController.createRazorpayOrder);
 router.get('/invoice/:orderId', invoiceController.getInvoicePage);
 router.get('/failed',auth.isUserLoggedIn,orderController.getFailedPage);  
-
+  
 //=== return item ===//
 router.post('/orders/return',auth.isUserLoggedIn,returnController.return);
-//=== cancel order ===//
+//=== cancel order ===//  
 router.post('/cancelOrder',auth.isUserLoggedIn,orderController.cancelOrder);
 
 //=== order pages ===//
 router.get('/orders',auth.isUserLoggedIn,orderController.getOrderPage);
 router.get('/orderedItem/:Id',auth.isUserLoggedIn,orderController.OrderDetails);
+
+//=== failed page ===//
+router.get('/failedOrders',auth.isUserLoggedIn,failedcontroller.getFailedPage);
 
 //=== review ===//
 router.post('/review/add',auth.isUserLoggedIn,reviewController.addOrEditReview);

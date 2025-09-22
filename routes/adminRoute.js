@@ -89,6 +89,11 @@ router.get('/referals',auth.isAdminLoggedIn,referralController.getRefferalPage);
 
 //=== Sales Report ===//
 router.get('/salesReport',auth.isAdminLoggedIn,salesReport.getSalesReport);
+router.post('/salesReport', auth.isAdminLoggedIn, salesReport.postSalesReport);
+
+//=== dashboard ===//
+router.get('/Dashboard', auth.isAdminLoggedIn,salesReport.getPage);
+router.post('/Dashboard',auth.isAdminLoggedIn,salesReport.getDashboard);
 
 // Admin Logout
 router.get('/logout', (req, res) => {
@@ -96,4 +101,4 @@ router.get('/logout', (req, res) => {
   res.redirect('/admin/login');
 });
   
-module.exports=router;
+module.exports=router;  

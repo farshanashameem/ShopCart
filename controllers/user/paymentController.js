@@ -15,7 +15,8 @@ const { validationResult } = require("express-validator");
 const { getCountryCodeFromIP } = require("../../utils/ipapi");
 const { count } = require("console");
 const WalletTransactions = require("../../models/WalletTransactions");
-
+const Failed=require('../../models/Faileds');
+  
 exports.makePayment = async (req, res) => {
   try {
     const { 
@@ -26,7 +27,8 @@ exports.makePayment = async (req, res) => {
       addressId,
       razorpayPaymentId,
       razorpayOrderId,
-      razorpaySignature 
+      razorpaySignature,
+      walletAmount //  to track wallet amount used
     } = req.body;
     
     console.log('Payment request received:', { 
@@ -37,65 +39,151 @@ exports.makePayment = async (req, res) => {
       addressId,
       razorpayPaymentId,
       razorpayOrderId,
-      razorpaySignature
+      razorpaySignature,
+      walletAmount
     });
+    const failedProducts = user.cart.map(item => ({
+  productId: item.productId,
+  variantId: item.variantId,
+  quantity: item.quantity
+}));
+
+    
+     const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    const orderId = `ORD-${timestamp}-${random}`;
 
     const user = await User.findById(req.session.user._id);
 
     if (!user.cart || user.cart.length === 0) {
-      return res.redirect("/orders");
+      return res.redirect("/orders");  
     }
-    
-    // If Razorpay payment, verify the payment first
-    if (payment === "razorpay") {
-      // Verify payment signature
-      if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
-        console.error('Missing Razorpay payment data');
-        return res.redirect('/failed');
-      }
-      
-      // Fix: Use the correct format for signature verification
-      const body = razorpayOrderId + "|" + razorpayPaymentId;
-      const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(body)
-        .digest('hex');
-      
-      console.log('Signature verification:', {
-        received: razorpaySignature,
-        expected: expectedSignature,
-        matches: expectedSignature === razorpaySignature,
-        body: body
-      });
-      
-      if (expectedSignature !== razorpaySignature) {
-        console.error('Payment signature verification failed');
-        return res.redirect('/failed');
-      }
-    }
-    else if(payment==="wallet"){
-        const walletBalance=user.wallet;
-        if(walletBalance<total){
-            req.flash("error", "Wallet balance is insufficient.");
-            return res.redirect('/payment?addressId='+addressId);
-        }
-        else{
-          user.wallet-=total;
-          await user.save();
-          const transaction=new WalletTransactions({
-            userId:user._id,
-            type:"debit",
-            amount:total,
-            reason:"order Payment"
 
-          });
-          await transaction.save();
-        }
-            
-      
-    }
+    // Track wallet amount used
+    let walletAmountUsed = 0;
+    let remainingAmount = parseFloat(total);
     
-    const coupon = appliedCoupon ? await Coupons.findOne(
+    // If wallet payment is involved
+    if (payment === "wallet" || walletAmount) {
+        const walletBalance = user.wallet;
+        walletAmountUsed = Math.min(walletBalance, remainingAmount);
+        remainingAmount -= walletAmountUsed;
+        
+        // If wallet covers the entire amount
+        if (remainingAmount <= 0) {
+            user.wallet -= walletAmountUsed;
+            await user.save();
+            
+            const transaction = new WalletTransactions({
+                userId: user._id,
+                type: "debit",
+                amount: walletAmountUsed,
+                reason: "Order Payment"
+            });
+            await transaction.save();
+        } 
+        // If wallet is insufficient and Razorpay is needed
+        else if (razorpayPaymentId && razorpayOrderId && razorpaySignature) {
+            // Verify Razorpay payment for the remaining amount
+            const body = razorpayOrderId + "|" + razorpayPaymentId;
+            const expectedSignature = crypto
+                .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+                .update(body)
+                .digest('hex');
+            
+            console.log('Signature verification:', {
+                received: razorpaySignature,
+                expected: expectedSignature,
+                matches: expectedSignature === razorpaySignature,
+                body: body
+            });
+            
+            if (expectedSignature !== razorpaySignature) {
+                console.error('Payment signature verification failed');
+              await Failed.create({
+    userId: user._id,
+    orderId,
+    amount: total,
+    paymentMethod: payment,
+    reason: "Razorpay payment failed",
+    products: failedProducts
+  });
+
+
+                return res.redirect('/failed');
+            }
+            
+            // Deduct wallet amount and record transaction
+            user.wallet -= walletAmountUsed;
+            await user.save();
+            
+            const transaction = new WalletTransactions({
+                userId: user._id,
+                type: "debit",
+                amount: walletAmountUsed,
+                reason: "Partial Order Payment"
+            });
+            await transaction.save();
+        }
+        // If wallet is insufficient but no Razorpay payment data
+        else if (remainingAmount > 0) {
+            // This case should be handled by redirecting to Razorpay
+            // We'll handle this in the frontend
+            console.log('Insufficient wallet balance, redirecting to Razorpay');
+            return res.status(400).json({ 
+                error: "Insufficient wallet balance", 
+                remainingAmount: remainingAmount 
+            });
+        }
+    }
+    // If only Razorpay payment
+    else if (payment === "razorpay") {
+        // Verify payment signature
+        if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+            console.error('Missing Razorpay payment data');
+            return res.redirect('/failed');
+        }
+        
+        const body = razorpayOrderId + "|" + razorpayPaymentId;
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(body)
+            .digest('hex');
+        
+        console.log('Signature verification:', {
+            received: razorpaySignature,
+            expected: expectedSignature,
+            matches: expectedSignature === razorpaySignature,
+            body: body
+        });
+        
+        if (expectedSignature !== razorpaySignature) {
+            console.error('Payment signature verification failed');
+           try {
+ await Failed.create({
+    userId: user._id,
+    orderId,
+    amount: total,
+    paymentMethod: payment,
+    reason: "Razorpay payment failed",
+    products: failedProducts
+  });
+  console.log("Failed order saved successfully");
+} catch (err) {
+  console.error("Failed to save failed order:", err);
+}
+
+            return res.redirect('/failed');
+        }
+    }
+   else if (payment === "cod" && total > 1000) {
+    console.log("cod is not possible");
+    req.flash("error", "Cash on delivery is not available for orders greater than 1000");
+     return res.redirect('/payment?addressId='+addressId);
+   }
+
+   
+      const coupon = appliedCoupon ? await Coupons.findOne(
       { code: appliedCoupon },
       { category: 1, usageCount: 1, usedBy: 1 }
     ) : null;
@@ -126,11 +214,8 @@ exports.makePayment = async (req, res) => {
       perItemDiscount = discountValue / eligibleItems.length;
     }
 
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    const orderId = `ORD-${timestamp}-${random}`;
+   
 
-    const walletAmountUsed = 0;
     const userId = user._id;
 
     const details = await Promise.all(
@@ -168,11 +253,17 @@ exports.makePayment = async (req, res) => {
           status: "pending",
           paymentStatus: payment === "cod" ? "pending" : "paid",
           paymentMethod: payment,
-          razorpayPaymentId: payment === "razorpay" ? razorpayPaymentId : null,
-          razorpayOrderId: payment === "razorpay" ? razorpayOrderId : null
+          razorpayPaymentId: (payment === "razorpay" || walletAmountUsed > 0) ? razorpayPaymentId : null,
+          razorpayOrderId: (payment === "razorpay" || walletAmountUsed > 0) ? razorpayOrderId : null
         };
       })
     );
+
+
+    
+
+    
+  
 
     await Orders.insertMany(details);
 
@@ -197,13 +288,28 @@ exports.makePayment = async (req, res) => {
       }
     }
 
+    const cartItems = user.cart;
+
+for (const item of cartItems) {
+  const { variantId, quantity } = item;
+
+  // Make sure quantity is positive
+  if (quantity > 0) {
+    await productVariant.findByIdAndUpdate(
+      variantId,
+      { $inc: { stock: -quantity } },
+      { new: true } // returns updated document if needed
+    );
+  }
+}
+
+
+
     user.cart = [];
     await user.save();
     req.session.orderPlaced = true;
 
-    // Redirect based on payment method
-   
-      return res.render("user/success", {orderId});
+    return res.render("user/success", {orderId});
     
   } catch (err) {
     console.error('Payment processing error:', err);
@@ -225,6 +331,6 @@ exports.createRazorpayOrder = async (req, res) => {
     res.json(order);
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
-    res.status(500).json({ error: 'Failed to create order' });
+    res.status(500).json({ error: 'Failed to create order' ,details: error.response ? error.response : error.message,});
   }
 };

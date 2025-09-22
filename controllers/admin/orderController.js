@@ -106,6 +106,7 @@ exports.getOrderDetails = async (req, res) => {
       quantity: order.quantity,
       price: order.price,
       status: order.status,
+      reasons:order.cancelReason,
       reason:returnItem?returnItem.reason:null,
       address: address || {},
       productId:order.productId,

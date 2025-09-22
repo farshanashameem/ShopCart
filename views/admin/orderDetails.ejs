@@ -45,6 +45,7 @@
             <p class="text-success fw-bold">✅ Order Delivered</p>
           <% } else if(order.status === "cancelled"){ %>
             <p class="text-danger fw-bold">❌ Order Cancelled</p>
+             <p class="mb-0">Reason: <%= order.reasons %></p>  
           <% } else if(order.status === "returned"){ %>
              <div class="returned-info p-2 pe-4 ps-4 mb-3" style="background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:10px;box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                 <p class="text-warning fw-bold mb-1">↩️ Order Returned</p>

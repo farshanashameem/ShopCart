@@ -60,7 +60,7 @@ exports.getProductsPage = async (req, res) => {
         create: product.createdAt.toDateString(),
         status: product.isActive ? "Active" : "Blocked",
         isActive: product.isActive
-      };
+      };  
 
     });
 

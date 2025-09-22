@@ -39,38 +39,35 @@ async function buildCheckoutData(userId, errors = {}, old = {}) {
     errors,
     old,
     cart: { items: cartItems, total },
+    charge:total>300?0:50
   };
 }
 
-/*exports.ApplyCoupon=async(req,res)=>{
-     try {
-    const { code } = req.body;
-    const coupon = await Coupon.findOne({ code, isActive:true });
-    if(!coupon) return res.json({ success:false, message:"Invalid coupon" });
-
-    req.session.coupon = coupon; // save applied coupon
-    const user = await User.findById(req.session.user._id);
-    const { cartItems, total, discount } = await getCartDetails(user, coupon);
-
-    res.json({ success:true, cartItems, total, discount });
-  } catch (err) {
-    console.log(err);
-    res.json({ success:false });
-  }
-};
-}*/
 
 exports.selectAddress = async (req, res) => {
   try {
     const data = await buildCheckoutData(req.session.user._id);
     data.showAddressBar = false;
     const user = await User.findById(req.session.user._id);
+   const results = await Promise.all(
+        user.cart.map(async (item) => {
+          const variant = await productVariant.findById(item.variantId);
+
+          if (!variant || variant.stock < item.quantity || variant.stock <= 0) {
+            return item; // return invalid item
+          }
+          return null;
+        })
+     );
+
+const itemsNotInCart = results.filter(Boolean); // remove nulls
+
     if (!user.cart || user.cart.length === 0) {
       return res.redirect("/orders");
     }
-    if (!data) return res.redirect("/login");
+    if (!data) return res.redirect("/orders");
     res.render("user/checkout1", data);
-  } catch (err) {
+  } catch (err) {  
     console.error("Error in checkout:", err);
     res.status(500).send("Internal Server Error");
   }
@@ -377,7 +374,7 @@ exports.getOrderPage = async (req, res) => {
 
 exports.cancelOrder = async (req, res) => {
   try {
-    const { orderId, variantId, productId } = req.body;
+    const { orderId, variantId, productId ,reason} = req.body;
     const order = await Orders.findOne({ orderId, variantId, productId });
     const variant = await productVariant.findById(variantId);
     const user=await User.findById(req.session.user._id);
@@ -399,7 +396,7 @@ exports.cancelOrder = async (req, res) => {
     await Orders.findOneAndUpdate(
       { orderId, variantId, productId },
       {
-        $set: { status: "cancelled" },
+        $set: { status: "cancelled" ,cancelReason:reason},
         $push: { statusHistory: { status: "cancelled", date: new Date() } },
       }
     );
