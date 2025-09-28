@@ -10,12 +10,14 @@ const orderController=require('../controllers/admin/orderController');
 const returnController=require('../controllers/admin/returnController');
 const couponController=require('../controllers/admin/couponController');
 const referralController=require('../controllers/admin/refferalController');
+const offerController=require('../controllers/admin/offerController');
 const salesReport=require('../controllers/admin/salesReport');
 const auth = require('../middlewares/auth');
 const upload=require('../middlewares/multer');
 const { validationResult } = require('express-validator');
 const { productValidationRules }= require('../middlewares/productValidator');  
 const { couponValidationRules }=require('../middlewares/couponValidator');
+const { offerValidationRules }=require('../middlewares/offerValidation');
 
 
 //======login management======//
@@ -83,6 +85,13 @@ router.get('/coupons',auth.isAdminLoggedIn,couponController.getCouponPage);
 router.post('/addCoupon',couponValidationRules,auth.isAdminLoggedIn,couponController.addCoupon);
 router.put('/editCoupon/:id',auth.isAdminLoggedIn,couponValidationRules,couponController.editCoupon);
 router.patch('/coupons/toggle/:id',auth.isAdminLoggedIn,couponController.toggleCoupon);
+
+//=== Offer maangement ===//
+router.get('/offers',auth.isAdminLoggedIn,offerController.getOfferPage);
+router.post('/addOffer',offerValidationRules,auth.isAdminLoggedIn,offerController.addOffer);
+router.put('/editOffer/:id',auth.isAdminLoggedIn,offerValidationRules,offerController.editOffer);
+router.patch('/offers/toggle/:id',auth.isAdminLoggedIn,offerController.toggleOffer);
+
 
 //=== Referral page ===//
 router.get('/referals',auth.isAdminLoggedIn,referralController.getRefferalPage);

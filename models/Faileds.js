@@ -16,5 +16,5 @@ const failedSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
-const Faileds = mongoose.model("Faileds", failedSchema, );
+const Faileds = mongoose.model("Failed", failedSchema, );
 module.exports = Faileds;

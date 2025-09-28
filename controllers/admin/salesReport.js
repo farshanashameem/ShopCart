@@ -1,10 +1,14 @@
 const Orders = require("../../models/Orders");
 const Users = require("../../models/userModel");
-const Products=require('../../models/Products');
-const productVariant=require('../../models/productVariant');
-// ==== Reusable function ====
+const Products = require("../../models/Products");
+const productVariant = require("../../models/productVariant");
+const ProductType = require('../../models/productType');
+
+// ==== Reusable function for finding the sales related things ====
 async function getReportData(query) {
-  // 1. Shipping Charges (orders < 300)
+
+  // 1.Total  Shipping Charges (orders < 300)
+    /* here Total shipping charge that assigned orders less than 300 is getting*/ 
   const totalShippingAgg = await Orders.aggregate([
     { $match: query },
     {
@@ -101,7 +105,7 @@ async function getReportData(query) {
 
 // ==== Controller ====
 
-// GET -> Initial load (default yearly)
+// GET -> Initial load (default yearly) in the sale report  
 exports.getSalesReport = async (req, res) => {
   try {
     const startDate = new Date();
@@ -109,10 +113,25 @@ exports.getSalesReport = async (req, res) => {
 
     const query = { createdAt: { $gte: startDate } };
     const report = await getReportData(query);
+    const orders=await Orders.find();
+    const orderedItems=await Promise.all(
+      orders.map(async(item)=>{
+        const product=await Products.findById(item.productId);
+        const category=await ProductType.findById(product.productTypeId);
+        return{
+          name:product.name,
+          category:category.name,
+          quantity:item.quantity,
+          total:item.total,
+          date:item.createdAt
+        }
+      })
+    );
+    
 
     res.render("admin/salesReport", {
       filter: "yearly",
-      ...report,
+      ...report,items:orderedItems
     });
   } catch (err) {
     console.log(err);
@@ -120,7 +139,7 @@ exports.getSalesReport = async (req, res) => {
   }
 };
 
-// POST -> For filters & custom dates
+// POST -> For filters & custom dates in the sales report
 exports.postSalesReport = async (req, res) => {
   try {
     const { filter, from, to } = req.body;
@@ -154,52 +173,50 @@ exports.postSalesReport = async (req, res) => {
       });
     }
 
- 
     // ==== Case 2: Custom Date Range ====
-if (from || to) {
-  // If only one date is provided -> invalid
-  if (!from || !to) {
-    return res.render("admin/salesReport", {
-      filter: "Custom Date",
-      orders: 0,
-      revenue: 0,
-      products: 0,
-      customers: 0,
-      pending: 0,
-      cancelled: 0,
-      shipping: 0,
-      errorMessage: "Please select both From and To dates",
-    });
-  }
+    if (from || to) {
+      // If only one date is provided -> invalid
+      if (!from || !to) {
+        return res.render("admin/salesReport", {
+          filter: "Custom Date",
+          orders: 0,
+          revenue: 0,
+          products: 0,
+          customers: 0,
+          pending: 0,
+          cancelled: 0,
+          shipping: 0,
+          errorMessage: "Please select both From and To dates",
+        });
+      }
 
-  let startDate = new Date(from);
-  let endDate = new Date(to);
-  endDate.setHours(23, 59, 59, 999);
+      let startDate = new Date(from);
+      let endDate = new Date(to);
+      endDate.setHours(23, 59, 59, 999);
 
-  // Validation: check valid dates & logical range
-  if (isNaN(startDate) || isNaN(endDate) || startDate > endDate) {
-    return res.render("admin/salesReport", {
-      filter: "Custom Date",
-      orders: 0,
-      revenue: 0,
-      products: 0,
-      customers: 0,
-      pending: 0,
-      cancelled: 0,
-      shipping: 0,
-      errorMessage: "Invalid date range",
-    });
-  }
+      // Validation: check valid dates & logical range
+      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate) {
+        return res.render("admin/salesReport", {
+          filter: "Custom Date",
+          orders: 0,
+          revenue: 0,
+          products: 0,
+          customers: 0,
+          pending: 0,
+          cancelled: 0,
+          shipping: 0,
+          errorMessage: "Invalid date range",
+        });
+      }
 
-  const query = { createdAt: { $gte: startDate, $lte: endDate } };
-  const report = await getReportData(query);
+      const query = { createdAt: { $gte: startDate, $lte: endDate } };
+      const report = await getReportData(query);
 
-  return res.render("admin/salesReport", {
-    filter: `From ${from} To ${to}`,
-    ...report,
-  });
-}
-
+      return res.render("admin/salesReport", {
+        filter: `From ${from} To ${to}`,
+        ...report,
+      });
+    }
 
     // If nothing matches -> redirect
     res.redirect("/admin/salesReport");
@@ -209,88 +226,156 @@ if (from || to) {
   }
 };
 
-exports.getPage=async (req,res)=>{
-  try{
 
-        startDate = new Date();
-        startDate.setDate(startDate.getDate() - 1);
-        const query = { createdAt: { $gte: startDate } };
-      const report = await getReportData(query);
-       
-       let  dateFormat = "%d %b";
-      const endDate = new Date(); 
+//function to calculate the total report in the dashboard
+async function getTotalReport(){
+  //=== getting full report from the start of the app ===//
+
+    //1. total customers count
+    const totalCustomer=await Users.countDocuments();
+    //2. Total Orders
+    const totalOrder = (await Orders.distinct("orderId")).length;
+
+    //3. Total sales
+     let totalSale=await Orders.aggregate([
+      {
+        $group:{
+          _id:null,
+          totalSale:{$sum:"$total"}
+        }
+      }
+     ]);
+     totalSale=totalSale[0]?.totalSale||0;
+     //4. Total products sold
+     let totalProducts=await Orders.aggregate([
+      {$match: {status: { $nin: ["cancelled", "returned"]}}},
+      {
+        $group:{
+          _id:null,
+          totalProducts: {$sum:"$quantity"}
+        }
+      }
+     ]);
+     totalProducts=totalProducts[0]?.totalProducts||0;
+     return{
+      totalCustomer,totalOrder,totalProducts,totalSale
+     }
+}
+
+exports.getPage = async (req, res) => {
+  try {
+
+    
+    startDate = new Date();
+    startDate.setDate(startDate.getDate() - 1);
+    const query = { createdAt: { $gte: startDate } };
+    const report = await getReportData(query);
+
+    let dateFormat = "%d %b";
+    const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
 
-    const start= new Date();
+    const start = new Date();
     start.setDate(endDate.getDate() - 6); // include today + past 6 days
     start.setHours(0, 0, 0, 0);
 
-   
-    let  groupBy = { $dayOfMonth: "$createdAt" }; // daily
-   
+    let groupBy = { $dayOfMonth: "$createdAt" }; // daily
 
     const data = await Orders.aggregate([
       { $match: { createdAt: { $gte: start, $lte: endDate } } },
-      {  $group: {
+      {
+        $group: {
           _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
-          total: { $sum: 1 }
-        } },
-      { $sort: { "_id": 1 } }
+          total: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
     ]);
 
-    const labels = data.map(d => d._id);
-    const values = data.map(d => d.total);
+    const labels = data.map((d) => d._id);
+    const values = data.map((d) => d.total);
 
     //top 10 orders
     const topOrders = await Orders.aggregate([
-  {
-    $match: { createdAt: { $gte: start, $lte: endDate } }
-  },
-  {
-    $group: {
-      _id: "$productId",
-      totalOrders: { $sum: 1 },
-      totalQuantity: { $sum: "$quantity" } 
-    }
-  },
-  { $sort: { totalOrders: -1 } },
-  { $limit: 10 }
-]);
+      {
+        $match: { createdAt: { $gte: start, $lte: endDate } },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          totalOrders: { $sum: 1 },
+          totalQuantity: { $sum: "$quantity" },
+        },
+      },
+      { $sort: { totalOrders: -1 } },
+      { $limit: 10 },
+    ]);
 
-const items = await Promise.all(
-  topOrders.map(async (item) => {
-    const product = await Products.findById(item._id);       // use item._id
-    const variant = await productVariant.findOne({ productId: item._id }); // first variant
-    return {
-      name: product.name,
-      image: variant ? variant.images[0] : null,            // handle no variant
-      itemsSold: item.totalOrders,
-      quantity:item.totalQuantity
-    };
-  })
-);
-   
-      return res.render("admin/dashboard", {
-        
-        ...report,labels,values,items
-      });
+    const items = await Promise.all(
+      topOrders.map(async (item) => {
+        const product = await Products.findById(item._id); // use item._id
+        const variant = await productVariant.findOne({ productId: item._id }); // first variant
+        return {
+          name: product.name,
+          image: variant ? variant.images[0] : null, // handle no variant
+          itemsSold: item.totalOrders,
+          quantity: item.totalQuantity,
+        };
+      })
+    );
 
-      
-      
-    
-  }catch(err){
+    const total=await getTotalReport();
+
+    return res.render("admin/dashboard", {
+      ...report,...total,
+      labels,
+      values,
+      items,
+    });
+  } catch (err) {
     console.log(err);
   }
-}
+};
 
 exports.getDashboard = async (req, res) => {
   try {
     const { from, to } = req.body || {};
-    let startDate, endDate;
+    let startDate = new Date(from);
+      let endDate = new Date(to);
 
+    //top 10 orders
+    const topOrders = await Orders.aggregate([
+      {
+        $match: { createdAt: { $gte: startDate, $lte: endDate } },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          totalOrders: { $sum: 1 },
+          totalQuantity: { $sum: "$quantity" },
+        },
+      },
+      { $sort: { totalOrders: -1 } },
+      { $limit: 10 },
+    ]);console.log(topOrders)
+
+    const items = await Promise.all(
+      topOrders.map(async (item) => {
+        const product = await Products.findById(item._id); // use item._id
+        const variant = await productVariant.findOne({ productId: item._id }); // first variant
+        return {
+          name: product.name,
+          image: variant ? variant.images[0] : null, // handle no variant
+          itemsSold: item.totalOrders,
+          quantity: item.totalQuantity,
+        };
+      })
+    );
+
+    const total=await getTotalReport();
     if (!from || !to) {
       return res.render("admin/dashboard", {
-        filter: "Custom Date",
+        filter: "Custom Date",...total,
         orders: 0,
         revenue: 0,
         products: 0,
@@ -300,9 +385,10 @@ exports.getDashboard = async (req, res) => {
         shipping: 0,
         errorMessage: "Please select both From and To dates",
         labels: [],
-        values: []
+        values: [],
+        items,
       });
-    } else {  
+    } else {
       startDate = new Date(from);
       endDate = new Date(to);
       endDate.setHours(23, 59, 59, 999);
@@ -319,20 +405,20 @@ exports.getDashboard = async (req, res) => {
           shipping: 0,
           errorMessage: "Invalid date range",
           labels: [],
-          values: []
+          values: [],
+          items,
         });
       }
     }
 
-  
     const days = (endDate - startDate) / (1000 * 60 * 60 * 24);
 
-     let dateFormat;
+    let dateFormat;
 
-    if (days <= 10) dateFormat = "%d %b";        // daily, e.g., 20 Sep
+    if (days <= 10) dateFormat = "%d %b"; // daily, e.g., 20 Sep
     else if (days <= 60) dateFormat = "Week %U"; // weekly
-    else dateFormat = "%b %Y"; 
-   
+    else dateFormat = "%b %Y";
+
     let groupBy;
     if (days <= 10) {
       groupBy = { $dayOfMonth: "$createdAt" }; // daily
@@ -344,56 +430,31 @@ exports.getDashboard = async (req, res) => {
 
     const data = await Orders.aggregate([
       { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-      {  $group: {
+      {
+        $group: {
           _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
-          total: { $sum: 1 }
-        } },
-      { $sort: { "_id": 1 } }
+          total: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
     ]);
 
-    const labels = data.map(d => d._id);
-    const values = data.map(d => d.total);
+    const labels = data.map((d) => d._id);
+    const values = data.map((d) => d.total);
 
     // Get report summary
     const query = { createdAt: { $gte: startDate, $lte: endDate } };
     const report = await getReportData(query);
 
-     //top 10 orders
-    const topOrders = await Orders.aggregate([
-  {
-    $match: { createdAt: { $gte: startDate, $lte: endDate } }
-  },
-  {
-    $group: {
-      _id: "$productId",
-      totalOrders: { $sum: 1 },
-      totalQuantity: { $sum: "$quantity" } 
-    }
-  },
-  { $sort: { totalOrders: -1 } },
-  { $limit: 10 }
-]);
-
-const items = await Promise.all(
-  topOrders.map(async (item) => {
-    const product = await Products.findById(item._id);       // use item._id
-    const variant = await productVariant.findOne({ productId: item._id }); // first variant
-    return {
-      name: product.name,
-      image: variant ? variant.images[0] : null,            // handle no variant
-      itemsSold: item.totalOrders,
-      quantity:item.totalQuantity
-    };
-  })
-);
+    
 
     res.render("admin/dashboard", {
-      ...report,
+      ...report,...total,
       labels,
       values,
       items,
       filter: `From ${from} To ${to}`,
-      errorMessage: null
+      errorMessage: null,
     });
   } catch (err) {
     console.error(err);
@@ -404,10 +465,7 @@ const items = await Promise.all(
       revenue: 0,
       products: 0,
       labels: [],
-      values: []
+      values: [],
     });
   }
 };
-
-
-

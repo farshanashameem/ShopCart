@@ -7,12 +7,14 @@ const Orders = require("../../models/Orders");
 const Returns = require("../../models/Returns");
 const Review = require("../../models/Review");
 const Coupons = require("../../models/Coupens");
+const Offers = require("../../models/Offers");
 const razorpay = require("../../utils/razorpay");
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");
 const { getCountryCodeFromIP } = require("../../utils/ipapi");
 const { count } = require("console");
 const WalletTransactions = require("../../models/WalletTransactions");
+const Faileds=require('../../models/Faileds');
 
 async function buildCheckoutData(userId, errors = {}, old = {}) {
   const user = await User.findById(userId)
@@ -191,8 +193,9 @@ exports.selectPayment = async (req, res) => {
   try {
     const userId = req.session.user._id;
     const addressId = req.query.addressId;
-    if (!addressId) return res.redirect("/");
+    if (!addressId) return res.redirect("/orders");
 
+    // Selecting cart items from the user cart for further going to payment
     const user = await User.findById(userId)
       .populate({ path: "cart.variantId", select: "discountPrice basePrice" })
       .populate({
@@ -206,6 +209,7 @@ exports.selectPayment = async (req, res) => {
       return res.redirect("/orders");
     }
 
+    // Finding all cart items wit their name,base price,discount price,category and quantity
     const cartItems = user.cart.map((item) => ({
       name: item.productId.name,
       price: item.variantId.basePrice,
@@ -217,6 +221,8 @@ exports.selectPayment = async (req, res) => {
     const categoriesInCart = [...new Set(cartItems.map((i) => i.category))];
 
     const today = new Date();
+
+    // Selecting all active coupons from the data base
     const coupons = await Coupons.find({
       isActive: true,
       startDate: { $lte: today },
@@ -229,16 +235,20 @@ exports.selectPayment = async (req, res) => {
     });
 
     let availableCoupons = [];
+    // If any coupon is present which applies for all product and customer ordering for more than the minimum value for applying the coupon it is selected.
     for (let coupon of coupons) {
       if (coupon.category && coupon.category.toLowerCase() === "all") {
         const total = cartItems.reduce(
           (sum, i) => sum + i.discountPrice * i.quantity,
           0
         );
+
+        // if the type is percentage finding the value that should be deducted.
         let discount =
           coupon.discountType === "percentage"
             ? Math.floor((coupon.discountValue / 100) * total)
             : coupon.discountValue;
+
 
         if (total >= coupon.minValue) {
           availableCoupons.push({
@@ -247,7 +257,9 @@ exports.selectPayment = async (req, res) => {
             discount,
           });
         }
-      } else if (categoriesInCart.includes(coupon.category)) {
+      } 
+      //finding  categories of cart items and if a couponis present for that category it is selected as the same method of coupon for all.
+      else if (categoriesInCart.includes(coupon.category)) {
         const categoryTotal = cartItems
           .filter((i) => i.category === coupon.category)
           .reduce((sum, i) => sum + i.discountPrice * i.quantity, 0);
@@ -267,11 +279,37 @@ exports.selectPayment = async (req, res) => {
       }
     }
 
-    console.log(availableCoupons);
+    //Finding the Offers available
+    let max=0;
+    const offers=await Offers.find({isActive: true,
+      startDate: { $lte: today },
+      endDate: { $gte: today }});
+     //Checking any these category is present in the cart
+     for (let offer of offers){
+      if(categoriesInCart.includes(offer.category)){
+        const categoryTotal = cartItems
+          .filter((i) => i.category === offer.category)
+          .reduce((sum, i) => sum + i.discountPrice * i.quantity, 0);
+
+        if (categoryTotal >= offer.minValue) {
+          let discount =
+            offer.discountType === "percentage"
+              ? Math.floor((offer.discountValue / 100) * categoryTotal)
+              : offer.discountValue;
+          if(max<discount)
+         max=discount;
+      }
+      
+
+     }
+
+    }
+   
     const total = cartItems.reduce(
       (sum, item) => sum + item.discountPrice * item.quantity,
       0
     );
+    //if total is less than 300 delivery charge of 300 is added
     const deliveryCharge= total<300?50:0;
    
 
@@ -281,6 +319,7 @@ exports.selectPayment = async (req, res) => {
     res.render("user/checkout2", {
       user,
       cart,
+      max,
       chosenAddressId: addressId,
       coupons: availableCoupons,
       deliveryCharge
@@ -453,6 +492,32 @@ exports.getSuccessPage = (req, res) => {
   res.render("user/success", { orderId: null });
 };
 
-exports.getFailedPage = (req, res) => {
+exports.getFailedPage = async (req, res) => {
+  const user=await User.findById(req.session.user._id);
+
+  if(req.session.orderId){
+    const failedProducts = user.cart.map(item => ({
+  productId: item.productId,
+  variantId: item.variantId,
+  quantity: item.quantity
+}));
+
+const orderId=req.session.orderId;
+    const total= req.session.amount;
+    const payment= req.session.payment;
+
+
+  await Faileds.create({
+    userId: user._id,
+    orderId,
+    amount: total,
+    paymentMethod: payment,
+    reason: "Razorpay payment failed",
+    products: failedProducts
+  });
+  req.session.orderId=null;
+  req.session.total=null;
+  req.session.payment=null;
+  }
   res.render("user/failed");
 };

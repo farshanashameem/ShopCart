@@ -15,7 +15,7 @@ const { validationResult } = require("express-validator");
 const { getCountryCodeFromIP } = require("../../utils/ipapi");
 const { count } = require("console");
 const WalletTransactions = require("../../models/WalletTransactions");
-const Failed=require('../../models/Faileds');
+
   
 exports.makePayment = async (req, res) => {
   try {
@@ -42,16 +42,15 @@ exports.makePayment = async (req, res) => {
       razorpaySignature,
       walletAmount
     });
-    const failedProducts = user.cart.map(item => ({
-  productId: item.productId,
-  variantId: item.variantId,
-  quantity: item.quantity
-}));
-
+    
+   
     
      const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000);
     const orderId = `ORD-${timestamp}-${random}`;
+     req.session.orderId=orderId;
+     req.session.amount=total;
+     req.session.payment=payment;
 
     const user = await User.findById(req.session.user._id);
 
@@ -99,17 +98,7 @@ exports.makePayment = async (req, res) => {
             });
             
             if (expectedSignature !== razorpaySignature) {
-                console.error('Payment signature verification failed');
-              await Failed.create({
-    userId: user._id,
-    orderId,
-    amount: total,
-    paymentMethod: payment,
-    reason: "Razorpay payment failed",
-    products: failedProducts
-  });
-
-
+                console.error('Payment signature verification failed');             
                 return res.redirect('/failed');
             }
             
@@ -158,21 +147,7 @@ exports.makePayment = async (req, res) => {
         });
         
         if (expectedSignature !== razorpaySignature) {
-            console.error('Payment signature verification failed');
-           try {
- await Failed.create({
-    userId: user._id,
-    orderId,
-    amount: total,
-    paymentMethod: payment,
-    reason: "Razorpay payment failed",
-    products: failedProducts
-  });
-  console.log("Failed order saved successfully");
-} catch (err) {
-  console.error("Failed to save failed order:", err);
-}
-
+            console.error('Payment signature verification failed');         
             return res.redirect('/failed');
         }
     }

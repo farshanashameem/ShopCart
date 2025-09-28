@@ -1,15 +1,15 @@
-const Coupon = require("../../models/Coupens");
+const Offers = require("../../models/Offers");
 const productType = require("../../models/productType");
 const { validationResult } = require("express-validator");
 
-exports.getCouponPage = async (req, res) => {  
+exports.getOfferPage = async (req, res) => {  
   try {
-    const coupon = await Coupon.find().sort({ createdAt: -1 }); // latest first
+    const offers = await Offers.find().sort({ createdAt: -1 }); //finding offers with  latest first
 
-    const categories = await productType.find();
+    const categories = await productType.find();    // finding the categories
 
-    res.render("admin/coupons", {
-      coupon,
+    res.render("admin/offers", {
+      offers,
       categories,
       errors: {},
       old: {},
@@ -21,7 +21,7 @@ exports.getCouponPage = async (req, res) => {
 };
 
 // controller/adminController.js
-exports.addCoupon = async (req, res) => {
+exports.addOffer = async (req, res) => {
   try {
     const errorsObj = {};
     const result = validationResult(req);
@@ -34,53 +34,45 @@ exports.addCoupon = async (req, res) => {
     }
 
     const {
-      code,
+      
       category,
       discountValue,
       discountType,
       minValue,
-      usageLimit,
       startDate,
       endDate,
     } = req.body;
-    const existItem = await Coupon.findOne({ code });
-if (existItem) {
-  return res.status(400).json({
-    success: false,
-    errors: { code: "This coupon already exists." }
-  });
-}
+   console.log(req.body);
     // Convert to Date objects
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    if (start > end) {
+    if (start > end|| !start || !end) {
       return res.status(400).json({success: false,message: "End date must be after start date"});
     }
-    const item = new Coupon({
-      code,
+    const item = new Offers({
+   
       category,
       discountValue,
       discountType,
       minValue,
-      usageLimit,
       startDate,
       endDate,
     });
 
     const saved = await item.save();
-    return res.status(200).json({ success: true, coupon: saved });
+    return res.status(200).json({ success: true, offer: saved });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-exports.editCoupon = async (req, res) => {
+exports.editOffer = async (req, res) => {
   try {
     const errorsObj = {};
     const result = validationResult(req);
-    const couponId = req.params.id;
+    const OfferId = req.params.id;
   
 
     // Handle validation errors
@@ -92,55 +84,39 @@ exports.editCoupon = async (req, res) => {
     }
 
     const {
-      code,
       category,
       discountValue,
       discountType,
       minValue,
-      minOrder,
       startDate,
       endDate,
     } = req.body;
 
-    // Check if coupon exists
-    const existingCoupon = await Coupon.findById(couponId);
-    if (!existingCoupon) {
-      return res.status(404).json({ success: false, message: "Coupon not found" });
-    }
-
-    // Check if another coupon with same code exists
-    const duplicate = await Coupon.findOne({ code });
-    if (duplicate && duplicate._id.toString() !== couponId) {
-      return res.status(400).json({
-        success: false,
-        errors: { code: "Coupon code already exists." },
-      });
-    }
 
     // Update and return new doc
-    const updatedCoupon = await Coupon.findByIdAndUpdate(
-     couponId,
-      { code, category, discountValue, discountType, minValue,  minOrder, startDate, endDate },
+    const updatedOffer = await Offers.findByIdAndUpdate(
+     OfferId,
+      {  category, discountValue, discountType, minValue,  startDate, endDate },
       { new: true } // returns updated doc
     );
 
-    return res.status(200).json({ success: true, coupon: updatedCoupon });
+    return res.status(200).json({ success: true, offer: updatedOffer });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-exports.toggleCoupon=async (req,res)=>{
+exports.toggleOffer=async (req,res)=>{
   try {
-    const coupon = await Coupon.findById(req.params.id);
-    console.log(coupon);
-    if (!coupon) return res.json({ success: false, error: "Coupon not found" });
+    const offer = await Offers.findById(req.params.id);
+   
+    if (!offer) return res.json({ success: false, error: "Offer not found" });
 
-    coupon.isActive = !coupon.isActive;
-    await coupon.save();
+    offer.isActive = !offer.isActive;
+    await offer.save();
 
-    res.json({ success: true, isActive: coupon.isActive });
+    res.json({ success: true, isActive: offer.isActive });
   } catch (err) {
     res.json({ success: false, error: "Server error" });
   }

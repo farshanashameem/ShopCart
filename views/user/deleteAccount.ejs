@@ -6,7 +6,7 @@
         <%- include('../partials/navbar') %>
 
             <div class="profile-container m-4">
-                <div class="row">  
+                <div class="row">
                     <!-- Hamburger button for small screens -->
                     <button class="btn btn-dark d-md-none mb-3" type="button" data-bs-toggle="offcanvas"
                         data-bs-target="#userSidebar" aria-controls="userSidebar">
@@ -25,30 +25,30 @@
                             <div class="user-greeting mb-3">
                                 <div class="image "><img src="images/admin.png" class="profile-image border-round"
                                         alt=""></div>
-                                Hello <%= name %>
+                                Hello Farshana
                             </div>
                             <ul class="nav flex-column user-list">
                                 <li class="nav-item ">
                                     <i class="bi bi-person-circle me-3"></i>
                                     <a href="/profile" class="text-decoration-none bg-transparent">Profile</a>
                                 </li>
-                                <li class="nav-item mb-3">
+                                <li class="nav-item mb-3 ">
                                     <i class="bi bi-card-checklist me-3"></i>
                                     <a href="/orders" class="text-decoration-none bg-transparent">My Orders</a>
                                 </li>
-                                <li class="nav-item mb-3 ">
+                                <li class="nav-item mb-3">
                                     <i class="bi bi-wallet-fill me-3"></i>
                                     <a href="/wallet" class="text-decoration-none bg-transparent">Wallet</a>
                                 </li>
-                                 <li class="nav-item mb-3">
-                                    <i class="bi bi-person-vcard me-3"></i>
+                                <li class="nav-item mb-3 ">
+                                    <i class="bi bi-person-vcard me-3 "></i>
                                     <a href="/address" class="text-decoration-none bg-transparent">Address</a>
                                 </li>
-                                <li class="nav-item mb-3 current">
+                                <li class="nav-item mb-3">
                                     <i class="bi bi-cash-coin me-3"></i>
                                     <a href="/referCode" class="text-decoration-none bg-transparent">Refer and Earn</a>
                                 </li>
-                                <li class="nav-item mb-3">
+                                <li class="nav-item mb-3 current">
                                     <i class="bi bi-person-x me-3"></i>
                                     <a href="/delete" class="text-decoration-none bg-transparent">Delete Account</a>
                                 </li>
@@ -60,46 +60,69 @@
                         </div>
                     </div>
 
-
-                    <div class="profile-card d-flex flex-column justify-content-center align-items-center text-center mx-auto my-5 p-4"
-     style="background: linear-gradient(145deg, #e0f7e0, #c8f0c8); 
-            border-radius: 20px; 
-            width: 100%; 
-            max-width: 380px; 
-            height: 60vh; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
-    
-    <!-- Title -->
-    <h4 class="fw-bold mb-4 text-primary" style="font-size: 1.5rem;">
-        <i class="bi bi-wallet-fill me-2"></i> My Referal Code
-    </h4>
-    
-    <!-- Wallet Balance -->
-    <div class="wallet-balance mb-4">
-        <h2 class="fw-bold text-success mb-1" style="font-size:2.5rem;"><%= code || 0 %></h2>
-       
-    </div>
-
-   
-</div>
-
-<!-- Optional: Add hover effect with CSS -->
-<style>
-.profile-card a.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-</style>
+                    <!-- Main Content -->
+                    <div class="col-md-9">
+                        <div class="card shadow-sm border-0 p-4 bg-light">
+                            <h3 class="text-danger mb-3">Are you sure you want to delete your account?</h3>
+                            <p class="mb-4 text-muted">This will delete all your records permanently and you won’t be
+                                able to retrieve any data.</p>
+                            <button id="deleteAccountBtn" class="btn btn-danger btn-lg">Yes, Delete My Account</button>
 
 
+                            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                            <script>
+                                document.getElementById('deleteAccountBtn').addEventListener('click', function () {
+                                    Swal.fire({
+                                        title: 'Are you sure?',
+                                        text: "This will permanently delete your account!",
+                                        icon: 'warning',
+                                        showCancelButton: true,
+                                        confirmButtonColor: '#d33',
+                                        cancelButtonColor: '#3085d6',
+                                        confirmButtonText: 'Yes, delete it!',
+                                        cancelButtonText: 'Cancel'
+                                    }).then(async (result) => {
+                                        if (result.isConfirmed) {
+                                            const response = await fetch('/delete-account', {
+                                                method: 'DELETE',
+                                                headers: { 'Content-Type': 'application/json' }
+                                            });
+
+                                            const data = await response.json();
+                                            if (data.success) {
+                                                Swal.fire('Deleted!', data.message, 'success').then(() => {
+                                                    window.location.href = '/'; // Redirect after deletion
+                                                });
+                                            } else {
+                                                Swal.fire('Error!', data.message, 'error');
+                                            }
+                                        }
+                                    });
+                                });
+                            </script>
+
+
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+
+
+
+
+            </div>
             </div>
 
 
             <%- include('../partials/footer') %>
                 <!-- Bootstrap Bundle with Popper -->
+
+
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="/js/profileEdit.js"></script>
+                <script src="/js/addressForm.js"></script>
+
+
     </body>
 
 </html>

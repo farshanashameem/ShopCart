@@ -95,7 +95,7 @@
                             <%}%>
 
                         <label class="payment-option selected">
-                            <input type="radio" name="payment" value="razorpay" checked>
+                            <input type="radio" name="payment" value="razorpay" id="payment" checked>
                             <img src="https://sellonboard.com/wp-content/uploads/2021/09/razorpay.png"
                                 alt="Razorpay">
                             <div class="payment-text">
@@ -164,6 +164,10 @@
                         <span style="color: green;"><%= deliveryCharge %></span>
                     </div>
                     <div class="summary-item d-flex justify-content-between">
+                        <span>Offer Discount</span>
+                        <span style="color: green;">-₹<%= max %></span>
+                    </div>
+                    <div class="summary-item d-flex justify-content-between">
                         <span>Platform fee</span>
                         <span>₹0</span>
                     </div>
@@ -211,12 +215,12 @@
 
                     <div class="total mt-3 fw-bold">
                         Total In Rupees: ₹<span id="totalAmount">
-                            <%= cart.total + deliveryCharge %>
+                            <%= cart.total + deliveryCharge-max %>
                         </span>
                     </div>
 
                     <input type="hidden" id="appliedCoupon" name="appliedCoupon">
-                    <input type="hidden" id="finalTotal" name="total" value="<%= cart.total %>">
+                    <input type="hidden" id="finalTotal" name="total" value="<%= cart.total +deliveryCharge-max %>">
                     <input type="hidden" id="couponDiscountValue" name="couponDiscount" value="0">
                     <input type="hidden" id="addressId" name="addressId" value="<%= chosenAddressId %>">
 
@@ -286,7 +290,7 @@ document.getElementById('payButton').addEventListener('click', function() {
     const walletBalance = parseFloat('<%= user.wallet %>');
     
     if (paymentMethod === 'wallet') {
-        if (walletBalance >= totalAmount) {
+        if (walletBalance > totalAmount) {
             // Wallet has sufficient balance - proceed with wallet payment
             document.getElementById('paymentForm').submit();
         } else {
@@ -357,11 +361,27 @@ function initiateHybridPayment(walletAmount, razorpayAmount) {
                 color: '#000000'
             },
             modal: {
-                ondismiss: function() {
-                    console.log("Payment popup closed by user");
-                    window.location.href = "/failed";
-                }
-            }
+    ondismiss: function() {
+        console.log("Payment popup closed by user");
+
+        const total = document.getElementById('finalTotal').value;
+        const payment = document.getElementById('payment').value;
+
+        fetch('/save-failed-order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                reason: "Payment popup closed",
+                total: total,
+                payment: payment
+            })
+        })
+        .finally(() => {
+            window.location.href = '/failed';
+        });
+    }
+}
+
         };
         
         try {
@@ -371,12 +391,21 @@ function initiateHybridPayment(walletAmount, razorpayAmount) {
                 console.error('Payment failed:', response.error);
                 document.getElementById('loadingOverlay').style.display = 'none';
                 
-                let errorMessage = 'Payment failed. Please try again.';
-                if (response.error && response.error.description) {
-                    errorMessage = response.error.description;
-                }
-                
-                window.location.href = '/failed';
+                const total = document.getElementById('finalTotal').value;  
+    const payment = 'wallet'; 
+
+    fetch('/save-failed-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            reason: response.error.description || "Payment failed",
+            total: total,
+            payment: payment
+        })
+    })
+    .finally(() => {
+        window.location.href = '/failed';
+    });
             });
             
             rzp.open();
@@ -502,13 +531,21 @@ function initiateRazorpayPayment(amount) {
             rzp.on('payment.failed', function(response) {
                 console.error('Payment failed:', response.error);
                 document.getElementById('loadingOverlay').style.display = 'none';
-                
-                let errorMessage = 'Payment failed. Please try again.';
-                if (response.error && response.error.description) {
-                    errorMessage = response.error.description;
-                }
-                
-                window.location.href = '/failed';
+               const total = document.getElementById('finalTotal').value;  
+    const payment = 'razorpay'; 
+
+    fetch('/save-failed-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            reason: response.error.description || "Payment failed",
+            total: total,
+            payment: payment
+        })
+    })
+    .finally(() => {
+        window.location.href = '/failed';
+    });
             });
             
             rzp.open();

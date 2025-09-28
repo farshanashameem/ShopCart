@@ -9,7 +9,7 @@
           <%- include('../partials/sweetAlert') %>
 
             <!-- Main Content -->
-            <div class="col-lg-9 col-md-12 mt-5 px-4">
+            <div class="col-lg-10 col-md-12 mt-5 px-4">
 
               <!-- Header with filters -->
               <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
@@ -55,6 +55,18 @@
                 </div>
               </div>
 
+              <!-- Download Buttons -->
+              <div class="mt-4 d-flex gap-2 mb-3 justify-content-end">
+                <button class="btn btn-success shadow-sm" id="downloadExcel">
+                  <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+                <button class="btn btn-warning shadow-sm" id="downloadCSV">
+                  <i class="bi bi-file-earmark-text"></i> CSV
+                </button>
+                <button class="btn btn-danger shadow-sm" id="downloadPDF">
+                  <i class="bi bi-file-earmark-pdf"></i> PDF
+                </button>
+              </div>
 
               <!-- Report Card -->
               <div class="card shadow-lg border-0 rounded-4">
@@ -106,18 +118,40 @@
                 </div>
               </div>
 
-              <!-- Download Buttons -->
-              <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-success shadow-sm" id="downloadExcel">
-                  <i class="bi bi-file-earmark-excel"></i> Excel
-                </button>
-                <button class="btn btn-warning shadow-sm" id="downloadCSV">
-                  <i class="bi bi-file-earmark-text"></i> CSV
-                </button>
-                <button class="btn btn-danger shadow-sm" id="downloadPDF">
-                  <i class="bi bi-file-earmark-pdf"></i> PDF
-                </button>
+              <!-- Order details -->
+               <div class="card shadow-lg border-0 rounded-4 mt-4">
+                <div class="card-body p-4">
+                  <table class="table table-bordered table-striped text-center align-middle mb-0" id="reportTable">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Ordered Date</th>
+                      </tr>
+                    </thead>
+                    <% items.forEach(item=> {%>
+                      <tbody>
+                        <tr>
+                          <td><%= item.name %></td>
+                          <td><%= item.category %></td>
+                          <td><%= item.quantity %></td>
+                          <td><%= item.total %></td>
+                          <td>
+                            <%= new Date(item.date).toLocaleDateString("en-IN") %>
+                            <%= new Date(item.date).toLocaleTimeString("en-IN", { hour: "numeric", minute: "numeric", hour12: true }) %>
+                          </td>
+
+                        </tr>
+                      </tbody>
+
+                    <% }) %>
+                  </table>
+                </div>
               </div>
+
+              
             </div>
 
             <!-- Footer -->
@@ -137,45 +171,58 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <!-- Export Scripts -->
     <script>
+  const filterType = "<%= filter %>".toUpperCase();
 
-      
+  // Get both tables
+  const summaryTable = document.querySelectorAll("#reportTable")[0];
+  const detailsTable = document.querySelectorAll("#reportTable")[1];
 
-      const filterType = "<%= filter %>".toUpperCase();
-      // Excel Export
-      document.getElementById("downloadExcel").addEventListener("click", () => {
-        const table = document.getElementById("reportTable");
-        const wb = XLSX.utils.table_to_book(table, { sheet: `SalesReport-${filterType}` });
-        XLSX.writeFile(wb, `SalesReport-${filterType}.xlsx`);
-      });
+  // Merge tables for export
+  function getCombinedTableHTML() {
+    const container = document.createElement("div");
+    container.appendChild(summaryTable.cloneNode(true));
+    container.appendChild(detailsTable.cloneNode(true));
+    return container;
+  }
 
-      // CSV Export
-      document.getElementById("downloadCSV").addEventListener("click", () => {
-        const table = document.getElementById("reportTable");
-        const wb = XLSX.utils.table_to_book(table, { sheet: `SalesReport_${filterType}` });
-        const csv = XLSX.utils.sheet_to_csv(wb.Sheets["Sales Report"]);
-        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-        saveAs(blob, `SalesReport-${filterType}.csv`);
-      });
+  // Excel Export
+  document.getElementById("downloadExcel").addEventListener("click", () => {
+    const combined = getCombinedTableHTML();
+    const wb = XLSX.utils.table_to_book(combined, { sheet: `SalesReport-${filterType}` });
+    XLSX.writeFile(wb, `SalesReport-${filterType}.xlsx`);
+  });
 
-      // PDF Export
-      document.getElementById("downloadPDF").addEventListener("click", () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(`SalesReport-${filterType}`, 14, 15);
-        doc.autoTable({ html: "#reportTable", startY: 20 });
-        doc.save(`SalesReport-${filterType}.pdf`);
-      });
+  // CSV Export
+  document.getElementById("downloadCSV").addEventListener("click", () => {
+    const combined = getCombinedTableHTML();
+    const wb = XLSX.utils.table_to_book(combined, { sheet: `SalesReport-${filterType}` });
+    const csv = XLSX.utils.sheet_to_csv(wb.Sheets[`SalesReport-${filterType}`]);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, `SalesReport-${filterType}.csv`);
+  });
 
-        <% if (typeof errorMessage !== 'undefined') { %>
-    Swal.fire({
-      icon: 'error',
-      title: 'Invalid Date Range',
-      text: '<%= errorMessage %>'
-    });
+  // PDF Export
+  document.getElementById("downloadPDF").addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text(`SalesReport-${filterType}`, 14, 15);
+
+    doc.autoTable({ html: summaryTable, startY: 20 });
+    doc.autoTable({ html: detailsTable, startY: doc.lastAutoTable.finalY + 10 });
+
+    doc.save(`SalesReport-${filterType}.pdf`);
+  });
+
+  <% if (typeof errorMessage !== 'undefined') { %>
+  Swal.fire({
+    icon: 'error',
+    title: 'Invalid Date Range',
+    text: '<%= errorMessage %>'
+  });
   <% } %>
-    </script>
+</script>
+
   </body>
 
 </html>

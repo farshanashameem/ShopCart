@@ -15,6 +15,7 @@ const reviewController=require('../controllers/user/reviewController');
 const paymentController=require('../controllers/user/paymentController');
 const referAndEarnController=require('../controllers/user/referAndEarn');
 const failedcontroller=require('../controllers/user/failedController');
+const deleteAccount=require('../controllers/user/deleteAccount');
 const auth = require('../middlewares/auth');
 const { validationResult } = require("express-validator");
 const { signupValidationRules, changePasswordValidationRules,editProfileValidation,changePasswordRules,validateAddress } = require('../middlewares/validation');
@@ -105,6 +106,7 @@ router.get('/orderedItem/:Id',auth.isUserLoggedIn,orderController.OrderDetails);
 
 //=== failed page ===//
 router.get('/failedOrders',auth.isUserLoggedIn,failedcontroller.getFailedPage);
+router.post('/save-failed-order',auth.isUserLoggedIn,failedcontroller.addToFailed);
 
 //=== review ===//
 router.post('/review/add',auth.isUserLoggedIn,reviewController.addOrEditReview);
@@ -124,7 +126,9 @@ router.get('/logout', (req, res) => {
     res.redirect('/');
 
 });  
+router.get('/delete',auth.isUserLoggedIn,deleteAccount.delete);
+router.delete('/delete-account',auth.isUserLoggedIn,deleteAccount.deleteAccount);
 
 
 
-module.exports = router;
+module.exports = router; 

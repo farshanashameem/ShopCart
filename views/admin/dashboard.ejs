@@ -14,6 +14,30 @@
             <h1 class="text-center">Dashboard</h1>
           </header>
 
+          
+          <h3><b>Total Report</b></h3><br><br><br>
+          <div class="cards">
+            <div class="card pink ">
+              <h4>Total Sales</h4>
+              <p>₹ <%= totalSale %></p>
+            </div>
+
+            <div class="card yellow ">
+              <h4>Total Orders</h4>
+              <p><%= totalOrder %></p>
+            </div>
+
+            <div class="card green ">
+              <h4>Products Sold</h4>
+              <p><%= totalProducts %></p>
+            </div>
+
+            <div class="card purple">
+              <h4>Total Customers</h4>
+              <p><%= totalCustomer %></p>
+            </div>
+          </div>
+
           <!-- Date Range Filter -->
           <div class="mt-4 mb-4">
             <div class="card shadow-sm border-0 rounded-3">
@@ -35,28 +59,6 @@
                   </div>
                 </form>
               </div>
-            </div>
-          </div>
-          <h3><b>This weeks Report</b></h3><br><br><br>
-          <div class="cards">
-            <div class="card pink ">
-              <h4>Total Sales</h4>
-              <p>₹ <%= revenue %></p>
-            </div>
-
-            <div class="card yellow ">
-              <h4>Total Orders</h4>
-              <p><%= orders %></p>
-            </div>
-
-            <div class="card green ">
-              <h4>Products Sold</h4>
-              <p><%= products %></p>
-            </div>
-
-            <div class="card purple">
-              <h4>New Customers</h4>
-              <p><%= customers %></p>
             </div>
           </div>
 

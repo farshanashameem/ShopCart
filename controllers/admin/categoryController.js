@@ -5,7 +5,7 @@ const Colour = require('../../models/Colour');
 //=== the category management page ===//
 exports.getCategoryManagement = async (req, res) => {
   try {
-    // Fetch all category documents
+    // Fetch all category documents and show them
     const productTypes = await ProductType.find({});
     const fits = await Fit.find({});
     const colours = await Colour.find({});
@@ -87,6 +87,7 @@ exports.getEditProductTypePage = async (req, res) => {
   }
 };
 
+//=== editing product type ===//
 exports.editPType = async (req, res) => {
   try {
     const id= req.body.id;
@@ -137,4 +138,9 @@ exports.togglePType=async (req, res) => {
   }
 };
 
+
+//=== Add offer for specific category ===//
+exports.addOffer=async (req,res)=>{
+  
+}
 
