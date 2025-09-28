@@ -1,7 +1,7 @@
-const ProductType = require('../../models/productType');
+const ProductType = require('../../models/')
 const Products = require('../../models/Products');
 const ProductVariant = require('../../models/productVariant');
-const Review = require('../../models/Review'); 
+const Review = require('../../models/Review');
 const Fit = require('../../models/Fit');
 const Colour = require('../../models/Colour');
 const productVariant = require('../../models/productVariant');
@@ -183,13 +183,13 @@ exports.getProductPage = async (req, res) => {
       const categoryIds = await Products.distinct("productTypeId", {
         isActive: true
       });
-      categories = await productType.find({ isActive: true }).lean(); 
+      categories = await ProductType.find({ isActive: true }).lean(); 
     } else {
       const categoryIds = await Products.distinct("productTypeId", {
         genderId: gender,
         isActive: true
       });
-      categories = await productType.find({
+      categories = await ProductType.find({
         _id: { $in: categoryIds },
         isActive: true
       });
