@@ -1,4 +1,4 @@
-const ProductType = require('../../models/productType');
+const ProductType = require('../../models/ProductType');
 const Fit = require('../../models/Fit');
 const Colour = require('../../models/Colour');
 const Product = require("../../models/Products");

@@ -2,7 +2,7 @@ const Orders = require("../../models/Orders");
 const Users = require("../../models/userModel");
 const Products = require("../../models/Products");
 const productVariant = require("../../models/productVariant");
-const ProductType = require('../../models/productType');
+const ProductType = require('../../models/ProductType');
 
 // ==== Reusable function for finding the sales related things ====
 async function getReportData(query) {

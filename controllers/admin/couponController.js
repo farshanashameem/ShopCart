@@ -1,12 +1,12 @@
 const Coupon = require("../../models/Coupens");
-const productType = require("../../models/productType");
+const ProductType = require("../../models/ProductType");
 const { validationResult } = require("express-validator");
 
 exports.getCouponPage = async (req, res) => {  
   try {
     const coupon = await Coupon.find().sort({ createdAt: -1 }); // latest first
 
-    const categories = await productType.find();
+    const categories = await ProductType.find();
 
     res.render("admin/coupons", {
       coupon,

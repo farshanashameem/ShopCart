@@ -1,11 +1,11 @@
-const fetch = require('node-fetch');
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 // Map country ISO code to phone code
 const countryPhoneCodes = {
   IN: '+91',
   US: '+1',
   UK: '+44',
-  // add more as needed
+ 
 };
 
 async function getCountryCodeFromIP(ip) {

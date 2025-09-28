@@ -1,12 +1,12 @@
 const Offers = require("../../models/Offers");
-const productType = require("../../models/productType");
+const ProductType = require("../../models/ProductType");
 const { validationResult } = require("express-validator");
 
 exports.getOfferPage = async (req, res) => {  
   try {
     const offers = await Offers.find().sort({ createdAt: -1 }); //finding offers with  latest first
 
-    const categories = await productType.find();    // finding the categories
+    const categories = await ProductType.find();    // finding the categories
 
     res.render("admin/offers", {
       offers,
