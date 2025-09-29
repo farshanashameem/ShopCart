@@ -119,7 +119,7 @@ exports.editPType = async (req, res) => {
     console.error(error);
   }
 };
-
+  
 //=== deleting and restoring productType ===//
 exports.togglePType=async (req, res) => {
   try {
@@ -137,7 +137,7 @@ exports.togglePType=async (req, res) => {
     res.redirect("/admin/category");
   }
 };
-
+  
 
 //=== Add offer for specific category ===//
 exports.addOffer=async (req,res)=>{
