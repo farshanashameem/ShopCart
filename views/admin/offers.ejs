@@ -94,7 +94,6 @@
                     <th>Discount</th>
                     <th>Type</th>
                     <th>Min.order</th>
-                    <th>Used</th>
                     <th>Start</th>
                     <th>End</th>
                     <th>Action</th>
@@ -117,9 +116,6 @@
                         </td>
                         <td>
                           <%= o.minValue %>
-                        </td>
-                        <td>
-                          <%= o.usageCount %>
                         </td>
                         <td>
                           <%= o.startDate ? o.startDate.toLocaleDateString(): '' %>
@@ -226,14 +222,12 @@ if (editingId) {
         data-discountvalue="${c.discountValue}"
         data-discounttype="${c.discountType}"
         data-minorder="${c.minValue}"
-        data-usagelimit="${c.usageCount}"
         data-startdate="${c.startDate ? new Date(c.startDate).toISOString().split('T')[0] : ''}"
         data-enddate="${c.endDate ? new Date(c.endDate).toISOString().split('T')[0] : ''}">
       <td>${c.category}</td>
       <td>${c.discountValue}</td>
       <td>${c.discountType}</td>
       <td>${c.minValue}</td>
-      <td>${c.usageCount || 0}</td>
       <td>${c.startDate ? new Date(c.startDate).toLocaleDateString() : ""}</td>
       <td>${c.endDate ? new Date(c.endDate).toLocaleDateString() : ""}</td>
       <td>
@@ -251,14 +245,12 @@ if (editingId) {
         data-discountvalue="${c.discountValue}"
         data-discounttype="${c.discountType}"
         data-minorder="${c.minValue}"
-        data-usagelimit="${c.usageCount}"
         data-startdate="${c.startDate}"
         data-enddate="${c.endDate}">
       <td>${c.category}</td>
       <td>${c.discountValue}</td>
       <td>${c.discountType}</td>
       <td>${c.minValue}</td>
-      <td>${c.usageCount || 0}</td>
       <td>${c.startDate ? c.startDate.split("T")[0] : ""}</td>
       <td>${c.endDate ? c.endDate.split("T")[0] : ""}</td>
       <td>

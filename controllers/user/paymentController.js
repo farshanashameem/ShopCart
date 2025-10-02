@@ -191,16 +191,10 @@ for (let item of user.cart) {
 
 let perItemOfferDiscount = 0;
 if (eligibleOfferItems.length > 0) {
-    // Option 1: divide by items count
+    // divide by items count
     perItemOfferDiscount = parseFloat(offer) / eligibleOfferItems.length;
 
 }
-
-console.log(perItemOfferDiscount);
-
-
-
-
 
 
     const userId = user._id;
@@ -256,11 +250,6 @@ console.log(perItemOfferDiscount);
       })
     );
 
-
-    
-
-    
-  
 
     await Orders.insertMany(details);
 

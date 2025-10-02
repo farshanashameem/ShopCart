@@ -3,7 +3,8 @@ const User=require('../../models/userModel');
 exports.delete=async(req,res)=>{
     try{
 
-        res.render('user/deleteAccount');
+        const user=await User.findById(req.session.user._id);
+        res.render('user/deleteAccount',{name:user.name,image:user.image});
 
     }catch(err){
         console.log(err)

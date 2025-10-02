@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 
 exports.getProfilePage = (req, res) => {
     const user = req.session.user;
-    res.render('user/profile', { user, errors: {}, old: {} });
+    res.render('user/profile', { user, errors: {}, old: {},name:user.name,image:user.image });
 }
 
 exports.updateProfile = async (req, res) => {

@@ -10,7 +10,7 @@ exports.getReferCode=async (req,res)=>{
             user.referCode=code;
             await user.save();
         }
-        return res.render('user/referCode',{name:user.name,code:user.referCode});
+        return res.render('user/referCode',{name:user.name,code:user.referCode,image:user.image});
 
     }catch(err){
 

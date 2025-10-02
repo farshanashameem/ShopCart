@@ -86,15 +86,18 @@ exports.retryPayment = async (req, res) => {
     // Find the user
     const user = await User.findById(req.session.user._id).lean();
     if (!user) {
-      return res.json({ success: false, message: "User not found." });
+     return res.render("user/failed", { 
+        errorMessage: "User not found." 
+      });
     }
 
     // Find the failed order
     const failedOrder = await Faileds.findById(orderId).lean();
     if (!failedOrder || !failedOrder.isActive) {
-      return res.json({ success: false, message: "Failed order not found or already processed." });
-    }
-
+       return res.render("user/failed", { 
+        errorMessage: "Failed order not found or already processed." 
+    });
+  }
     const failedItems = failedOrder.products;
 
     // Compare the user cart with failed order items
@@ -109,7 +112,9 @@ exports.retryPayment = async (req, res) => {
       );
 
     if (!isSameCart) {
-      return res.json({ success: false, message: "The payment has already been done or cart changed." });
+      return res.render("user/failed", { 
+        errorMessage: "The payment has already been done or cart changed." 
+      });
     }
 
     // Mark failed order as inactive
