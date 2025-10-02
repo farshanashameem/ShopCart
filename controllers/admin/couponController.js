@@ -20,12 +20,13 @@ exports.getCouponPage = async (req, res) => {
   }
 };
 
-// controller/adminController.js
+// Adding new coupo to db
 exports.addCoupon = async (req, res) => {
   try {
     const errorsObj = {};
     const result = validationResult(req);
 
+    // Checking for errors. If there is an error then return that error back to page
     if (!result.isEmpty()) {
       result.array().forEach((error) => {
         errorsObj[error.path] = error.msg;
@@ -43,6 +44,8 @@ exports.addCoupon = async (req, res) => {
       startDate,
       endDate,
     } = req.body;
+
+    //Check if this coupon is already present
     const existItem = await Coupon.findOne({ code });
 if (existItem) {
   return res.status(400).json({
@@ -54,6 +57,7 @@ if (existItem) {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
+    //Checking for valid date range
     if (start > end) {
       return res.status(400).json({success: false,message: "End date must be after start date"});
     }
@@ -68,10 +72,11 @@ if (existItem) {
       endDate,
     });
 
+    // If every thing ok,save the item to database
     const saved = await item.save();
     return res.status(200).json({ success: true, coupon: saved });
   } catch (err) {
-    console.error(err);
+    
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -126,7 +131,7 @@ exports.editCoupon = async (req, res) => {
 
     return res.status(200).json({ success: true, coupon: updatedCoupon });
   } catch (err) {
-    console.error(err);
+    
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -134,9 +139,10 @@ exports.editCoupon = async (req, res) => {
 exports.toggleCoupon=async (req,res)=>{
   try {
     const coupon = await Coupon.findById(req.params.id);
-    console.log(coupon);
+    
     if (!coupon) return res.json({ success: false, error: "Coupon not found" });
 
+    // Find the coupon and chage the status
     coupon.isActive = !coupon.isActive;
     await coupon.save();
 

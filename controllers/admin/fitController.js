@@ -31,7 +31,7 @@ exports.addFit = async (req, res) => {
       req.flash('error', 'This fit already exist.')
       return res.redirect('/admin/addFit');
     } else {
-      console.error(err);
+      
       req.flash('error', 'Internal server error.')
       return res.redirect('/admin/addFit');
     }
@@ -51,7 +51,7 @@ exports.getEditFitPage = async (req, res) => {
     });
 
   } catch (error) {
-    console.log(error);
+    
     res.render('admin/editFit', {
       fit: null,
       oldInput: null,
@@ -60,6 +60,7 @@ exports.getEditFitPage = async (req, res) => {
   }
 };
 
+/* Taking the values from admin, If any mistake, then return error .Other wise adding to the database */
 exports.editFit = async (req, res) => {
   try {
     const id= req.body.id;
@@ -87,7 +88,7 @@ exports.editFit = async (req, res) => {
     req.session.successMessage="Product fit updated."
     res.redirect('/admin/category');
   } catch (error) {
-    console.error(error);
+   
   }
 };
 

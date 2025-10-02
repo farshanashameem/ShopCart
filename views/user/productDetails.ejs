@@ -2,225 +2,210 @@
 <html lang="en">
 <%- include('../partials/head', { title: 'ShopCart | Product Details' }) %>
 
-    <body  data-product-id="<%= product._id %>">
-        <%- include('../partials/navbar') %>
+<body data-product-id="<%= product._id %>">
+  <%- include('../partials/navbar') %>
 
-            <div class="container py-5">
-                <div class="row g-5">
-                    <!-- Left Images -->
-                    <div class="col-6">
-                        <div class="row">
-                            <!-- Thumbnails -->
-                            <div class="col-3 d-flex flex-lg-column flex-row align-items-start g-2">
-                                <% if (images && images.length > 0) { %>
-                                    <% images.forEach((image, index) => { %>
-                                    <img src="<%= image %>" 
-                                        alt="Thumbnail" 
-                                        class="img-thumbnail mb-2 me-2 thumb-img <%= index === 0 ? 'active' : '' %>" 
-                                        data-index="<%= index %>">
-                                    <% }) %>
-                                <% } else { %>
-                                    <p>No images available</p>
-                                <% } %>
-                            </div>
+  <div class="container py-5">
+    <div class="row g-5 flex-column flex-lg-row">
+      <!-- Left Images -->
+      <div class="col-12 col-lg-6">
+        <div class="row">
+          <!-- Thumbnails -->
+          <div class="col-3 col-md-2 d-flex flex-lg-column flex-row align-items-start g-2 flex-wrap">
+            <% if (images && images.length > 0) { %>
+              <% images.forEach((image, index) => { %>
+                <img src="<%= image %>"
+                  alt="Thumbnail"
+                  class="img-thumbnail mb-2 me-2 thumb-img <%= index === 0 ? 'active' : '' %>"
+                  data-index="<%= index %>">
+              <% }) %>
+            <% } else { %>
+              <p>No images available</p>
+            <% } %>
+          </div>
 
-                            <!-- Main Image -->
-                            <div class="col-9">
-                            <% if (images && images.length > 0) { %>
-                                <div class="main-image-container position-relative">
-                                <img id="mainImage" 
-                                    src="<%= images[0] %>" 
-                                    alt="Main Product" 
-                                    class="img-fluid rounded shadow product-img">
-                                <div id="magnifierLens"></div>
-                                </div>
-                            <% } %>
-                            </div>
-                        </div>
-                    </div>
+          <!-- Main Image -->
+          <div class="col-9 col-md-10">
+            <% if (images && images.length > 0) { %>
+              <div class="main-image-container position-relative">
+                <img id="mainImage"
+                  src="<%= images[0] %>"
+                  alt="Main Product"
+                  class="img-fluid rounded shadow product-img w-100">
+                <div id="magnifierLens"></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
 
+      <!-- Right Content -->
+      <div class="col-12 col-lg-6">
+        <% if (product) { %>
+          <h5 class="fw-bold"><%= product.name %></h5>
+          <p class="text-muted"><%= product.productType %></p>
 
+          <!-- Rating & Price -->
+          <div class="d-flex flex-column flex-sm-row align-items-sm-center mb-3">
+            <span class="me-2 fw-bold">
+              <% if (avgRating > 0) { %>
+                <% for (let i = 1; i <= 5; i++) { %>
+                  <% if (i <= Math.floor(avgRating)) { %>
+                    ★
+                  <% } else if (i - avgRating < 1) { %>
+                    ☆
+                  <% } else { %>
+                    ☆
+                  <% } %>
+                <% } %>
+                <%= avgRating %> (<%=count%>)
+              <% } else { %>
+                ☆☆☆☆☆ (0)
+              <% } %>
+            </span>
+            <span class="fw-bold fs-5 mt-2 mt-sm-0 ms-sm-3">
+              <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
+            </span>
+          </div>
 
-                    <!-- Right Content -->
-                    <div class="col-lg-6">
-                        <% if (product) { %>
-                            <h5 class="fw-bold">
-                                <%= product.name %>
-                            </h5>
-                            <p class="text-muted">
-                                <%= product.productType %>
-                            </p>
-
-                            <div class="d-flex flex-column align-items-start mb-2">
-                                <span class="me-2 fw-bold">
-                                    <% if (avgRating > 0) { %>
-                                    <% for (let i = 1; i <= 5; i++) { %>
-                                        <% if (i <= Math.floor(avgRating)) { %>
-                                        ★
-                                        <% } else if (i - avgRating < 1) { %>
-                                        ☆  <!-- optional: you could use half-star icon here -->
-                                        <% } else { %>
-                                        ☆
-                                        <% } %>
-                                    <% } %>
-                                    <%= avgRating %>(<%=count%>)
-                                    <% } else { %>
-                                    ☆☆☆☆☆ (0)
-                                    <% } %>
-                                    </span>
-                                <span class="fw-bold fs-5">
-
-                                <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
-
-
-                                </span>
-                            </div>
-
-                            <!-- Sizes -->
-                            <% if (variants.length> 0) { %>
-                                <div class="mb-3">
-                                    <label class="form-label">Select a Size</label>
-                                    <div class="size-btn d-flex flex-wrap">
-                                        <% let shownSizes=new Set(); %>
-                                            <% variants.forEach((variant, i)=> {
-                                                if (!shownSizes.has(variant.size)) {
-                                                shownSizes.add(variant.size); %>
-                                                <input type="radio" class="btn-check" name="size" id="size<%= i %>" 
-                                                    autocomplete="off" value="<%= variant.size %>">
-                                                    <label class="btn btn-outline-dark me-2 mb-2" for="size<%= i %>">
-                                                        <%= variant.size %>
-                                                    </label>
-
-                                                <% } }) %>
-                                    </div>
-                                </div>
-
-                                <!-- Buttons -->
-                                <div class="d-flex flex-column flex-md-row gap-2 mb-4">
-                                    <button id="wishlistBtn" class="btn btn-outline-dark w-100" disabled>Add to Wishlist</button>
-                                    <button id="cartBtn" class="btn btn-dark w-100" disabled>Add to Cart</button>
-                                </div>
-
-
-                                <!-- Description Tabs -->
-                                <ul class="nav nav-tabs" id="descTab" role="tablist">
-                                    <li class="nav-item">
-                                        <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"
-                                            data-bs-target="#desc" type="button">Description</button>
-                                    </li>
-                                    <li class="nav-item">
-                                        <button class="nav-link" id="review-tab" data-bs-toggle="tab"
-                                            data-bs-target="#review" type="button">Review</button>
-                                    </li>
-                                </ul>
-                                <div class="tab-content" id="descTabContent">
-                                    <div class="tab-pane fade show active p-3" id="desc">
-                                        <p>
-                                            <%= product.description %>
-                                        </p>
-                                        <p><strong>Size & Fit:</strong></p>
-                                        <ul>
-                                            <% let shownFits=new Set(); %>
-                                                <% variants.forEach((variant)=> {
-                                                    if (!shownFits.has(variant.fitId.name)) {
-                                                    shownFits.add(variant.fitId.name); %>
-                                                    <li>
-                                                        <%= variant.fitId.name %>
-                                                    </li>
-                                                    <% } }) %>
-                                        </ul>
-                                    </div>
-                                    <div class="tab-pane fade p-3" id="review">
-                                        <!-- Show existing reviews -->
-                                        <% if (reviews && reviews.length > 0) { %>
-                                        <div class="mb-3">
-                                            <% reviews.forEach(r => { %>
-                                                <div class="border rounded p-2 mb-2">
-                                                    <strong><%= r.userId.name %></strong> <br>
-                                                    <span class="text-warning">
-                                                        <% for (let i = 0; i < r.rating; i++) { %>★<% } %>
-                                                        <% for (let i = r.rating; i < 5; i++) { %>☆<% } %>
-                                                    </span>
-                                                    <p><%= r.comment %></p>
-                                                </div>
-                                            <% }) %>
-                                        </div>
-                                        <% } else { %>
-                                            <p>No reviews yet.</p>
-                                        <% } %>
-                                    </div>
-                                </div>
-
-                                <!-- Colors -->
-                                <div class="mt-4">
-                                    <p class="fw-bold mb-2">Available Colours:</p>
-                                    <div class="d-flex align-items-center flex-wrap">
-                                       <% let shownColors = new Set(); %>
-                                            <% variants.forEach((variant, i) => {
-                                                if (!shownColors.has(variant.colorId.name)) {
-                                                    shownColors.add(variant.colorId.name); %>
-                                                    <input type="radio" class="btn-check" name="color" id="color<%= i %>" 
-                                                        value="<%= variant.colorId._id %>" autocomplete="off">
-                                                    <label class="color-label me-2 mb-2" for="color<%= i %>" 
-                                                        style="cursor:pointer;">
-                                                        <span class="product-color-dot" 
-                                                            style="background-color:<%= variant.colorId.hexCode %>;" 
-                                                            title="<%= variant.colorId.name %>"></span>
-                                                    </label>
-                                            <% } }) %>
-
-                                    </div>
-                                </div>
-                                <% } else { %>
-                                    <p>No variants available</p>
-                                    <% } %>
-                                        <% } else { %>
-                                            <p class="text-danger">Product not found.</p>
-                                            <% } %>
-                    </div>
+          <!-- Sizes & Colours side by side -->
+          <% if (variants.length > 0) { %>
+            <div class="row mb-3">
+              <!-- Sizes -->
+              <div class="col-12 col-sm-6 mb-3 mb-sm-0">
+                <label class="form-label">Select a Size</label>
+                <div class="size-btn d-flex flex-wrap">
+                  <% let shownSizes = new Set(); %>
+                  <% variants.forEach((variant, i) => {
+                    if (!shownSizes.has(variant.size)) {
+                      shownSizes.add(variant.size); %>
+                      <input type="radio" class="btn-check" name="size" id="size<%= i %>"
+                        autocomplete="off" value="<%= variant.size %>">
+                      <label class="btn btn-outline-dark me-2 mb-2" for="size<%= i %>">
+                        <%= variant.size %>
+                      </label>
+                  <% } }) %>
                 </div>
+              </div>
 
-                <!-- Related Products -->
-                <hr class="my-5" />
-                <h4 class="mb-4">You May Also Like</h4>
-                <div class="row g-4">
-                    <% if (relatedProducts && relatedProducts.length> 0) { %>
-                        <% relatedProducts.forEach(prod=> { %>
-                        <div class="col-6 col-md-3">
-                            <div class="card h-100 border-0 shadow-sm">
-                                <% if (prod.firstVariantImages && prod.firstVariantImages.length > 0) { %>
-                                <a href="/details/<%= prod._id %>" class="text-decoration-none">
-                                    <div class="product-image-wrapper">
-                                    <img src="<%= prod.firstVariantImages[0] %>" 
-                                        alt="<%= prod.name %>" 
-                                        class="product-img" />
-                                    </div>
-                                </a>
-                                <% } else { %>
-                                <p class="text-center">No image available</p>
-                                <% } %>
-                                <div class="card-body text-center">
-                                <h6 class="card-title mb-1"><%= prod.name %></h6>
-                                <p class="card-text text-muted mb-0">
-                                    <del>₹<%= prod.basePrice %></del> ₹<%= prod.discountPrice %>
-                                </p>
-                                </div>
-                            </div>
-                        </div>
-                            <% }) %>
-                                <% } else { %>
-                                    <p>No related products found.</p>
-                                    <% } %>
+              <!-- Colours -->
+              <div class="col-12 col-sm-6">
+                <label class="form-label">Select a Colour</label>
+                <div class="d-flex align-items-center flex-wrap">
+                  <% let shownColors = new Set(); %>
+                  <% variants.forEach((variant, i) => {
+                    if (!shownColors.has(variant.colorId.name)) {
+                      shownColors.add(variant.colorId.name); %>
+                      <input type="radio" class="btn-check" name="color" id="color<%= i %>"
+                        value="<%= variant.colorId._id %>" autocomplete="off">
+                      <label class="color-label me-2 mb-2" for="color<%= i %>" style="cursor:pointer;">
+                        <span class="product-color-dot"
+                          style="background-color:<%= variant.colorId.hexCode %>;"
+                          title="<%= variant.colorId.name %>"></span>
+                      </label>
+                  <% } }) %>
                 </div>
+              </div>
             </div>
 
-            <%- include('../partials/footer') %>
-              <link rel="stylesheet" href="/css/productDetails.css" />
+            <!-- Buttons -->
+            <div class="d-flex flex-column flex-md-row gap-2 mb-4">
+              <button id="wishlistBtn" class="btn btn-outline-dark w-100" disabled>Add to Wishlist</button>
+              <button id="cartBtn" class="btn btn-dark w-100" disabled>Add to Cart</button>
+            </div>
 
-                <script src="/js/imageMagnifier.js"></script>
-                <script src="/js/adding.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    </body>
+            <!-- Tabs -->
+            <ul class="nav nav-tabs" id="descTab" role="tablist">
+              <li class="nav-item">
+                <button class="nav-link active" id="desc-tab" data-bs-toggle="tab"
+                  data-bs-target="#desc" type="button">Description</button>
+              </li>
+              <li class="nav-item">
+                <button class="nav-link" id="review-tab" data-bs-toggle="tab"
+                  data-bs-target="#review" type="button">Review</button>
+              </li>
+            </ul>
+            <div class="tab-content" id="descTabContent">
+              <div class="tab-pane fade show active p-3" id="desc">
+                <p><%= product.description %></p>
+                <p><strong>Size & Fit:</strong></p>
+                <ul>
+                  <% let shownFits=new Set(); %>
+                  <% variants.forEach((variant)=> {
+                    if (!shownFits.has(variant.fitId.name)) {
+                      shownFits.add(variant.fitId.name); %>
+                      <li><%= variant.fitId.name %></li>
+                  <% } }) %>
+                </ul>
+              </div>
+              <div class="tab-pane fade p-3" id="review">
+                <% if (reviews && reviews.length > 0) { %>
+                  <div class="mb-3">
+                    <% reviews.forEach(r => { %>
+                      <div class="border rounded p-2 mb-2">
+                        <strong><%= r.userId.name %></strong> <br>
+                        <span class="text-warning">
+                          <% for (let i = 0; i < r.rating; i++) { %>★<% } %>
+                          <% for (let i = r.rating; i < 5; i++) { %>☆<% } %>
+                        </span>
+                        <p><%= r.comment %></p>
+                      </div>
+                    <% }) %>
+                  </div>
+                <% } else { %>
+                  <p>No reviews yet.</p>
+                <% } %>
+              </div>
+            </div>
+          <% } else { %>
+            <p>No variants available</p>
+          <% } %>
+        <% } else { %>
+          <p class="text-danger">Product not found.</p>
+        <% } %>
+      </div>
+    </div>
 
+    <!-- Related Products -->
+    <hr class="my-5" />
+    <h4 class="mb-4">You May Also Like</h4>
+    <div class="row g-4">
+      <% if (relatedProducts && relatedProducts.length> 0) { %>
+        <% relatedProducts.forEach(prod=> { %>
+          <div class="col-6 col-md-3">
+            <div class="card h-100 border-0 shadow-sm">
+              <% if (prod.firstVariantImages && prod.firstVariantImages.length > 0) { %>
+                <a href="/details/<%= prod._id %>" class="text-decoration-none">
+                  <div class="product-image-wrapper">
+                    <img src="<%= prod.firstVariantImages[0] %>"
+                      alt="<%= prod.name %>"
+                      class="product-img" />
+                  </div>
+                </a>
+              <% } else { %>
+                <p class="text-center">No image available</p>
+              <% } %>
+              <div class="card-body text-center">
+                <h6 class="card-title mb-1"><%= prod.name %></h6>
+                <p class="card-text text-muted mb-0">
+                  <del>₹<%= prod.basePrice %></del> ₹<%= prod.discountPrice %>
+                </p>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No related products found.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <link rel="stylesheet" href="/css/productDetails.css" />
+
+  <script src="/js/imageMagnifier.js"></script>
+  <script src="/js/adding.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
 </html>

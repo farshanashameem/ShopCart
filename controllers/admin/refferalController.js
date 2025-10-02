@@ -13,8 +13,8 @@ exports.getRefferalPage = async (req, res) => {
         return {
           name: user?.name || "Unknown User",
           code: user?.referCode || "N/A",
-          count: item.referredCount,
-          amount: item.rewardAmount,
+          count: item.referredCount,      // how many times this user is refferred
+          amount: item.rewardAmount,      // reward get from the reffer method
         };
       })
     );

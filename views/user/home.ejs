@@ -90,34 +90,6 @@
 
 
 
-      <!-- Top Trends 
-      <section class="container text-center my-5">
-        <h3 class="fw-bold">TOP TRENDS</h3>
-        <div class="btn-group my-3">
-          <button class="btn btn-dark" onclick="switchTrends('female')">Women</button>
-          <button class="btn btn-outline-dark" onclick="switchTrends('male')">Men</button>
-        </div>
-
-        <% ['female', 'male' ].forEach(gender=> { %>
-          <div class="position-relative trend-section" id="trend-<%= gender %>"
-            style="<%= gender === 'female' ? '' : 'display:none;' %>">
-            <button class="scroll-btn left" onclick="scrollItems('trends-<%= gender %>', -1)">&#8249;</button>
-            <div id="trends-<%= gender %>" class="scroll-container">
-              <% if (trends[gender]) { %>
-                <% trends[gender].forEach(item=> { %>
-                  <div class="item-card text-center">
-                    <img src="<%= item.image %>" class="img-fluid rounded mb-2" alt="<%= item.productName %>">
-                    <h6>
-                      <%= item.productName %>
-                    </h6>
-                  </div>
-                  <% }) %>
-                    <% } %>
-            </div>
-            <button class="scroll-btn right" onclick="scrollItems('trends-<%= gender %>', 1)">&#8250;</button>
-          </div>
-          <% }) %>
-      </section>-->
 
 
 

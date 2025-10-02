@@ -125,11 +125,11 @@
 
       <h6 class="text-right">Total: ₹<%= grandTotal %>
       </h6>
-      <h6 class="text-right" style="color: green;">Coupon Discount: -₹<%= discount %>
-      </h6>
+      <h6 class="text-right" style="color: green;">Coupon Discount: -₹<%= discount %></h6>
+      <h6 class="text-right" style="color: green;">Offer Discount: -₹<%= offerDiscount %></h6>
       <h6 class="text-right" style="color: green;">Delivery Charge: +₹<%= deliveryCharge %>
       </h6>
-      <h3 class="text-right">Grand Total : ₹<%= grandTotal-discount+ deliveryCharge %>
+      <h3 class="text-right">Grand Total : ₹<%= grandTotal-discount-offerDiscount+ deliveryCharge %>
       </h3>
 
       <p class="notes"><b>Notes:</b> Thank you for shopping with us!</p>

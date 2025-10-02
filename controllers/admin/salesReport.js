@@ -2,13 +2,12 @@ const Orders = require("../../models/Orders");
 const Users = require("../../models/userModel");
 const Products = require("../../models/Products");
 const productVariant = require("../../models/productVariant");
-const ProductType = require('../../models/ProductType');
+const ProductType = require("../../models/ProductType");
 
 // ==== Reusable function for finding the sales related things ====
 async function getReportData(query) {
-
   // 1.Total  Shipping Charges (orders < 300)
-    /* here Total shipping charge that assigned orders less than 300 is getting*/ 
+  /* here Total shipping charge that assigned orders less than 300 is getting*/
   const totalShippingAgg = await Orders.aggregate([
     { $match: query },
     {
@@ -105,7 +104,7 @@ async function getReportData(query) {
 
 // ==== Controller ====
 
-// GET -> Initial load (default yearly) in the sale report  
+// GET -> Initial load (default yearly) in the sale report
 exports.getSalesReport = async (req, res) => {
   try {
     const startDate = new Date();
@@ -113,25 +112,25 @@ exports.getSalesReport = async (req, res) => {
 
     const query = { createdAt: { $gte: startDate } };
     const report = await getReportData(query);
-    const orders=await Orders.find();
-    const orderedItems=await Promise.all(
-      orders.map(async(item)=>{
-        const product=await Products.findById(item.productId);
-        const category=await ProductType.findById(product.productTypeId);
-        return{
-          name:product.name,
-          category:category.name,
-          quantity:item.quantity,
-          total:item.total,
-          date:item.createdAt
-        }
+    const orders = await Orders.find();
+    const orderedItems = await Promise.all(
+      orders.map(async (item) => {
+        const product = await Products.findById(item.productId);
+        const category = await ProductType.findById(product.productTypeId);
+        return {
+          name: product.name,
+          category: category.name,
+          quantity: item.quantity,
+          total: item.total,
+          date: item.createdAt,
+        };
       })
     );
-    
 
     res.render("admin/salesReport", {
       filter: "yearly",
-      ...report,items:orderedItems
+      ...report,
+      items: orderedItems,
     });
   } catch (err) {
     console.log(err);
@@ -226,46 +225,46 @@ exports.postSalesReport = async (req, res) => {
   }
 };
 
-
 //function to calculate the total report in the dashboard
-async function getTotalReport(){
+async function getTotalReport() {
   //=== getting full report from the start of the app ===//
 
-    //1. total customers count
-    const totalCustomer=await Users.countDocuments();
-    //2. Total Orders
-    const totalOrder = (await Orders.distinct("orderId")).length;
+  //1. total customers count
+  const totalCustomer = await Users.countDocuments();
+  //2. Total Orders
+  const totalOrder = (await Orders.distinct("orderId")).length;
 
-    //3. Total sales
-     let totalSale=await Orders.aggregate([
-      {
-        $group:{
-          _id:null,
-          totalSale:{$sum:"$total"}
-        }
-      }
-     ]);
-     totalSale=totalSale[0]?.totalSale||0;
-     //4. Total products sold
-     let totalProducts=await Orders.aggregate([
-      {$match: {status: { $nin: ["cancelled", "returned"]}}},
-      {
-        $group:{
-          _id:null,
-          totalProducts: {$sum:"$quantity"}
-        }
-      }
-     ]);
-     totalProducts=totalProducts[0]?.totalProducts||0;
-     return{
-      totalCustomer,totalOrder,totalProducts,totalSale
-     }
+  //3. Total sales
+  let totalSale = await Orders.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalSale: { $sum: "$total" },
+      },
+    },
+  ]);
+  totalSale = totalSale[0]?.totalSale || 0;
+  //4. Total products sold
+  let totalProducts = await Orders.aggregate([
+    { $match: { status: { $nin: ["cancelled", "returned"] } } },
+    {
+      $group: {
+        _id: null,
+        totalProducts: { $sum: "$quantity" },
+      },
+    },
+  ]);
+  totalProducts = totalProducts[0]?.totalProducts || 0;
+  return {
+    totalCustomer,
+    totalOrder,
+    totalProducts,
+    totalSale,
+  };
 }
 
 exports.getPage = async (req, res) => {
   try {
-
-    
     startDate = new Date();
     startDate.setDate(startDate.getDate() - 1);
     const query = { createdAt: { $gte: startDate } };
@@ -324,10 +323,11 @@ exports.getPage = async (req, res) => {
       })
     );
 
-    const total=await getTotalReport();
+    const total = await getTotalReport();
 
     return res.render("admin/dashboard", {
-      ...report,...total,
+      ...report,
+      ...total,
       labels,
       values,
       items,
@@ -341,7 +341,7 @@ exports.getDashboard = async (req, res) => {
   try {
     const { from, to } = req.body || {};
     let startDate = new Date(from);
-      let endDate = new Date(to);
+    let endDate = new Date(to);
 
     //top 10 orders
     const topOrders = await Orders.aggregate([
@@ -357,7 +357,8 @@ exports.getDashboard = async (req, res) => {
       },
       { $sort: { totalOrders: -1 } },
       { $limit: 10 },
-    ]);console.log(topOrders)
+    ]);
+    console.log(topOrders);
 
     const items = await Promise.all(
       topOrders.map(async (item) => {
@@ -372,10 +373,11 @@ exports.getDashboard = async (req, res) => {
       })
     );
 
-    const total=await getTotalReport();
+    const total = await getTotalReport();
     if (!from || !to) {
       return res.render("admin/dashboard", {
-        filter: "Custom Date",...total,
+        filter: "Custom Date",
+        ...total,
         orders: 0,
         revenue: 0,
         products: 0,
@@ -446,10 +448,9 @@ exports.getDashboard = async (req, res) => {
     const query = { createdAt: { $gte: startDate, $lte: endDate } };
     const report = await getReportData(query);
 
-    
-
     res.render("admin/dashboard", {
-      ...report,...total,
+      ...report,
+      ...total,
       labels,
       values,
       items,

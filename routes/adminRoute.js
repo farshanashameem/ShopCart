@@ -62,7 +62,7 @@ router.post('/addFit',auth.isAdminLoggedIn,fitController.addFit);           //Ad
 router.get('/editFit/:id',auth.isAdminLoggedIn,fitController.getEditFitPage);   //edit Fit page
 router.post('/editFit',auth.isAdminLoggedIn,fitController.editFit);
 router.post('/deleteFit/:id',auth.isAdminLoggedIn,fitController.toggleFit);
-
+ 
 //======Adding Colour=====//
 router.get('/addColour',auth.isAdminLoggedIn,colorController.getAddColourPage);       //add colour page
 router.post('/addColour',auth.isAdminLoggedIn,colorController.addColour);         //adding colour to db

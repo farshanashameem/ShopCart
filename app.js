@@ -18,6 +18,9 @@ const authRoutes = require("./routes/auth");
 const userRouter = require("./routes/userRoute");
 const adminRouter = require("./routes/adminRoute");
 
+// Middlewares
+const errorHandler = require("./middlewares/errorHandler");
+
 const app = express();
 
 // ----------------------------
@@ -64,8 +67,8 @@ app.set("views", path.join(__dirname, "views"));
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
-  res.locals.user = req.session.user || req.user || null; // user login
-  res.locals.admin = req.session.admin || null; // admin login
+  res.locals.user = req.session.user || req.user || null;
+  res.locals.admin = req.session.admin || null;
   next();
 });
 
@@ -80,6 +83,11 @@ app.use("/admin", adminRouter);
 app.use((req, res) => {
   res.status(404).render("error/404", { title: "Page Not Found" });
 });
+
+// ----------------------------
+// Error Handling Middleware
+// ----------------------------
+app.use(errorHandler);
 
 // ----------------------------
 // Start Server

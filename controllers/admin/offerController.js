@@ -20,7 +20,7 @@ exports.getOfferPage = async (req, res) => {
   }
 };
 
-// controller/adminController.js
+/* adding new offer for a category. If any errors happened, then error msg is passing other wise data will added to database */
 exports.addOffer = async (req, res) => {
   try {
     const errorsObj = {};
@@ -42,7 +42,7 @@ exports.addOffer = async (req, res) => {
       startDate,
       endDate,
     } = req.body;
-   console.log(req.body);
+  
     // Convert to Date objects
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -63,11 +63,12 @@ exports.addOffer = async (req, res) => {
     const saved = await item.save();
     return res.status(200).json({ success: true, offer: saved });
   } catch (err) {
-    console.error(err);
+ 
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
+// Same procedure as adding the offer. Here updating is done
 exports.editOffer = async (req, res) => {
   try {
     const errorsObj = {};
@@ -102,11 +103,13 @@ exports.editOffer = async (req, res) => {
 
     return res.status(200).json({ success: true, offer: updatedOffer });
   } catch (err) {
-    console.error(err);
+    
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
+
+//Offers can activate and desable here by changing the isActive field
 exports.toggleOffer=async (req,res)=>{
   try {
     const offer = await Offers.findById(req.params.id);

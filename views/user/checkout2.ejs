@@ -103,25 +103,9 @@
                             </div>
                         </label>
 
-                        <label class="payment-option">
-                            <input type="radio" name="payment" value="gpay">
-                            <img src="https://telecomtalk.info/wp-content/uploads/2022/12/gpay-how-to-create-or-find-upi.jpg"
-                                alt="GPay">
-                            <div class="payment-text">
-                                <strong>UPI Payment</strong>
-                                <span>Pay by any UPI app</span>
-                            </div>
-                        </label>
+                        
 
-                        <label class="payment-option">
-                            <input type="radio" name="payment" value="card">
-                            <img src="https://images.goodreturns.in/webp/img/2020/01/creditcard-23-1461389394-1579856618.jpg"
-                                alt="creditCard">
-                            <div class="payment-text">
-                                <strong>Credit/Debit/ATM Card</strong>
-                                <span>Add any secure card by RBI guidelines</span>
-                            </div>
-                        </label>
+                        
 
                         <label class="payment-option">
                             <input type="radio" name="payment" value="wallet">
@@ -163,9 +147,9 @@
                         <span>Delivery Charges</span>
                         <span style="color: green;"><%= deliveryCharge %></span>
                     </div>
-                    <div class="summary-item d-flex justify-content-between">
-                        <span>Offer Discount</span>
-                        <span style="color: green;">-₹<%= max %></span>
+                    <div class="summary-item d-flex justify-content-between" >
+                        <span>Offer Discount(for <%= categoryy %>)</span>
+                        <span style="color: green;">-₹<%= offer %></span>
                     </div>
                     <div class="summary-item d-flex justify-content-between">
                         <span>Platform fee</span>
@@ -215,14 +199,16 @@
 
                     <div class="total mt-3 fw-bold">
                         Total In Rupees: ₹<span id="totalAmount">
-                            <%= cart.total + deliveryCharge-max %>
+                            <%= cart.total + deliveryCharge-offer %>
                         </span>
                     </div>
 
                     <input type="hidden" id="appliedCoupon" name="appliedCoupon">
-                    <input type="hidden" id="finalTotal" name="total" value="<%= cart.total +deliveryCharge-max %>">
+                    <input type="hidden" id="finalTotal" name="total" value="<%= cart.total +deliveryCharge-offer %>">
                     <input type="hidden" id="couponDiscountValue" name="couponDiscount" value="0">
                     <input type="hidden" id="addressId" name="addressId" value="<%= chosenAddressId %>">
+                    <input type="hidden" id="offer" name="offer" value="<%= offer %>">
+                    <input type="hidden" id="category" name="categoryy" value="<%= categoryy %>">
 
                     <!-- Continue Button -->
                     <button type="button" id="payButton" class="btn btn-dark w-100 mt-3">Continue</button>
@@ -366,14 +352,19 @@ function initiateHybridPayment(walletAmount, razorpayAmount) {
 
         const total = document.getElementById('finalTotal').value;
         const payment = document.getElementById('payment').value;
-
+        const appliedCoupon= document.getElementById('appliedCoupon').value;
+        const couponDiscount= document.getElementById('couponDiscountValue').value;        
+        const addressId= document.getElementById('addressId').value;
         fetch('/save-failed-order', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 reason: "Payment popup closed",
                 total: total,
-                payment: payment
+                payment: payment,
+                appliedCoupon,couponDiscount,addressId,
+            offer:document.getElementById('offer').value,
+            category:document.getElementById('category').value
             })
         })
         .finally(() => {
@@ -392,7 +383,11 @@ function initiateHybridPayment(walletAmount, razorpayAmount) {
                 document.getElementById('loadingOverlay').style.display = 'none';
                 
                 const total = document.getElementById('finalTotal').value;  
-    const payment = 'wallet'; 
+                const payment = 'wallet'; 
+                 const appliedCoupon= document.getElementById('appliedCoupon').value;
+        const couponDiscount= document.getElementById('couponDiscountValue').value;
+        
+        const addressId= document.getElementById('addressId').value;
 
     fetch('/save-failed-order', {
         method: 'POST',
@@ -400,7 +395,12 @@ function initiateHybridPayment(walletAmount, razorpayAmount) {
         body: JSON.stringify({
             reason: response.error.description || "Payment failed",
             total: total,
-            payment: payment
+            payment: payment,
+            appliedCoupon: document.getElementById('appliedCoupon').value,
+            couponDiscount: document.getElementById('couponDiscountValue').value,
+            addressId: document.getElementById('addressId').value,
+            offer:document.getElementById('offer').value,
+            categoryy:document.getElementById('category').value
         })
     })
     .finally(() => {
@@ -441,6 +441,8 @@ function handleHybridPaymentSuccess(response, walletAmount) {
         couponDiscount: document.getElementById('couponDiscountValue').value,
         total: document.getElementById('finalTotal').value,
         addressId: document.getElementById('addressId').value,
+        offer:document.getElementById('offer').value,
+        categoryy:document.getElementById('category').value,
         razorpayPaymentId: response.razorpay_payment_id,
         razorpayOrderId: response.razorpay_order_id,
         razorpaySignature: response.razorpay_signature,
@@ -540,7 +542,12 @@ function initiateRazorpayPayment(amount) {
         body: JSON.stringify({
             reason: response.error.description || "Payment failed",
             total: total,
-            payment: payment
+            payment: payment,
+           appliedCoupon: document.getElementById('appliedCoupon').value,
+            couponDiscount: document.getElementById('couponDiscountValue').value,
+            addressId: document.getElementById('addressId').value,
+            offer:document.getElementById('offer').value,
+            categoryy:document.getElementById('category').value
         })
     })
     .finally(() => {
@@ -582,6 +589,8 @@ function initiateRazorpayPayment(amount) {
             couponDiscount: document.getElementById('couponDiscountValue').value,
             total: document.getElementById('finalTotal').value,
             addressId: document.getElementById('addressId').value,
+            offer:document.getElementById('offer').value,
+            categoryy:document.getElementById('category').value,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpayOrderId: response.razorpay_order_id,
             razorpaySignature: response.razorpay_signature

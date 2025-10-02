@@ -34,6 +34,7 @@ exports.addToWishlist = async (req, res) => {
 
         const { productId, size, color } = req.body;
         const user = req.session.user;
+        
 
         const variant = await productVariant.findOne({ productId: productId, size: size, colorId: color });
         if (!variant)

@@ -1,6 +1,8 @@
 
 const User = require('../models/userModel'); 
 
+
+// this middle ware is for protection. if there is a user or admin is logged in , only then the pages can see. Other wise always redirect to login page
 //protecting routes using middleware
 module.exports={
  isUserLoggedIn :async (req, res, next) => {

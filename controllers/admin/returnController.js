@@ -1,47 +1,48 @@
-const Orders=require('../../models/Orders');
-const Returns=require('../../models/Returns');
-const User=require('../../models/userModel');
-const WalletTransactions = require('../../models/WalletTransactions');
-const Products=require('../../models/Products');
-
+const Orders = require("../../models/Orders");
+const Returns = require("../../models/Returns");
+const User = require("../../models/userModel");
+const WalletTransactions = require("../../models/WalletTransactions");
+const Products = require("../../models/Products");
 
 exports.updateReturnStatus = async (req, res) => {
   try {
-    const { orderId,productId,variantId,userId,total,discount,action } = req.body;
+    const { orderId, productId, variantId, userId, total, discount, action } =
+      req.body;
     console.log(total);
-    if (!["approved", "rejected","refunded"].includes(action)) {
+    if (!["approved", "rejected", "refunded"].includes(action)) {
       return res.json({ success: false, message: "Invalid action" });
     }
 
-    const item=await Returns.findOne({
-          orderId: orderId,
-          orderedItem:productId,
-          variantId:variantId,  
-          userId: userId
-        });
-    item.status=action;
+    const item = await Returns.findOne({
+      orderId: orderId,
+      orderedItem: productId,
+      variantId: variantId,
+      userId: userId,
+    });
+    item.status = action;
     await item.save();
 
-    if(action==="refunded"){
-        const user=await User.findById(userId);
-        let Discount=total-discount;
-        console.log("wallet:"+user.wallet);
-        console.log("discount:"+ discount)
-        user.wallet=user.wallet+Discount;
-        await user.save();
-        console.log(user.wallet);
-        const transaction=new WalletTransactions({
-            userId:user._id,
-            type:"credit",
-            amount:total,
-            reason: "Order Refund" 
-         });
-         await transaction.save();
-
-
+    if (action === "refunded") {
+      const user = await User.findById(userId);
+      let Discount = total - discount;
+      console.log("wallet:" + user.wallet);
+      console.log("discount:" + discount);
+      user.wallet = user.wallet + Discount;
+      await user.save();
+      console.log(user.wallet);
+      const transaction = new WalletTransactions({
+        userId: user._id,
+        type: "credit",
+        amount: total,
+        reason: "Order Refund",
+      });
+      await transaction.save();
     }
-    
-    return res.json({ success: true, message: `Return ${action} successfully` });
+
+    return res.json({
+      success: true,
+      message: `Return ${action} successfully`,
+    });
   } catch (err) {
     console.error(err);
     return res.json({ success: false, message: "Server error" });
@@ -63,7 +64,7 @@ exports.getReturnPage = async (req, res) => {
     if (search) {
       // find all users matching search name
       const users = await User.find({
-        name: { $regex: search, $options: "i" }
+        name: { $regex: search, $options: "i" },
       }).select("_id");
 
       const userIds = users.map((u) => u._id);
@@ -73,7 +74,7 @@ exports.getReturnPage = async (req, res) => {
     // Get paginated returns
     const [returns, totalCount] = await Promise.all([
       Returns.find(query).skip(skip).limit(limit).sort({ createdAt: -1 }),
-      Returns.countDocuments(query)
+      Returns.countDocuments(query),
     ]);
 
     // Map return items with related data
@@ -85,7 +86,7 @@ exports.getReturnPage = async (req, res) => {
           orderId: item.orderId,
           productId: item.orderedItem,
           variantId: item.variantId,
-          userId: item.userId
+          userId: item.userId,
         });
 
         return {
@@ -99,7 +100,7 @@ exports.getReturnPage = async (req, res) => {
           userId: user?._id || null,
           price: order?.price || 0,
           quantity: order?.quantity || 0,
-          couponDiscount: order?.couponDiscount || 0
+          couponDiscount: order?.couponDiscount || 0,
         };
       })
     );
@@ -110,13 +111,10 @@ exports.getReturnPage = async (req, res) => {
       items,
       currentPage: page,
       totalPages,
-      search
+      search,
     });
   } catch (err) {
     console.error("Error fetching returns:", err);
     res.status(500).send("Internal Server Error");
   }
 };
-
-
-

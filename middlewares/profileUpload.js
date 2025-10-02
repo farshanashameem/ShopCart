@@ -2,6 +2,7 @@ const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../utils/cloudinary"); 
 
+//inorder to upload profile image
 const profileStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {

@@ -11,6 +11,7 @@ exports.getInvoicePage = async (req, res) => {
     // get all orders with same orderId
     const orderItems = await Orders.find({ orderId });
     const discount = orderItems.reduce((sum, item) => sum + (item.couponDiscount || 0), 0);
+     const offerDiscount = orderItems.reduce((sum, item) => sum + (item.offerDiscount || 0), 0);
     if (!orderItems || orderItems.length === 0) {
       return res.status(404).send("Order not found");
     }
@@ -23,10 +24,19 @@ exports.getInvoicePage = async (req, res) => {
         const variant = await ProductVariant.findById(item.variantId);
         const color = await Colour.findById(variant.colorId);
 
-        // find correct address
-        const address = user.address.find(
-          (addr) => addr._id.toString() === item.addressId.toString()
-        );
+        // 🔹 Address handling
+    let address = {};
+    if (item.address) {
+      // New format (full address saved in order)
+      address = item.address;
+    } else if (item.addressId ) {
+      // Old format (addressId -> find from user's addresses array)
+      const foundAddress = user.address.find(addr => addr._id.toString() === item.addressId.toString());
+     
+      if (foundAddress) {
+        address = foundAddress;
+      }
+    }
 
         return {
           name: user.name,
@@ -52,7 +62,7 @@ exports.getInvoicePage = async (req, res) => {
       orderId,
       grandTotal,
       createdAt: orderItems[0].createdAt,
-      discount,
+      discount,offerDiscount,
       deliveryCharge
     });
   } catch (err) {

@@ -30,6 +30,7 @@ exports.getOrderPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+      //from orders list finding the product name,variant and then finding the price,size for displaying
     const list = await Promise.all(
       orders.map(async (item) => {
         const product = await Product.findById(item.productId);
@@ -46,6 +47,7 @@ exports.getOrderPage = async (req, res) => {
       })
     );
 
+    // finding the total pages that present
     const totalPages = Math.max(Math.ceil(totalOrders / limit), 1);
 
     res.render("admin/orders", {
@@ -55,7 +57,7 @@ exports.getOrderPage = async (req, res) => {
       totalPages
     });
   } catch (err) {
-    console.log(err);
+    
     res.status(500).send("Server Error");
   }
 };
@@ -66,62 +68,70 @@ exports.getOrderDetails = async (req, res) => {
     const orderId = req.params.id;
 
     // Get the order document
-    const order = await Orders.findById(orderId);
+    const order = await Orders.findById(orderId).lean();
     if (!order) {
       return res.status(404).send("Order not found");
-    }  
+    }
 
     // Get product, variant, user
     const product = await Product.findById(order.productId);
     const variant = await ProductVariant.findById(order.variantId);
     const user = await User.findById(order.userId);
 
-    // Find shipping address
-    let address = null;
-    if (user && user.address && order.addressId) {
-      address = user.address.find(
-        (addr) => addr._id.toString() === order.addressId.toString()
-      );
-    }
+    // Find return request (if any)
+    const orderID = order.orderId;
+    const returnItem = await Returns.findOne({
+      orderId: orderID,
+      orderedItem: order.productId,
+      variantId: order.variantId,
+      userId: user?._id
+    }).lean();
 
-    //checking for return request is there
-    const orderID=order.orderId;
-     const returnItem = await Returns.findOne({
-              orderId: orderID,
-              orderedItem: order.productId,
-              variantId: order.variantId,
-              userId: user._id
-            }).lean();
-           
+    // 🔹 Address handling
+    let address = {};
+    if (order.address) {
+      // New format (full address saved in order)
+      address = order.address;
+    } else if (order.addressId ) {
+      // Old format (addressId -> find from user's addresses array)
+      const foundAddress = user.address.find(addr => addr._id.toString() === order.addressId.toString());
+     
+      if (foundAddress) {
+        address = foundAddress;
+      }
+    }
 
     const orderDetails = {
       orderId: order.orderId,
-      _id:orderId,
+      _id: orderId,
       userId: user ? user._id : null,
       product: {
         name: product?.name || "Unknown product",
         description: product?.description || "",
-        image: variant.images[0],
+        image: variant?.images[0] || ""
       },
       quantity: order.quantity,
       price: order.price,
       status: order.status,
-      reasons:order.cancelReason,
-      reason:returnItem?returnItem.reason:null,
-      address: address || {},
-      productId:order.productId,
-      variantId:order.variantId,
-      couponDiscount:order.couponDiscount,
-      returnedStatus:returnItem?returnItem.status:null
+      reasons: order.cancelReason,
+      reason: returnItem ? returnItem.reason : null,
+      address, // 👈 Always resolved
+      productId: order.productId,
+      variantId: order.variantId,
+      couponDiscount: order.couponDiscount,
+      returnedStatus: returnItem ? returnItem.status : null
     };
-     const successMessage = req.session.successMessage;
+
+    const successMessage = req.session.successMessage;
     req.session.successMessage = null;
-    res.render("admin/orderDetails", { order: orderDetails,successMessage });
+
+    res.render("admin/orderDetails", { order: orderDetails, successMessage });
   } catch (err) {
-    console.log(err);
+    console.error("Error fetching order details:", err);
     res.status(500).send("Server Error");
   }
 };
+
 
 //=== change the status of each order ===//
 exports.changeStatus = async (req, res) => {
@@ -155,7 +165,7 @@ exports.changeStatus = async (req, res) => {
     res.redirect(`/admin/orders/${orderId}`);
 
   } catch (err) {
-    console.error("Error updating order status:", err);
+   
     req.session.errorMessage = "Something went wrong";
     res.redirect("/admin/orders");
   }

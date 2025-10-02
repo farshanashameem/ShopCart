@@ -5,11 +5,12 @@ const Colour = require('../../models/Colour');
 //=== the category management page ===//
 exports.getCategoryManagement = async (req, res) => {
   try {
-    // Fetch all category documents and show them
+    // Fetch all category documents and show them eg:product type,fit,colour
     const productTypes = await ProductType.find({});
     const fits = await Fit.find({});
     const colours = await Colour.find({});
 
+    // when adding new data success message should shown
     const successMessage = req.session.successMessage;
     req.session.successMessage = null;
     res.render('admin/category', {

@@ -280,24 +280,27 @@ exports.selectPayment = async (req, res) => {
     }
 
     //Finding the Offers available
-    let max=0;
+    let offer=0,categoryy;
     const offers=await Offers.find({isActive: true,
       startDate: { $lte: today },
       endDate: { $gte: today }});
      //Checking any these category is present in the cart
-     for (let offer of offers){
-      if(categoriesInCart.includes(offer.category)){
+     for (let offerr of offers){
+      if(categoriesInCart.includes(offerr.category)){
         const categoryTotal = cartItems
-          .filter((i) => i.category === offer.category)
+          .filter((i) => i.category === offerr.category)
           .reduce((sum, i) => sum + i.discountPrice * i.quantity, 0);
 
-        if (categoryTotal >= offer.minValue) {
+        if (categoryTotal >= offerr.minValue) {
           let discount =
-            offer.discountType === "percentage"
-              ? Math.floor((offer.discountValue / 100) * categoryTotal)
-              : offer.discountValue;
-          if(max<discount)
-         max=discount;
+            offerr.discountType === "percentage"
+              ? Math.floor((offerr.discountValue / 100) * categoryTotal)
+              : offerr.discountValue;
+          if(offer<discount){
+            offer=discount;
+            categoryy=offerr.category;
+          }
+         
       }
       
 
@@ -319,7 +322,7 @@ exports.selectPayment = async (req, res) => {
     res.render("user/checkout2", {
       user,
       cart,
-      max,
+      offer,categoryy,
       chosenAddressId: addressId,
       coupons: availableCoupons,
       deliveryCharge
@@ -354,9 +357,7 @@ exports.getOrderPage = async (req, res) => {
       orders.map(async (item) => {
         const product = await Products.findById(item.productId).lean();
         const variant = await productVariant.findById(item.variantId).lean();
-        const address = user.address.find(
-          (addr) => addr._id.toString() === item.addressId.toString()
-        );
+        
 
         // check if return request exists for this order item
         const returnRequest = await Returns.findOne({
@@ -370,15 +371,16 @@ exports.getOrderPage = async (req, res) => {
         item.statusHistory.forEach((h) => {
           statusDates[h.status] = h.date;
         });
-
+        
         return {
           id: item._id,
-          address,
+          address:item.address,
           name: product?.name,
           description: product?.description,
           color: variant?.color,
           image: variant?.images?.[0],
           quantity: item.quantity,
+          size:variant?.size,
           price: item.price,
           total: item.total,
           status: item.status,
@@ -450,11 +452,23 @@ exports.OrderDetails = async (req, res) => {
   try {
     const id = req.params.Id;
 
-    const order = await Orders.findById(id);
+    const order = await Orders.findById(id).lean();
     const product = await Products.findById(order.productId);
     const variant = await productVariant.findById(order.variantId);
     const user = await User.findById(order.userId);
-    const address = user.address.id(order.addressId);
+    // 🔹 Address handling
+    let address = {};
+    if (order.address) {
+      // New format (full address saved in order)
+      address = order.address;
+    } else if (order.addressId ) {
+      // Old format (addressId -> find from user's addresses array)
+      const foundAddress = user.address.find(addr => addr._id.toString() === order.addressId.toString());
+     
+      if (foundAddress) {
+        address = foundAddress;
+      }
+    }
     const statusDates = {};
     if (!order) return res.status(404).send("Order not found");
     order.statusHistory.forEach((h) => {

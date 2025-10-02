@@ -50,6 +50,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (data.success) {
                     button.closest(".order-row")?.remove();
+                    setTimeout(() => {
+                                location.reload();
+                            }, 2000);
                 }
             })
             .catch(err => {

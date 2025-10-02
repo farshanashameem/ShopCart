@@ -1,15 +1,14 @@
-const ProductType = require('../../models/ProductType');
-const Fit = require('../../models/Fit');
-const Colour = require('../../models/Colour');
+const ProductType = require("../../models/ProductType");
+const Fit = require("../../models/Fit");
+const Colour = require("../../models/Colour");
 const Product = require("../../models/Products");
 const ProductVariant = require("../../models/productVariant");
 const path = require("path");
-const { validationResult } = require('express-validator');
-const generateSKU = require('../../utils/skuGenerator');
+const { validationResult } = require("express-validator");
+const generateSKU = require("../../utils/skuGenerator");
 
 //===load Product details page ===//
 exports.getProductsPage = async (req, res) => {
-
   try {
     const search = req.query.search ? req.query.search.trim() : "";
     const page = parseInt(req.query.page) || 1;
@@ -19,14 +18,17 @@ exports.getProductsPage = async (req, res) => {
 
     // Substring name match using case-insensitive regex
     const query = {
-      name: { $regex: search, $options: "i" }
+      name: { $regex: search, $options: "i" },
     };
 
     if (selectedGender) {
       query.genderId = selectedGender;
     }
     const totalProducts = await Product.countDocuments(query);
-    const products = await Product.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const products = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     //getting the total stock for each product
     const variantData = await ProductVariant.aggregate([
@@ -35,14 +37,14 @@ exports.getProductsPage = async (req, res) => {
           _id: "$productId",
           totalStock: { $sum: "$stock" },
           maxPrice: { $max: "$basePrice" },
-          minPrice: { $min: "$discountPrice" }
-        }
-      }
+          minPrice: { $min: "$discountPrice" },
+        },
+      },
     ]);
 
     //conversion to map for better use
     const variantMap = {};
-    variantData.forEach(item => {
+    variantData.forEach((item) => {
       variantMap[item._id.toString()] = item;
     });
 
@@ -59,9 +61,8 @@ exports.getProductsPage = async (req, res) => {
         totalStock: variant.totalStock || 0,
         create: product.createdAt.toDateString(),
         status: product.isActive ? "Active" : "Blocked",
-        isActive: product.isActive
-      };  
-
+        isActive: product.isActive,
+      };
     });
 
     const totalPages = Math.max(Math.ceil(totalProducts / limit), 1);
@@ -73,17 +74,16 @@ exports.getProductsPage = async (req, res) => {
       currentPage: page,
       totalPages,
       selectedGender,
-      successMessage
+      successMessage,
     });
   } catch (err) {
-    console.error(err);
     res.render("admin/products", {
       products: [],
       search: "",
       currentPage: 1,
       selectedGender,
       totalPages: 1,
-      error: ["Something went wrong."]
+      error: ["Something went wrong."],
     });
   }
 };
@@ -93,19 +93,21 @@ exports.getProductDetail = async (req, res) => {
   try {
     const productId = req.params.id;
 
+    //Find the product
     const product = await Product.findById(productId).lean();
     if (!product) {
-      return res.redirect('/admin/products')
+      return res.redirect("/admin/products");
     }
 
+    // Find the variants of that product
     const variants = await ProductVariant.find({ productId })
-      .populate('colorId')
-      .populate('fitId')
+      .populate("colorId")
+      .populate("fitId")
       .lean();
 
     res.render("admin/productDetails", {
       product,
-      variants
+      variants,
     });
   } catch (err) {
     console.error(err);
@@ -116,19 +118,19 @@ exports.getProductDetail = async (req, res) => {
 //=== adding new product ===//
 exports.getAddProductPage = async (req, res) => {
   try {
+    // For showing colours,fits and category
     const fits = await Fit.find();
     const colors = await Colour.find();
     const productTypes = await ProductType.find();
-    res.render('admin/addProduct', {
-      oldInput: {},     
+    res.render("admin/addProduct", {
+      oldInput: {},
       errors: {},
       fits,
       colors,
-      productTypes
+      productTypes,
     });
   } catch (err) {
     console.error("Error loading form data:", err);
-
   }
 };
 
@@ -138,16 +140,17 @@ exports.addProduct = async (req, res) => {
   const productTypes = await ProductType.find();
 
   try {
+    // Find the errors and if any error exist, pass the error to front end
     const errorsObj = {};
     const result = validationResult(req);
     const oldInput = req.body;
 
     if (!result.isEmpty()) {
-      result.array().forEach(error => {
+      result.array().forEach((error) => {
         errorsObj[error.path] = error.msg;
       });
-      console.log(errorsObj);
-      return res.render('admin/addProduct', {
+
+      return res.render("admin/addProduct", {
         errors: errorsObj,
         oldInput,
         colors,
@@ -163,7 +166,6 @@ exports.addProduct = async (req, res) => {
       description,
       genderId,
       productTypeId,
-
     });
 
     const savedProduct = await newProduct.save();
@@ -176,7 +178,7 @@ exports.addProduct = async (req, res) => {
     const filesPerVariant = req.files || [];
 
     // Group files based on variant index if using multiple file inputs later
-    const imagePaths = filesPerVariant.map(file => file.path);
+    const imagePaths = filesPerVariant.map((file) => file.path);
 
     const variantDocs = variants.map((variant, index) => {
       const sku = generateSKU(name, variant.colorId, variant.size);
@@ -195,11 +197,10 @@ exports.addProduct = async (req, res) => {
 
     await ProductVariant.insertMany(variantDocs);
     req.session.successMessage = "Product added Successfully.";
-    res.redirect('/admin/products');
+    res.redirect("/admin/products");
   } catch (error) {
-    console.error('Add product error:', error);
-    res.render('admin/addProduct', {
-      errors: { general: 'Server error. Please try again.' },
+    res.render("admin/addProduct", {
+      errors: { general: "Server error. Please try again." },
       oldInput: req.body,
       colors,
       fits,
@@ -217,8 +218,8 @@ exports.getEditProductPage = async (req, res) => {
     const variants = await ProductVariant.find({ productId: pID });
 
     if (!product) {
-      req.flash('error', 'Product not found');
-      return res.redirect('/admin/products');
+      req.flash("error", "Product not found");
+      return res.redirect("/admin/products");
     }
 
     // Pass variants and productTypes, fits, colors too
@@ -226,19 +227,18 @@ exports.getEditProductPage = async (req, res) => {
     const fits = await Fit.find();
     const colors = await Colour.find();
 
-    res.render('admin/editProduct', {
+    res.render("admin/editProduct", {
       product,
       variants,
       productTypes,
       fits,
       colors,
       oldInput: null,
-      errors: null
+      errors: null,
     });
   } catch (err) {
-    console.log(err);
-    req.flash('error', 'Error loading product edit page');
-    res.redirect('/admin/products');
+    req.flash("error", "Error loading product edit page");
+    res.redirect("/admin/products");
   }
 };
 
@@ -253,11 +253,11 @@ exports.editProduct = async (req, res) => {
     const oldInput = req.body;
 
     if (!result.isEmpty()) {
-      result.array().forEach(error => {
+      result.array().forEach((error) => {
         errorsObj[error.path] = error.msg;
       });
-      console.log(errorsObj);
-      return res.render('admin/editProduct', {
+
+      return res.render("admin/editProduct", {
         errors: errorsObj,
         product,
         oldInput,
@@ -268,46 +268,39 @@ exports.editProduct = async (req, res) => {
     }
 
     const { name, description, genderId } = req.body;
-    
 
     product.name = name;
     product.description = description;
     product.genderId = genderId;
     product.updatedAt = new Date();
 
-
     await product.save();
-    // 🟡 Normalize variant input (array of objects)
+    //  Normalize variant input (array of objects)
     const variants = Array.isArray(req.body.variants)
       ? req.body.variants
       : Object.values(req.body.variants);
 
     const files = req.files || {};
-const existing = req.body.existingImages || {};
+    const existing = req.body.existingImages || {};
 
-// Normalize existing to array form
-let keep = [existing[0], existing[1], existing[2]];
+    // Normalize existing to array form
+    let keep = [existing[0], existing[1], existing[2]];
 
-const finalImages = [];
-for (let i = 0; i < 3; i++) {
-  if (files[`images${i}`] && files[`images${i}`][0]) {
-    // new upload replaces this slot
-    finalImages.push(files[`images${i}`][0].path);
-  } else if (keep[i]) {
-    // fallback: keep old one if no replacement
-    finalImages.push(keep[i]);
-  }
-}
-
-
-
-
+    const finalImages = [];
+    for (let i = 0; i < 3; i++) {
+      if (files[`images${i}`] && files[`images${i}`][0]) {
+        // new upload replaces this slot
+        finalImages.push(files[`images${i}`][0].path);
+      } else if (keep[i]) {
+        // fallback: keep old one if no replacement
+        finalImages.push(keep[i]);
+      }
+    }
 
     const submittedVariantIds = [];
 
     for (let i = 0; i < variants.length; i++) {
       const variant = variants[i];
-      
 
       const sku = generateSKU(name, variant.colorId, variant.size);
 
@@ -344,15 +337,11 @@ for (let i = 0; i < 3; i++) {
       }
     }
 
-
     req.session.successMessage = "Product updated Successfully.";
-    res.redirect('/admin/products');
-
-
+    res.redirect("/admin/products");
   } catch (error) {
-    console.error('Add product error:', error);
-    res.render('admin/products', {
-      errors: { general: 'Server error. Please try again.' },
+    res.render("admin/products", {
+      errors: { general: "Server error. Please try again." },
       oldInput,
       product,
       colors,
@@ -367,17 +356,22 @@ exports.toggleProductStatus = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
-      req.flash('error', 'Product not found.');
+      req.flash("error", "Product not found.");
       return res.redirect("/admin/products");
     }
 
     product.isActive = !product.isActive;
     await product.save();
 
-    req.session.successMessage = product.isActive ? "Product restored." : "Product deleted.";
-    res.redirect(`/admin/products?page=${req.body.page || 1}&search=${req.body.search || ""}`);
+    req.session.successMessage = product.isActive
+      ? "Product restored."
+      : "Product deleted.";
+    res.redirect(
+      `/admin/products?page=${req.body.page || 1}&search=${
+        req.body.search || ""
+      }`
+    );
   } catch (err) {
-    console.error("Toggle product status error:", err);
     req.session.errorMessage = "Something went wrong.";
     res.redirect("/admin/products");
   }

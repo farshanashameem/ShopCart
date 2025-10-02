@@ -15,6 +15,9 @@ const { validationResult } = require("express-validator");
 const { getCountryCodeFromIP } = require("../../utils/ipapi");
 const { count } = require("console");
 const WalletTransactions = require("../../models/WalletTransactions");
+const Offers=require('../../models/Offers');
+
+
 
   
 exports.makePayment = async (req, res) => {
@@ -25,29 +28,19 @@ exports.makePayment = async (req, res) => {
       couponDiscount, 
       total, 
       addressId,
+      offer,categoryy,
       razorpayPaymentId,
       razorpayOrderId,
       razorpaySignature,
       walletAmount //  to track wallet amount used
     } = req.body;
-    
-    console.log('Payment request received:', { 
-      payment, 
-      appliedCoupon, 
-      couponDiscount, 
-      total, 
-      addressId,
-      razorpayPaymentId,
-      razorpayOrderId,
-      razorpaySignature,
-      walletAmount
-    });
-    
+      
    
-    
+    //Creating order Id
      const timestamp = Date.now();
     const random = Math.floor(Math.random() * 1000);
     const orderId = `ORD-${timestamp}-${random}`;
+
      req.session.orderId=orderId;
      req.session.amount=total;
      req.session.payment=payment;
@@ -90,15 +83,10 @@ exports.makePayment = async (req, res) => {
                 .update(body)
                 .digest('hex');
             
-            console.log('Signature verification:', {
-                received: razorpaySignature,
-                expected: expectedSignature,
-                matches: expectedSignature === razorpaySignature,
-                body: body
-            });
+           
             
             if (expectedSignature !== razorpaySignature) {
-                console.error('Payment signature verification failed');             
+                             
                 return res.redirect('/failed');
             }
             
@@ -129,7 +117,7 @@ exports.makePayment = async (req, res) => {
     else if (payment === "razorpay") {
         // Verify payment signature
         if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
-            console.error('Missing Razorpay payment data');
+          
             return res.redirect('/failed');
         }
         
@@ -139,20 +127,15 @@ exports.makePayment = async (req, res) => {
             .update(body)
             .digest('hex');
         
-        console.log('Signature verification:', {
-            received: razorpaySignature,
-            expected: expectedSignature,
-            matches: expectedSignature === razorpaySignature,
-            body: body
-        });
+       
         
         if (expectedSignature !== razorpaySignature) {
-            console.error('Payment signature verification failed');         
+                    
             return res.redirect('/failed');
         }
     }
    else if (payment === "cod" && total > 1000) {
-    console.log("cod is not possible");
+  
     req.flash("error", "Cash on delivery is not available for orders greater than 1000");
      return res.redirect('/payment?addressId='+addressId);
    }
@@ -189,7 +172,36 @@ exports.makePayment = async (req, res) => {
       perItemDiscount = discountValue / eligibleItems.length;
     }
 
-   
+   // Calculate the Offer applied things
+    const offers = offer ? await Offers.findOne(
+      { category: categoryy }
+    ) : null;
+
+   let eligibleOfferItems = [];
+
+for (let item of user.cart) {
+    const product = await Products.findById(item.productId).populate(
+        "productTypeId",
+        "name"
+    );
+    if (product.productTypeId.name.toLowerCase() === categoryy.toLowerCase()) {
+        eligibleOfferItems.push(item);
+    }
+}
+
+let perItemOfferDiscount = 0;
+if (eligibleOfferItems.length > 0) {
+    // Option 1: divide by items count
+    perItemOfferDiscount = parseFloat(offer) / eligibleOfferItems.length;
+
+}
+
+console.log(perItemOfferDiscount);
+
+
+
+
+
 
     const userId = user._id;
 
@@ -208,15 +220,24 @@ exports.makePayment = async (req, res) => {
               eligible.productId.toString() === item.productId.toString()
           );
 
+          //check if the item is eligible for offer
+          const isOfferEligible=eligibleOfferItems.some((eligible)=>eligible.productId.toString()===item.productId.toString());
+
         // Apply discount only if eligible
         const itemTotal = variant.discountPrice * item.quantity;
-        const finalTotal = isEligible ? itemTotal - perItemDiscount : itemTotal;
-
+        let finalTotal = isEligible ? itemTotal - perItemDiscount : itemTotal;
+        final=isOfferEligible?finalTotal-perItemOfferDiscount:finalTotal;
+          
+        // ✅ Grab full address snapshot
+    const selectedAddress = user.address.id(addressId); 
+    if (!selectedAddress) {
+      throw new Error("Invalid address selected");
+    }
         return {
           name: product.name,
           orderId,
           userId,
-          addressId,
+          address:selectedAddress.toObject(),
           productId: item.productId,
           variantId: item.variantId,
           quantity: item.quantity,
@@ -228,6 +249,7 @@ exports.makePayment = async (req, res) => {
           status: "pending",
           paymentStatus: payment === "cod" ? "pending" : "paid",
           paymentMethod: payment,
+          offerDiscount:isOfferEligible?perItemOfferDiscount:0,
           razorpayPaymentId: (payment === "razorpay" || walletAmountUsed > 0) ? razorpayPaymentId : null,
           razorpayOrderId: (payment === "razorpay" || walletAmountUsed > 0) ? razorpayOrderId : null
         };

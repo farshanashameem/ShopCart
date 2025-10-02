@@ -1,5 +1,5 @@
-const User = require('../../models/userModel');
-const Orders=require('../../models/Orders');
+const User = require("../../models/userModel");
+const Orders = require("../../models/Orders");
 exports.getUsersPage = async (req, res) => {
   try {
     const search = req.query.search ? req.query.search.trim() : "";
@@ -9,21 +9,24 @@ exports.getUsersPage = async (req, res) => {
 
     // Substring name match using case-insensitive regex
     const query = {
-      name: { $regex: search, $options: "i" }
+      name: { $regex: search, $options: "i" },
     };
 
     const totalUsers = await User.countDocuments(query);
-    const users = await User.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
+    const users = await User.find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
 
-    const userIds = users.map(u => u._id);
+    const userIds = users.map((u) => u._id);
     const orderCounts = await Orders.aggregate([
       { $match: { userId: { $in: userIds } } },
-      { $group: { _id: "$userId", count: { $sum: 1 } } }
+      { $group: { _id: "$userId", count: { $sum: 1 } } },
     ]);
 
     // Convert aggregation result into lookup map
     const orderCountMap = {};
-    orderCounts.forEach(oc => {
+    orderCounts.forEach((oc) => {
       orderCountMap[oc._id.toString()] = oc.count;
     });
 
@@ -35,7 +38,7 @@ exports.getUsersPage = async (req, res) => {
       orders: orderCountMap[user._id.toString()] || 0,
       wallet: user.wallet || 0,
       status: user.isBlocked ? "Blocked" : "Active",
-      isBlocked: user.isBlocked
+      isBlocked: user.isBlocked,
     }));
 
     const totalPages = Math.max(Math.ceil(totalUsers / limit), 1);
@@ -46,7 +49,7 @@ exports.getUsersPage = async (req, res) => {
       search,
       currentPage: page,
       totalPages,
-      successMessage
+      successMessage,
     });
   } catch (err) {
     console.error(err);
@@ -55,7 +58,7 @@ exports.getUsersPage = async (req, res) => {
       search: "",
       currentPage: 1,
       totalPages: 1,
-      error: ["Something went wrong."]
+      error: ["Something went wrong."],
     });
   }
 };
@@ -66,9 +69,15 @@ exports.toggleBlockUser = async (req, res) => {
     if (user) {
       user.isBlocked = !user.isBlocked;
       await user.save();
-      req.session.successMessage = user.isBlocked ? "User Blocked." : "User Unblocked.";
+      req.session.successMessage = user.isBlocked
+        ? "User Blocked."
+        : "User Unblocked.";
     }
-    res.redirect(`/admin/users?page=${req.query.page || 1}&search=${req.query.search || ""}`);
+    res.redirect(
+      `/admin/users?page=${req.query.page || 1}&search=${
+        req.query.search || ""
+      }`
+    );
   } catch (err) {
     console.error(err);
     res.redirect("/admin/users");
@@ -79,7 +88,11 @@ exports.deleteUser = async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
     req.session.successMessage = "User Deleted Successfully.";
-    res.redirect(`/admin/users?page=${req.query.page || 1}&search=${req.query.search || ""}`);
+    res.redirect(
+      `/admin/users?page=${req.query.page || 1}&search=${
+        req.query.search || ""
+      }`
+    );
   } catch (err) {
     console.error(err);
     res.redirect("/admin/users");

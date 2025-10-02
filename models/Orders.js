@@ -1,5 +1,56 @@
 const mongoose = require("mongoose");
 
+const addressSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  pincode: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  locality: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  address: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  city: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  state: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  landmark: {
+    type: String,
+    trim: true
+  },
+  alternateNumber: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    enum: ['home', 'office'],
+    required: true
+  }
+});
+
 const orderSchema = new mongoose.Schema({
   name:{
     type:String,
@@ -14,13 +65,11 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
-    index: true  
+    index: true    
   },
-  addressId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User.address",
-    required: true
-  },
+  address: 
+    addressSchema
+  ,
   productId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Product",
@@ -95,6 +144,10 @@ const orderSchema = new mongoose.Schema({
     type: String,
     enum: ["cod", "card", "upi", "wallet","razorpay"],
     required: true
+  },
+  offerDiscount:{
+    type:Number,
+    default:0
   }
 }, {
   timestamps: true 

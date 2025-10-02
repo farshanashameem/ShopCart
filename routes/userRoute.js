@@ -107,6 +107,7 @@ router.get('/orderedItem/:Id',auth.isUserLoggedIn,orderController.OrderDetails);
 //=== failed page ===//
 router.get('/failedOrders',auth.isUserLoggedIn,failedcontroller.getFailedPage);
 router.post('/save-failed-order',auth.isUserLoggedIn,failedcontroller.addToFailed);
+router.post('/retry-payment',auth.isUserLoggedIn,failedcontroller.retryPayment);
 
 //=== review ===//
 router.post('/review/add',auth.isUserLoggedIn,reviewController.addOrEditReview);
