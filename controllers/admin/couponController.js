@@ -61,6 +61,22 @@ if (existItem) {
     if (start > end) {
       return res.status(400).json({success: false,message: "End date must be after start date"});
     }
+
+    if(discountValue<0)
+       return res.status(400).json({success:false,message:"Discount value should not be negative"})
+
+    if(discountType==='flat' && minValue-discountValue<1000){
+
+      return res.status(400).json({success:false,message:"Discount value and minimum order value doesnot match"})
+    }
+    if(discountType==='percentage' && discountValue>75){
+      return res.status(400).json({success:false,message:"Percentage shoulnot be greater than 75"});
+    }
+
+     if(usageLimit<0){
+      return res.status(400).json({success:false,message:"usage limit should be greater than 0"})
+    }
+
     const item = new Coupon({
       code,
       category,
@@ -103,6 +119,7 @@ exports.editCoupon = async (req, res) => {
       discountType,
       minValue,
       minOrder,
+      usageLimit,
       startDate,
       endDate,
     } = req.body;
@@ -122,10 +139,24 @@ exports.editCoupon = async (req, res) => {
       });
     }
 
+    if(discountValue<0)
+       return res.status(400).json({success:false,message:"Discount value should not be negative"})
+
+    if(discountType==='flat' && minValue-discountValue<1000){
+
+      return res.status(400).json({success:false,message:"Discount value and minimum order value doesnot match"})
+    }
+    if(discountType==='percentage' && discountValue>75){
+      return res.status(400).json({success:false,message:"Percentage shoulnot be greater than 75"});
+    }
+    if(usageLimit<0){
+      return res.status(400).json({success:false,message:"usage limit should be greater than 0"})
+    }
+
     // Update and return new doc
     const updatedCoupon = await Coupon.findByIdAndUpdate(
      couponId,
-      { code, category, discountValue, discountType, minValue,  minOrder, startDate, endDate },
+      { code, category, discountValue, discountType, minValue,  minOrder,usageLimit, startDate, endDate },
       { new: true } // returns updated doc
     );
 

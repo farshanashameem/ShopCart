@@ -176,7 +176,7 @@ exports.addProduct = async (req, res) => {
       : Object.values(req.body.variants);
 
     const filesPerVariant = req.files || [];
-
+  
     // Group files based on variant index if using multiple file inputs later
     const imagePaths = filesPerVariant.map((file) => file.path);
 
@@ -247,10 +247,13 @@ exports.editProduct = async (req, res) => {
   const colors = await Colour.find();
   const productTypes = await ProductType.find();
   const product = await Product.findById(req.body.productId);
+  const pID=req.body.productId;
+    const variants = await ProductVariant.find({ productId: pID });
+     const oldInput = req.body;
   try {
     const errorsObj = {};
     const result = validationResult(req);
-    const oldInput = req.body;
+   
 
     if (!result.isEmpty()) {
       result.array().forEach((error) => {
@@ -264,6 +267,7 @@ exports.editProduct = async (req, res) => {
         colors,
         fits,
         productTypes,
+        variants
       });
     }
 
@@ -340,13 +344,13 @@ exports.editProduct = async (req, res) => {
     req.session.successMessage = "Product updated Successfully.";
     res.redirect("/admin/products");
   } catch (error) {
-    res.render("admin/products", {
+    res.render("admin/editProduct", {
       errors: { general: "Server error. Please try again." },
       oldInput,
       product,
       colors,
       fits,
-      productTypes,
+      productTypes,variants
     });
   }
 };

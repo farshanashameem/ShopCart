@@ -23,9 +23,9 @@
                         </div>
                         <div class="offcanvas-body p-0">
                             <div class="user-greeting mb-3">
-                                <div class="image "><img src="<%= image %>" class="profile-image border-round"
+                                <div class="image "><img src="<%= user.image %>" class="profile-image border-round"
                                         alt=""></div>
-                                Hello <%= name %>
+                                Hello <%= user.name %>
                             </div>
                             <ul class="nav flex-column user-list">
                                 <li class="nav-item current">
@@ -69,13 +69,20 @@
                             <div class="avatar-container">
                                 <img src="<%= user.image  %>" alt="Profile Picture" class="avatar-img"
                                     id="profileImage">
+                                
 
                                 <label for="avatarUpload" class="avatar-upload">
                                     <i class="bi bi-camera-fill"></i>
                                 </label>
+                               
 
                                 <input type="file" name="profileImage" id="avatarUpload" accept="image/*" hidden>
                             </div>
+                             <% if (errors?.profileImage) { %>
+                                    <p class="text-danger m-0">
+                                        <%= errors.profileImage %>
+                                    </p>
+                                    <% } %>
 
                             <div class="form-group">
                                 <label>Name:</label>

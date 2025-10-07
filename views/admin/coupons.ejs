@@ -284,8 +284,8 @@
             <td>${c.usageLimit}</td>
             <td>${c.minValue}</td>
             <td>${c.usageCount || 0}</td>
-            <td>${c.startDate ? c.startDate.split("T")[0] : ""}</td>
-            <td>${c.endDate ? c.endDate.split("T")[0] : ""}</td>
+            <td>${c.startDate ? new Date(c.startDate).toLocaleDateString() : ""}</td>
+            <td>${c.endDate ? new Date(c.endDate).toLocaleDateString() : ""}</td>
             <td>
               <button class="btn btn-sm btn-warning editBtn" data-id="${c._id}">Edit</button>
               <button class="btn btn-sm ${c.isActive ? 'btn-danger' : 'btn-success'} toggleBtn" data-id="${c._id}">

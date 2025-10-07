@@ -14,7 +14,9 @@ const coupenScema=new mongoose.Schema({
     },
     discountValue:{
         type:Number,
-        required:true
+        required:true,
+        min: [0, "Value cannot be negative"],
+    
     },
     discountType:{
         type:String,
@@ -25,7 +27,8 @@ const coupenScema=new mongoose.Schema({
     minValue:{
         type:Number,
         default:0,
-        required:true
+        required:true,
+        min: [0, "Value cannot be negative"],
     },
     usageLimit:{
         type:Number,

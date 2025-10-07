@@ -14,6 +14,12 @@ exports.addColour = async (req, res) => {
       req.flash('error', 'all fields are required');
       return res.redirect('/admin/addColour');
     }
+    const item = await Colour.findOne({ name: { $regex: `^${name}$`, $options: 'i' } });    //case insensitive search for duplicate entry
+    const code=await Colour.findOne({ hexCode: { $regex: `^${hexCode}$`, $options: 'i' } }); 
+    if(item || code){
+      req.flash('error',"This item is already present ");
+      return res.redirect('/admin/addColour');
+    }
 
     // Save new product type
     const newType = new Colour({
@@ -29,7 +35,7 @@ exports.addColour = async (req, res) => {
   } catch (err) {
     if (err.code === 11000) {
       // Duplicate entry
-      req.flash('error', 'This fit already exist.')
+      req.flash('error', 'This item already exist.')
       return res.redirect('/admin/addColour');
     } else {
       console.error(err);
@@ -48,7 +54,7 @@ exports.getEditColourPage = async (req, res) => {
     res.render('admin/editColour',{
       colour,
       oldInput: null,
-      error: null
+      
     });
 
   } catch (error) {
@@ -68,14 +74,28 @@ exports.editColour = async (req, res) => {
     const hexCode=req.body.hexCode.trim();
     const colour= await Colour.findById(id);
     const oldInput = req.body;
- 
+    console.log(req.body);
     if (!name || !hexCode) {
   
-      return res.render('admin/editFit', {
+      return res.render('admin/editColour', {
         colour:colour,
         oldInput,
         error: 'Colour  and hexcode are required.'
       });
+    }
+    const existingName = await Colour.findOne({
+      name: { $regex: `^${name}$`, $options: "i" },
+      _id: { $ne: id },
+    });
+
+    const existingCode = await Colour.findOne({
+      hexCode: { $regex: `^${hexCode}$`, $options: "i" },
+      _id: { $ne: id },
+    });
+
+    if (existingName || existingCode) {
+      req.flash("error", "This colour name or hex code already exists.");
+      return res.redirect(`/admin/editColour/${id}`);
     }
 
     if (!colour) {

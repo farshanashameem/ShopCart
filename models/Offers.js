@@ -8,7 +8,8 @@ const offerSchema=new mongoose.Schema({
     },
     discountValue:{
         type:Number,
-        required:true
+        required:true,
+        min: [0, "Value cannot be negative"],
     },
     discountType:{
         type:String,
@@ -19,13 +20,11 @@ const offerSchema=new mongoose.Schema({
     minValue:{
         type:Number,
         default:0,
-        required:true
+        required:true,
+        min: [0, "Value cannot be negative"],
     },
     
-    usageCount:{
-        type:Number,
-        default:0
-    },
+    
     startDate:{
         type:Date,
         required:true

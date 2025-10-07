@@ -50,6 +50,20 @@ exports.addOffer = async (req, res) => {
     if (start > end|| !start || !end) {
       return res.status(400).json({success: false,message: "End date must be after start date"});
     }
+
+
+    if(discountValue<0)
+       return res.status(400).json({success:false,message:"Discount value should not be negative"})
+
+    if(discountType==='flat' && minValue-discountValue<1000){
+
+      return res.status(400).json({success:false,message:"Discount value and minimum order value doesnot match"})
+    }
+    if(discountType==='percentage' && discountValue>75){
+      return res.status(400).json({success:false,message:"Percentage shoulnot be greater than 75"});
+    }
+
+
     const item = new Offers({
    
       category,
@@ -92,6 +106,26 @@ exports.editOffer = async (req, res) => {
       startDate,
       endDate,
     } = req.body;
+
+     // Convert to Date objects
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (start > end|| !start || !end) {
+      return res.status(400).json({success: false,message: "End date must be after start date"});
+    }
+
+
+    if(discountValue<0)
+       return res.status(400).json({success:false,message:"Discount value should not be negative"})
+
+    if(discountType==='flat' && minValue-discountValue<1000){
+
+      return res.status(400).json({success:false,message:"Discount value and minimum order value doesnot match"})
+    }
+    if(discountType==='percentage' && discountValue>75){
+      return res.status(400).json({success:false,message:"Percentage shoulnot be greater than 75"});
+    }
 
 
     // Update and return new doc

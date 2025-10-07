@@ -15,6 +15,13 @@ exports.addFit = async (req, res) => {
       return res.redirect('/admin/addFit');
     }
 
+    const item = await Fit.findOne({ name: { $regex: `^${fname}$`, $options: 'i' } });    //case insensitive search for duplicate entry
+        
+            if(item){
+              req.flash('error',"This item is already present ");
+              return res.redirect('/admin/addFit');
+            }
+
     // Save new product type
     const newType = new Fit({
       name: fname,
@@ -47,7 +54,7 @@ exports.getEditFitPage = async (req, res) => {
     res.render('admin/editFit',{
       fit,
       oldInput: null,
-      error: null
+    
     });
 
   } catch (error) {
@@ -77,6 +84,13 @@ exports.editFit = async (req, res) => {
         error: 'Product name and description are required.'
       });
     }
+
+    const item = await Fit.findOne({ name: { $regex: `^${name}$`, $options: 'i' } ,_id:{$ne:id}});    //case insensitive search for duplicate entry
+        
+            if(item){
+              req.flash('error',"This item is already present ");
+              return res.redirect(`/admin/editFit/${id}`);
+            }
 
     if (!fit) {
       return res.redirect('/admin/category');

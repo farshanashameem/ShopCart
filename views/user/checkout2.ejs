@@ -222,7 +222,9 @@
 
     <!-- ✅ Razorpay script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    
+    <!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
    <script>
     const originalTotal = <%= cart.total %>;
     let selectedCoupon = null;
@@ -270,10 +272,42 @@
     });
 
     // Payment button click
-document.getElementById('payButton').addEventListener('click', function() {
+document.getElementById('payButton').addEventListener('click', async function() {
     const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
     const totalAmount = parseFloat(document.getElementById('finalTotal').value);
     const walletBalance = parseFloat('<%= user.wallet %>');
+
+    
+    // ✅ Step 1: Check stock via API
+    try {
+        const response = await fetch('/check-stock', { method: 'POST' });
+        const data = await response.json();
+        console.log(data);
+        if (!data.ok) {
+            let htmlMessage = "<ul style='text-align:left;'>";
+            data.outOfStockItems.forEach(item => {
+                htmlMessage += `<li>${item.name} (Requested: ${item.requestedQty}, Available: ${item.availableQty})</li>`;
+            });
+            htmlMessage += "</ul>";
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Some items are out of stock',
+                html: htmlMessage,
+                confirmButtonText: 'OK'
+            });
+            return; // stop the payment flow
+        }
+    } catch (err) {
+        console.error('Stock check failed', err);
+        Swal.fire({
+            icon: 'error',
+            title: 'Stock check failed',
+            text: 'Please try again later.',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
     
     if (paymentMethod === 'wallet') {
         if (walletBalance > totalAmount) {

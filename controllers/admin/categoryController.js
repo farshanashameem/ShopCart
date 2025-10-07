@@ -43,6 +43,13 @@ exports.addProductType = async (req, res) => {
       return res.redirect('/admin/addPType');
     }
 
+    const item = await ProductType.findOne({ name: { $regex: `^${pname}$`, $options: 'i' } });    //case insensitive search for duplicate entry
+    
+        if(item){
+          req.flash('error',"This item is already present ");
+          return res.redirect('/admin/addPType');
+        }
+
     // Save new product type
     const newType = new ProductType({
       name: pname,
@@ -75,7 +82,7 @@ exports.getEditProductTypePage = async (req, res) => {
     res.render('admin/editPtype', {
       pType,
       oldInput: null,
-      error: null
+      
     });
 
   } catch (error) {
@@ -105,6 +112,13 @@ exports.editPType = async (req, res) => {
         error: 'Product name and description are required.'
       });
     }
+
+    const item = await ProductType.findOne({ name: { $regex: `^${name}$`, $options: 'i' } ,_id:{$ne:id}});    //case insensitive search for duplicate entry
+    
+        if(item){
+          req.flash('error',"This item is already present ");
+          return res.redirect(`/admin/editPType/${id}`);
+        }
 
     if (!type) {
       return res.redirect('/admin/category');

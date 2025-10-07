@@ -63,7 +63,18 @@ const editProfileValidation = [
     .trim()
     .notEmpty().withMessage("This feild cannot be empty")
     .isNumeric().withMessage("Mobile number must be numeric")
-    .isLength({ min: 10, max: 10 }).withMessage("Mobile number must be 10 digits")
+    .isLength({ min: 10, max: 10 }).withMessage("Mobile number must be 10 digits"),
+
+  body("profileImage").custom((value, { req }) => {
+    if (req.file) {
+      // Allowed mime types
+      const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        throw new Error("Only image files (jpg, jpeg, png, webp) are allowed");
+      }
+    }
+    return true; // no file uploaded is okay if image is optional
+  }),
 ];
 
 const changePasswordRules = [
@@ -128,9 +139,14 @@ const validateAddress = [
   body("altnumber")
     .optional({ checkFalsy: true })
     .trim()
-    .isNumeric().withMessage("enter valid number")
-    .isLength({min:10,max:10}).withMessage("Phone number is 10 digit long"),
-
+    .isNumeric().withMessage("Enter valid number")
+    .isLength({ min: 10, max: 10 }).withMessage("Phone number is 10 digits long")
+    .custom((value, { req }) => {
+      if (value && value === req.body.phone) {
+        throw new Error("Alternate number cannot be same as primary phone number");
+      }
+      return true;
+    }),
   body("addressType")
     .trim()
     .notEmpty().withMessage("Select one Type")

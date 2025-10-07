@@ -7,8 +7,8 @@ const Colour = require('../../models/Colour');
 const productVariant = require('../../models/productVariant');
 const User=require('../../models/userModel');
 const mongoose = require('mongoose');
-
-
+const Offers = require("../../models/Offers");
+ 
 
 // Get first variant with images for product IDs
 async function getFirstVariantsForProducts(productIds) {
@@ -327,6 +327,9 @@ exports.getProductDetails = async (req, res) => {
     const product = await Products.findOne({ _id: id, isActive: true }).lean();
     const gender=product.genderId;
     if (!product) return res.redirect('/products');
+    const type=await ProductType.findById(product.productTypeId);
+    //finding the offers available for a product
+    const offers=await Offers.find({category:type.name,isActive:true});
 
     const variants = await productVariant.find({ productId: id }).populate('colorId fitId size').lean();
 
@@ -376,7 +379,7 @@ exports.getProductDetails = async (req, res) => {
       discountPrice,
        relatedProducts: relatedDatas,
        reviews,
-       avgRating,count
+       avgRating,count,offers
     });
   } catch (err) {
     console.error('Product Details Error:', err.message);

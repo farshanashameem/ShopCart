@@ -16,10 +16,11 @@ const paymentController=require('../controllers/user/paymentController');
 const referAndEarnController=require('../controllers/user/referAndEarn');
 const failedcontroller=require('../controllers/user/failedController');
 const deleteAccount=require('../controllers/user/deleteAccount');
+const checkCart=require('../controllers/user/check-stock');
 const auth = require('../middlewares/auth');
 const { validationResult } = require("express-validator");
 const { signupValidationRules, changePasswordValidationRules,editProfileValidation,changePasswordRules,validateAddress } = require('../middlewares/validation');
-const uploadProfile=require('../middlewares/profileUpload');
+const uploadProfileMiddleware = require('../middlewares/uploadProfileMiddleware');
 
 
 //=======public routes==========//
@@ -57,7 +58,7 @@ router.get('/api/products/:productId/variants',auth.isUserLoggedIn,productPageCo
 
 //======Profile======//
 router.get('/profile', auth.isUserLoggedIn, profileController.getProfilePage);
-router.post('/profileUpdate',auth.isUserLoggedIn,uploadProfile.single("profileImage"),editProfileValidation,profileController.updateProfile);
+router.post('/profileUpdate',auth.isUserLoggedIn,uploadProfileMiddleware,editProfileValidation,profileController.updateProfile);
 router.get('/changeMail',auth.isUserLoggedIn,profileController.getChangeMailPage);        //page for typing the new mail
 router.post('/confirmMail',auth.isUserLoggedIn,profileController.confirmMail);            //post request to send otp to new mail
 router.get('/otpForMail',auth.isUserLoggedIn,profileController.getOtpForMail);            //page for typing the otp
@@ -89,6 +90,7 @@ router.get('/select-address',auth.isUserLoggedIn,orderController.selectAddress);
 router.post('/select-address/addAddress',auth.isUserLoggedIn,validateAddress,orderController.addAddress);
 router.post('/select-address/updateAddress/:id',auth.isUserLoggedIn,validateAddress,orderController.updateAddress);
 router.get('/payment',auth.isUserLoggedIn,orderController.selectPayment);
+router.post('/check-stock',auth.isUserLoggedIn,checkCart.checkCart)
 router.post('/payment',auth.isUserLoggedIn,paymentController.makePayment);
 router.get('/success',auth.isUserLoggedIn,orderController.getSuccessPage);
 router.post('/create-razorpay-order', paymentController.createRazorpayOrder);

@@ -30,10 +30,13 @@ const productVariantSchema = new mongoose.Schema({
   },
   basePrice: {
     type: Number,
-    required: true
+    required: true,
+    min: [0, "Value cannot be negative"]
   },
   discountPrice: {
-    type: Number
+    type: Number,
+    required: true,
+    min: [0, "Value cannot be negative"]
   },
   stock: {
     type: Number,

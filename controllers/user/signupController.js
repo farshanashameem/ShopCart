@@ -118,7 +118,7 @@ exports.verifySignUpOtp = async (req, res) => {
     const sessionUser = req.session.tempUser;
 
     if (!sessionUser) {
-      return res.render("user/changeMail", {
+      return res.render("user/signup", {
         error: "Session expired. Please try again.",
       });
     }
@@ -126,7 +126,7 @@ exports.verifySignUpOtp = async (req, res) => {
     const otpAge = Date.now() - sessionUser.otpCreatedAt;
     if (otpAge > 60 * 1000) {
       req.session.tempUser = null;
-      return res.render("user/changeMail", {
+      return res.render("user/signup", {
         error: "OTP expired. Please try again.",
         old: {},
         errors: {},

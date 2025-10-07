@@ -166,6 +166,19 @@
       </div>
     </div>
 
+    <% if(offers){%>
+      <div class="text-success mt-4">
+        <h3>Offers available for the this category </h3>
+      <ul>
+      <% offers.forEach(offer=> {%>
+        
+          <b><li><%= offer.discountValue %> <%= offer.discountType %> off for minimum ₹<%= offer.minValue %> order  .</li></b>
+        
+      <%})%>
+      </ul>
+    </div>
+    <%}%>
+
     <!-- Related Products -->
     <hr class="my-5" />
     <h4 class="mb-4">You May Also Like</h4>

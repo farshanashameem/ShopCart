@@ -15,7 +15,7 @@ module.exports = (err, req, res, next) => {
   }
 
   // Otherwise render error page
-  res.status(statusCode).render("error/404", {
+  res.status(statusCode).render("error/500", {
     title: "Server Error",
     message,
   });

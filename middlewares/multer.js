@@ -15,9 +15,19 @@ const storage = new CloudinaryStorage({
   },
 });
 
+// File type check
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true); // Accept file
+  } else {
+    cb(new multer.MulterError("LIMIT_UNEXPECTED_FILE", "images")); // Trigger error
+  }
+};
+
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+   fileFilter: fileFilter,
 });
 
 module.exports = upload;

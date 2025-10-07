@@ -13,7 +13,7 @@ const referralController=require('../controllers/admin/refferalController');
 const offerController=require('../controllers/admin/offerController');
 const salesReport=require('../controllers/admin/salesReport');
 const auth = require('../middlewares/auth');
-const upload=require('../middlewares/multer');
+const imageUpload=require('../middlewares/imageUpload');
 const { validationResult } = require('express-validator');
 const { productValidationRules }= require('../middlewares/productValidator');  
 const { couponValidationRules }=require('../middlewares/couponValidator');
@@ -34,15 +34,38 @@ router.post("/users/delete/:id",auth.isAdminLoggedIn, userController.deleteUser)
 //=====Product Management ========//
 router.get('/products',auth.isAdminLoggedIn,productController.getProductsPage);       //products page
 router.get('/addProducts',auth.isAdminLoggedIn,productController.getAddProductPage);   //addproduct page
-router.post('/addProduct', auth.isAdminLoggedIn,upload.array("images", 3),productValidationRules,productController.addProduct);          //Adding product to Database
+router.post(
+  "/addProduct",
+  auth.isAdminLoggedIn, 
+  imageUpload({
+    type: "array",
+    fieldName: "images",
+    maxCount: 3,
+    renderPage: "admin/addProduct",
+  }),
+ productValidationRules,
+  productController.addProduct
+);
+         //Adding product to Database
 router.post('/products/:id/toggle',auth.isAdminLoggedIn, productController.toggleProductStatus);    //soft delete and restore the product
 router.get('/product/:id', auth.isAdminLoggedIn,productController.getProductDetail);   //Full details about the product
 router.get('/editProducts/:id',auth.isAdminLoggedIn,productController.getEditProductPage);    //edit product page
-router.post('/editProduct',auth.isAdminLoggedIn, upload.fields([
-    { name: 'images0', maxCount: 1 },
-    { name: 'images1', maxCount: 1 },
-    { name: 'images2', maxCount: 1 },
-  ]),productValidationRules,productController.editProduct);
+router.post(
+  "/editProduct",
+  auth.isAdminLoggedIn, 
+  imageUpload({
+    type: "fields",
+    fieldName: [
+      { name: "images0", maxCount: 1 },
+      { name: "images1", maxCount: 1 },
+      { name: "images2", maxCount: 1 },
+    ],
+    renderPage: "admin/editProduct",
+  }),
+ productValidationRules,
+  productController.editProduct
+);
+
 
 
 
@@ -86,7 +109,8 @@ router.post('/addCoupon',couponValidationRules,auth.isAdminLoggedIn,couponContro
 router.put('/editCoupon/:id',auth.isAdminLoggedIn,couponValidationRules,couponController.editCoupon);
 router.patch('/coupons/toggle/:id',auth.isAdminLoggedIn,couponController.toggleCoupon);
 
-//=== Offer maangement ===//
+//=== Offer maangement ===//  
+  
 router.get('/offers',auth.isAdminLoggedIn,offerController.getOfferPage);
 router.post('/addOffer',offerValidationRules,auth.isAdminLoggedIn,offerController.addOffer);
 router.put('/editOffer/:id',auth.isAdminLoggedIn,offerValidationRules,offerController.editOffer);

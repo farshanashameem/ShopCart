@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 - Page Not Found</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Montserrat:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    /* Reset + base */
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: url('/images/login-side.jpg') no-repeat center center/cover;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      position: relative;
+    }
+
+    /* Overlay to make text readable */
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); /* dark overlay */
+      z-index: 0;
+    }
+
+    header {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+    }
+
+    header h1 {
+      height: 60px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 55px;
+    }
+
+    .center {
+      position: relative;
+      z-index: 2;
+    }
+
+    .center h1 {
+      font-size: 140px;
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      margin: 0;
+      color: #fff;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    }
+
+    .center p {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      margin: 20px 0;
+      font-style: italic;
+      color: #ffdda6;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    }
+
+    .center a {
+      display: inline-block;
+      padding: 12px 28px;
+      border: 2px solid #ffdda6;
+      border-radius: 25px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #ffdda6;
+      transition: 0.3s;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .center a:hover {
+      background: #ffdda6;
+      color: #333;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .center h1 {
+        font-size: 80px;
+      }
+      .center p {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="text-center">
+   <h1>ShopCart</h1>
+  </header>
+
+  <div class="center">
+    <h1>500</h1>
+    <p>Server error</p>
+    
+  </div>
+
+</body>
+</html>
