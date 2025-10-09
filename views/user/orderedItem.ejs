@@ -74,7 +74,8 @@
             <div>
             <h5 class="fw-bold mb-2"><%= product.name %></h5>
             <p class="mb-1 text-muted">Quantity: <%= order.quantity %></p>
-            <p>Size:<%= variant.size %></p>
+            <p class="mb-1 text-muted">Size:<%= variant.size %></p>
+            <p class="mb-1 text-muted">Order ID: <%= order.orderId %></p>
             <p class="mb-1 text-muted">Price: ₹<%= order.price %></p>
             <p class="fw-bold fs-5 text-success">Total: ₹<%= order.price * order.quantity %></p>
             </div>
@@ -138,7 +139,10 @@
                                     Delivered
                                 <% } else if(returnStatus === 'pending' || returnStatus === 'approved' ||returnStatus === 'refunded' ||returnStatus === 'rejected') { %>
                                     Returned
-                                <% } else { %>
+                                <% } else if(order.status ==='cancelled') { %>
+                                    Cancelled
+                                <% } 
+                                else { %>
                                     Expected Delivery
                                 <% } %>
                             </p>
@@ -147,8 +151,13 @@
                                     <%= statusDates.delivered ? new Date(statusDates.delivered).toDateString() : '' %>
                                 <% } else if(returnStatus === 'pending' ||returnStatus === 'approved' ||returnStatus === 'refunded' ||returnStatus === 'rejected') { %>
                                     <%= statusDates.returned ? new Date(statusDates.returned).toDateString() : '' %>
-                                <% } else { %>
-                                    <%= expectedDate ? new Date(order.expectedDate).toDateString() : '' %>
+                                <% } if(order.status === 'cancelled') { %>
+                                    <%= statusDates.cancelled ? new Date(statusDates.cancelled).toDateString() : '' %>
+                                <% }
+                                
+                                else { %>
+                                    <%= expectedDate ? new Date(expectedDate).toDateString() : '' %>
+
                                 <% } %>
                             </small>
                         </div>

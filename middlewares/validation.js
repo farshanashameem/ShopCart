@@ -146,7 +146,7 @@ const validateAddress = [
         throw new Error("Alternate number cannot be same as primary phone number");
       }
       return true;
-    }),
+    }),  
   body("addressType")
     .trim()
     .notEmpty().withMessage("Select one Type")

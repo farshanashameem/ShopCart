@@ -1,4 +1,9 @@
 <form action="<%= formAction %>" method="get" id="filter" class="col-md-3 col-12">
+
+    <% if (typeof searchQuery !== 'undefined' && searchQuery) { %>
+  <input type="hidden" name="search" value="<%= searchQuery %>">
+<% } %>
+
     <!-- Filters Sidebar -->
     <div class="col-12 filters">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -17,8 +22,16 @@
                 </h2>
                 <div id="sortByCollapse" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        <label><input type="radio" name="sort" value="LowToHigh"> Price - Low to High</label><br>
-                        <label><input type="radio" name="sort" value="HighToLow"> Price - High to Low</label><br>
+                       <label>
+                        <input type="radio" name="sort" value="LowToHigh" <%= sort === 'LowToHigh' ? 'checked' : '' %>> 
+                        Price - Low to High
+                        </label><br>
+
+                        <label>
+                        <input type="radio" name="sort" value="HighToLow" <%= sort === 'HighToLow' ? 'checked' : '' %>> 
+                        Price - High to Low
+                        </label><br>
+
                     </div>
                 </div>
             </div>

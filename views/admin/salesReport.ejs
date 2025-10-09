@@ -139,8 +139,17 @@
                           <td><%= item.quantity %></td>
                           <td><%= item.total %></td>
                           <td>
-                            <%= new Date(item.date).toLocaleDateString("en-IN") %>
-                            <%= new Date(item.date).toLocaleTimeString("en-IN", { hour: "numeric", minute: "numeric", hour12: true }) %>
+                            
+                           <%= new Date(item.date).toLocaleString("en-IN", {
+                              timeZone: "Asia/Kolkata",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric"
+                            }) %>
+
                           </td>
 
                         </tr>

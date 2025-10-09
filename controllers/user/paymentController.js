@@ -169,7 +169,8 @@ exports.makePayment = async (req, res) => {
     let perItemDiscount = 0;
     const discountValue = parseFloat(couponDiscount) || 0;
     if (eligibleItems.length > 0 && discountValue > 0) {
-      perItemDiscount = discountValue / eligibleItems.length;
+      perItemDiscount = parseFloat((discountValue / eligibleItems.length).toFixed(2));
+
     }
 
    // Calculate the Offer applied things
@@ -192,7 +193,8 @@ for (let item of user.cart) {
 let perItemOfferDiscount = 0;
 if (eligibleOfferItems.length > 0) {
     // divide by items count
-    perItemOfferDiscount = parseFloat(offer) / eligibleOfferItems.length;
+    perItemOfferDiscount = parseFloat((parseFloat(offer) / eligibleOfferItems.length).toFixed(2));
+
 
 }
 

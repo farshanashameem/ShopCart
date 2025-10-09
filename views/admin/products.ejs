@@ -82,32 +82,38 @@
         </tbody>
       </table>
        
-      <!-- Pagination -->
-      <% if (totalPages > 1) { %>
-        <nav aria-label="Page navigation">
-          <ul class="pagination justify-content-center mt-4">
-            <!-- Previous Button -->
-            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-              <a class="page-link" 
-                href="/admin/products?page=<%= currentPage - 1 %>&search=<%= search %>">Previous</a>
-            </li>
+     <!-- Pagination -->
+<% if (totalPages > 1) { %>
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-4">
+      <!-- Previous Button -->
+      <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+        <a class="page-link" 
+          href="/admin/products?page=<%= currentPage - 1 %>&search=<%= search %>&gender=<%= selectedGender %>">
+          Previous
+        </a>
+      </li>
 
-            <!-- Page Numbers -->
-            <% for (let i = 1; i <= totalPages; i++) { %>
-              <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                <a class="page-link" 
-                  href="/admin/products?page=<%= i %>&search=<%= search %>"><%= i %></a>
-              </li>
-            <% } %>
-
-            <!-- Next Button -->
-            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-              <a class="page-link" 
-                href="/admin/products?page=<%= currentPage + 1 %>&search=<%= search %>">Next</a>
-            </li>
-          </ul>
-        </nav>
+      <!-- Page Numbers -->
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+          <a class="page-link" 
+            href="/admin/products?page=<%= i %>&search=<%= search %>&gender=<%= selectedGender %>">
+            <%= i %>
+          </a>
+        </li>
       <% } %>
+
+      <!-- Next Button -->
+      <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+        <a class="page-link" 
+          href="/admin/products?page=<%= currentPage + 1 %>&search=<%= search %>&gender=<%= selectedGender %>">
+          Next
+        </a>
+      </li>
+    </ul>
+  </nav>
+<% } %>
 
 
  

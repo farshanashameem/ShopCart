@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color: rgb(244, 236, 227);">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="/">
-      <img src="/images/ShopCart.png" class="img-fluid logo-img" alt="ShopCart">
+      <img src="/images/ShopCart.PNG" class="img-fluid logo-img" alt="ShopCart">
     </a>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -18,10 +18,33 @@
       </ul>
 
       <!-- Search bar -->
-      <form class="d-flex me-3" id="productFilterForm" action="/search" method="GET">
-        <input class="form-control rounded-pill me-2 "  type="text" name="q"   value="<%= typeof search !== 'undefined' ? search : '' %>" placeholder="Search products..." aria-label="Search" style="width: 300px;">
-        <button class="btn btn-dark rounded-pill" type="submit"><i class="bi bi-search"></i></button>
-      </form>
+     <form class="d-flex me-3 position-relative" id="productFilterForm" action="/products" method="GET">
+  <input
+    id="searchInput"
+    class="form-control rounded-pill me-2 pe-5"
+    type="text"
+    name="search"
+    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+    placeholder="Search products..."
+    aria-label="Search"
+    style="width: 300px;"
+  >
+
+  <!-- Clear (X) Button -->
+  <button
+    type="button"
+    id="clearSearchBtn"
+    class="btn position-absolute end-0 me-5"
+    style="background: transparent; border: none; top: 50%; transform: translateY(-50%); display: none;"
+  >
+    <i class="bi bi-x-circle text-secondary"></i>
+  </button>
+
+  <button class="btn btn-dark rounded-pill" type="submit">
+    <i class="bi bi-search"></i>
+  </button>
+</form>
+
 
       <!-- Right side auth / icons -->
       <ul class="navbar-nav align-items-center gap-3">
@@ -55,3 +78,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   </div>
 </nav>
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearSearchBtn");
+
+  // Show the clear button only when there's text
+  searchInput.addEventListener("input", () => {
+    clearBtn.style.display = searchInput.value ? "block" : "none";
+  });
+
+  // Clear the input and resubmit or redirect to /products
+  clearBtn.addEventListener("click", () => {
+    searchInput.value = "";
+    clearBtn.style.display = "none";
+    window.location.href = "/products"; // ✅ Redirect to all products after clear
+  });
+
+  // If there's already a search value (on reload), show the clear button
+  if (searchInput.value) clearBtn.style.display = "block";
+</script>

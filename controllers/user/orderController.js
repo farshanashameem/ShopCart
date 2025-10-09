@@ -44,36 +44,56 @@ async function buildCheckoutData(userId, errors = {}, old = {}) {
     charge:total>300?0:50
   };
 }
-
+  
 
 exports.selectAddress = async (req, res) => {
   try {
     const data = await buildCheckoutData(req.session.user._id);
     data.showAddressBar = false;
     const user = await User.findById(req.session.user._id);
-   const results = await Promise.all(
-        user.cart.map(async (item) => {
-          const variant = await productVariant.findById(item.variantId);
 
-          if (!variant || variant.stock < item.quantity || variant.stock <= 0) {
-            return item; // return invalid item
-          }
-          return null;
-        })
-     );
+    const results = await Promise.all(
+      user.cart.map(async (item) => {
+        const variant = await productVariant
+          .findById(item.variantId)
+          .populate("productId"); // ✅ to access product.isActive
 
-const itemsNotInCart = results.filter(Boolean); // remove nulls
+        // ✅ Check inactive or out-of-stock
+        if (
+          !variant ||
+          variant.stock < item.quantity ||
+          variant.stock <= 0 ||
+          (variant.productId && !variant.productId.isActive)
+        ) {
+          return item; // invalid
+        }
+        return null; // valid
+      })
+    );
+
+    const itemsNotInCart = results.filter(Boolean);
+
+    // ✅ Show error and redirect to cart if invalid
+    if (itemsNotInCart.length > 0) {
+      req.flash(
+        "error",
+        "Some products in your cart are inactive or out of stock. Please review your cart."
+      );
+      return res.redirect("/cart");
+    }
 
     if (!user.cart || user.cart.length === 0) {
       return res.redirect("/orders");
     }
     if (!data) return res.redirect("/orders");
     res.render("user/checkout1", data);
-  } catch (err) {  
+  } catch (err) {
     console.error("Error in checkout:", err);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
 
 exports.addAddress = async (req, res) => {
   try {
@@ -456,10 +476,12 @@ exports.OrderDetails = async (req, res) => {
     const product = await Products.findById(order.productId);
     const variant = await productVariant.findById(order.variantId);
     const user = await User.findById(order.userId);
+    
+
     // 🔹 Address handling
     let address = {};
     if (order.address) {
-      // New format (full address saved in order)
+      //  (full address saved in order)
       address = order.address;
     } else if (order.addressId ) {
       // Old format (addressId -> find from user's addresses array)
@@ -481,7 +503,13 @@ exports.OrderDetails = async (req, res) => {
       variantId: order.variantId,
       userId: user._id,
     }).lean();
+let expectedDate = null;
 
+if (order.createdAt) {
+  const createdAt = new Date(order.createdAt); // ensure it’s a Date object
+  expectedDate = new Date(createdAt.getTime() + 10 * 24 * 60 * 60 * 1000);
+}
+      console.log(order)
     const review = await Review.find(user._id, product._id);
     res.render("user/orderedItem", {
       order,
@@ -491,9 +519,7 @@ exports.OrderDetails = async (req, res) => {
       statusDates,
       returnStatus: returnRequest ? returnRequest.status : null,
       returnDate: returnRequest ? returnRequest.returnDate : null,
-      expectedDate: new Date(
-        order.createdAt.getTime() + 10 * 24 * 60 * 60 * 1000
-      ),
+      expectedDate: expectedDate,
       userReview: review ? review : null,
     });
   } catch (err) {

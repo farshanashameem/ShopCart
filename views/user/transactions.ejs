@@ -121,7 +121,10 @@
                     <%= transaction.reason %>
                   </p>
                   <small class="text-muted">
-                    <%= new Date(transaction.createdAt).toLocaleString() %>
+                    <%= new Date(transaction.createdAt).toLocaleString("en-IN", {
+                      timeZone: "Asia/Kolkata"
+                    }) %>
+
                   </small>
                 </div>
                 <div class="text-end">

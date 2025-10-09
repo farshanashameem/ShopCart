@@ -144,6 +144,20 @@ exports.postSalesReport = async (req, res) => {
     const { filter, from, to } = req.body;
     let startDate, endDate;
     const today = new Date();
+     const orders = await Orders.find();
+    const orderedItems = await Promise.all(
+      orders.map(async (item) => {
+        const product = await Products.findById(item.productId);
+        const category = await ProductType.findById(product.productTypeId);
+        return {
+          name: product.name,
+          category: category.name,
+          quantity: item.quantity,
+          total: item.total,
+          date: item.createdAt,
+        };
+      })
+    );
 
     // ==== Case 1: Predefined filter ====
     if (filter) {
@@ -168,7 +182,7 @@ exports.postSalesReport = async (req, res) => {
 
       return res.render("admin/salesReport", {
         filter,
-        ...report,
+        ...report,items: orderedItems
       });
     }
 
@@ -184,7 +198,7 @@ exports.postSalesReport = async (req, res) => {
           customers: 0,
           pending: 0,
           cancelled: 0,
-          shipping: 0,
+          shipping: 0,items: orderedItems,
           errorMessage: "Please select both From and To dates",
         });
       }
@@ -194,9 +208,9 @@ exports.postSalesReport = async (req, res) => {
       endDate.setHours(23, 59, 59, 999);
 
       // Validation: check valid dates & logical range
-      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate) {
+      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate || startDate>today) {
         return res.render("admin/salesReport", {
-          filter: "Custom Date",
+          filter: "Custom Date",items: orderedItems,
           orders: 0,
           revenue: 0,
           products: 0,
@@ -213,7 +227,7 @@ exports.postSalesReport = async (req, res) => {
 
       return res.render("admin/salesReport", {
         filter: `From ${from} To ${to}`,
-        ...report,
+        ...report,items: orderedItems
       });
     }
 
@@ -342,7 +356,7 @@ exports.getDashboard = async (req, res) => {
     const { from, to } = req.body || {};
     let startDate = new Date(from);
     let endDate = new Date(to);
-
+    const today = new Date();
     //top 10 orders
     const topOrders = await Orders.aggregate([
       {
@@ -395,9 +409,10 @@ exports.getDashboard = async (req, res) => {
       endDate = new Date(to);
       endDate.setHours(23, 59, 59, 999);
 
-      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate) {
+      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate ||startDate>today) {
         return res.render("admin/dashboard", {
           filter: `From ${from} To ${to}`,
+          ...total,
           orders: 0,
           revenue: 0,
           products: 0,

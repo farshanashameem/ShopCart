@@ -8,33 +8,124 @@
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
+      background-color: #f8f9fa;
     }
 
-   
+    .order-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 20px;
+      margin: 20px;
+    }
+
+    .left-section,
+    .right-section {
+      flex: 1;
+      min-width: 300px;
+      max-width: 700px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+
+    .product-info {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .product-img {
+      width: 100%;
+      max-width: 180px;
+      height: auto;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .product-details {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .status-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    footer {
+      background-color: #fff;
+      box-shadow: 0 -1px 6px rgba(0,0,0,0.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .order-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .product-info {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .product-details {
+        text-align: center;
+      }
+
+      .status-buttons {
+        justify-content: center;
+      }
+
+      .card {
+        padding: 15px;
+      }
+
+      footer {
+        font-size: 0.85rem;
+        padding: 10px;
+      }
+    }
   </style>
 </head>
+
 <body>
+  <%- include('../partials/adminDashboard') %>
 
-
-  <div class="order-container m-4">
-    <!-- Left: Product Card -->
-    <div class="card">
-      <div class="product-info mb-3">
-        <img src="<%= order.product.image %>" alt="Product"  class="product-img">
-        <div class="product-details">
-          <h3><%= order.product.name %></h3>
-          <p>Quantity: <%= order.quantity %></p>
-          <input type="hidden" id="orderId" value="<%= order._id %>">
-         
-          <p>Order ID: <%= order.orderId %></p>
-          <p >User ID: <%= order.userId %></p>
-           <p><b>Current Status:</b> <%= order.status %></p>
+  <div class="order-container">
+    <!-- LEFT SIDE -->
+    <div class="left-section">
+      <div class="card">
+        <div class="product-info mb-3">
+          <img src="<%= order.product.image %>" alt="Product" class="product-img">
+          <div class="product-details">
+            <h3><%= order.product.name %></h3>
+            <p>Quantity: <%= order.quantity %></p>
+            <input type="hidden" id="orderId" value="<%= order._id %>">
+            <p>Order ID: <%= order.orderId %></p>
+            <p>User ID: <%= order.userId %></p>
+            <p><b>Current Status:</b> <%= order.status %></p>
+          </div>
         </div>
-      </div>
+
         <div class="status-buttons mt-4">
           <% if(order.status==='shipped'||order.status === "pending" || order.status === "placed" || order.status === "out-for-delivery" ){ %>
             <p><b>Change the status:</b></p>
-            <%}%>
+          <% } %>
+
           <% if(order.status === "pending" || order.status === "placed"){ %>
             <button class="btn btn-primary" id="shipped">Shipped</button>
           <% } else if(order.status === "shipped"){ %>
@@ -45,75 +136,68 @@
             <p class="text-success fw-bold">✅ Order Delivered</p>
           <% } else if(order.status === "cancelled"){ %>
             <p class="text-danger fw-bold">❌ Order Cancelled</p>
-             <p class="mb-0">Reason: <%= order.reasons %></p>  
+            <p class="mb-0">Reason: <%= order.reasons %></p>  
           <% } else if(order.status === "returned"){ %>
-             <div class="returned-info p-2 pe-4 ps-4 mb-3" style="background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:10px;box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                <p class="text-warning fw-bold mb-1">↩️ Order Returned</p>
-                <p class="mb-0">Reason: <%= order.reason %></p>  
+            <div class="returned-info p-2 pe-4 ps-4 mb-3" style="background-color:#fff3cd; border-left:4px solid #ffc107; border-radius:10px;box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+              <p class="text-warning fw-bold mb-1">↩️ Order Returned</p>
+              <p class="mb-0">Reason: <%= order.reason %></p>  
+            </div>
+
+            <% if(order.returnedStatus && order.returnedStatus ==='pending') { %>
+              <div class="mt-3 d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
+                <form action="admin/returns">
+                  <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                  <input type="hidden" name="productId" value="<%= order.productId %>">
+                  <input type="hidden" name="variantId" value="<%= order.variantId %>">
+                  <input type="hidden" name="userId" value="<%= order.userId %>">
+                  <input type="hidden" name="total" value="<%= order.price * order.quantity %>">
+                  <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
+                  <button type="submit" class="btn btn-success return-action" data-action="approved" data-orderid="<%= order._id %>">Accept</button>
+                  <button type="submit" class="btn btn-danger return-action" data-action="rejected" data-orderid="<%= order._id %>">Reject</button>
+                </form>               
               </div>
-              <% if(order.returnedStatus && order.returnedStatus ==='pending') { %>
-                     <div class="ms-4 mt-3">
-                        <form action="admin/returns">
-                          <input type="hidden" name="orderId" id="orderId" value="<%= order.orderId %>">
-                          <input type="hidden" name="productId" value="<%= order.productId %>">
-                          <input type="hidden" name="variantId" id="" value="<%= order.variantId %>">
-                          <input type="hidden" name="userId" value="<%= order.userId %>">
-                          <input type="hidden" name="total" id="" value="<%= order.price * order.quantity %>">
-                           <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
-                          <button type="submit" class="btn btn-success ms-4 return-action" data-action="approved" data-orderid="<%= order._id %>">Accept</button>
-                        <button type="submit" class="btn btn-danger ms-4 return-action" data-action="rejected" data-orderid="<%= order._id %>">Reject</button>
-                        </form>               
-                      </div>
-              <% } else if(order.returnedStatus && order.returnedStatus==="approved"){ %>
-                 <p> Return approved.</p>
-                  <form action="admin/returns">
-                          <input type="hidden" name="orderId" id="orderId" value="<%= order.orderId %>">
-                          <input type="hidden" name="productId" value="<%= order.productId %>">
-                          <input type="hidden" name="variantId" id="" value="<%= order.variantId %>">
-                          <input type="hidden" name="userId" value="<%= order.userId %>">
-                           <input type="hidden" name="total" id="" value="<%= order.price * order.quantity %>">
-                           <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
-                          <button type="submit" class="btn btn-success ms-4 return-action" data-action="refunded" data-orderid="<%= order._id %>">Refund</button>                  
-                        </form> 
-                
-                <%}  else {%>
-                     <div class="returned-info p-2 pe-4 ps-4 mb-3"
-                          style="background: #e6f9ec; border-left: 4px solid #28a745; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                          <i class="bi bi-check-circle-fill text-success me-2" style="font-size: 1.5rem;"></i>
-                          <p class="mb-0 fw-bold text-success" style="font-size: 1rem;">Refund Successful</p>
-                      </div>
-
-                      
-
-                       
-                     
-                  <%} %>
-             
-
+            <% } else if(order.returnedStatus && order.returnedStatus==="approved"){ %>
+              <p>Return approved.</p>
+              <form action="admin/returns">
+                <input type="hidden" name="orderId" value="<%= order.orderId %>">
+                <input type="hidden" name="productId" value="<%= order.productId %>">
+                <input type="hidden" name="variantId" value="<%= order.variantId %>">
+                <input type="hidden" name="userId" value="<%= order.userId %>">
+                <input type="hidden" name="total" value="<%= order.price * order.quantity %>">
+                <input type="hidden" name="discount" value="<%= order.couponDiscount || 0 %>">
+                <button type="submit" class="btn btn-success return-action" data-action="refunded" data-orderid="<%= order._id %>">Refund</button>                  
+              </form> 
+            <% } else { %>
+              <div class="returned-info p-2 pe-4 ps-4 mb-3"
+                  style="background: #e6f9ec; border-left: 4px solid #28a745; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                  <i class="bi bi-check-circle-fill text-success me-2" style="font-size: 1.5rem;"></i>
+                  <p class="mb-0 fw-bold text-success" style="font-size: 1rem;">Refund Successful</p>
+              </div>
+            <% } %>
           <% } %>
+        </div>
       </div>
     </div>
 
-    <!-- Right: Details -->
-    <div>
+    <!-- RIGHT SIDE -->
+    <div class="right-section">
       <div class="card">
         <h4>Shipping Details</h4>
-        <p>Name:<%= order.address.name %></p>
-        <p>Locality:<%= order.address.locality %></p>
-        <p>Address:<%= order.address.address %></p>
-        <p>State:<%= order.address. state %></p>
-        <p>PhoneNumber:<%= order.address.phoneNumber %></p>
+        <p>Name: <%= order.address.name %></p>
+        <p>Locality: <%= order.address.locality %></p>
+        <p>Address: <%= order.address.address %></p>
+        <p>State: <%= order.address.state %></p>
+        <p>Phone Number: <%= order.address.phoneNumber %></p>
         <% if(order.address.alternateNumber) {%>
-           <p>alternateNumber:<%= order.address.alternateNumber %></p>
+          <p>Alternate Number: <%= order.address.alternateNumber %></p>
         <%}%>
-        <p>Pincode:<%= order.address.pincode %></p>
+        <p>Pincode: <%= order.address.pincode %></p>
         <% if(order.address.landmark) {%>
-          <p>Land mark:<%= order.address.landmark %></p>
+          <p>Landmark: <%= order.address.landmark %></p>
         <%}%>
-        
       </div>
 
-     <div class="card" style="margin-top: 15px;">
+      <div class="card mt-3">
         <h4>Price Details</h4>
         <p>Price (1 item): ₹<%= order.price %></p>
         <p>Total price: ₹<%= order.price * order.quantity %></p>
@@ -122,16 +206,17 @@
         <p>Delivery Charges: <span style="color: green;">FREE</span></p>
         <p>Platform fee: 0</p>
       </div>
-
     </div>
   </div>
-     <footer class="text-center py-4 small text-muted border-top mt-4" style="font-weight: 700;">
-        © 2025 | ShopCart | All Rights Reserved. | We Give You Style.
-        </footer>>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <footer class="text-center py-4 small text-muted border-top mt-4 fw-bold">
+    © 2025 | ShopCart | All Rights Reserved. | We Give You Style.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <%- include ('../partials/successAlert') %>
+  <script src="/js/order.js"></script>
+  <script src="/js/returnAction.js"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <%- include ('../partials/successAlert') %>
-<script src="/js/order.js"></script>
-<script src="/js/returnAction.js"></script>
 </html>

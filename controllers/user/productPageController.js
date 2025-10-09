@@ -159,65 +159,101 @@ exports.getHomePage = async (req, res) => {
 
 exports.getProductPage = async (req, res) => {
   try {
-    
     const genderParam = req.params.gender || 'all';
-
     const allowedGenders = ['men', 'women', 'all'];
     if (!allowedGenders.includes(genderParam)) {
       return res.status(404).render('error/404');
     }
 
     const genderMap = {
-      'women': 'female',
-      'men': 'male'
+      women: 'female',
+      men: 'male',
     };
     const gender = genderMap[genderParam] || null;
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
 
+    const searchQuery = req.query.search ? req.query.search.trim() : null; // ✅ Added search support
+
+    // ====== Fetch categories ======
     const categoriesQuery = { isActive: true };
     if (gender === 'female' || gender === 'male') categoriesQuery.gender = gender;
+
     let categories;
     if (!gender) {
-      const categoryIds = await Products.distinct("productTypeId", {
-        isActive: true
-      });
-      categories = await ProductType.find({ isActive: true }).lean(); 
+      const categoryIds = await Products.distinct('productTypeId', { isActive: true });
+      categories = await ProductType.find({ isActive: true }).lean();
     } else {
-      const categoryIds = await Products.distinct("productTypeId", {
+      const categoryIds = await Products.distinct('productTypeId', {
         genderId: gender,
-        isActive: true
+        isActive: true,
       });
       categories = await ProductType.find({
         _id: { $in: categoryIds },
-        isActive: true
+        isActive: true,
       });
     }
-
 
     const fit = await Fit.find({ isActive: true });
     const colors = await Colour.find({ isActive: true });
     const sort = req.query.sort || null;
 
-    const selectedCategories = typeof req.query.category === 'string' ? req.query.category.split(',') : Array.isArray(req.query.category) ? req.query.category : req.query.category ? [req.query.category] : [];
-    const selectedFits = typeof req.query.fit === 'string' ? req.query.fit.split(',') : Array.isArray(req.query.fit) ? req.query.fit : req.query.fit ? [req.query.fit] : [];
-    const selectedColors = typeof req.query.color === 'string' ? req.query.color.split(',') : Array.isArray(req.query.color) ? req.query.color : req.query.color ? [req.query.color] : [];
+    // ====== Parse filter params ======
+    const selectedCategories =
+      typeof req.query.category === 'string'
+        ? req.query.category.split(',')
+        : Array.isArray(req.query.category)
+        ? req.query.category
+        : req.query.category
+        ? [req.query.category]
+        : [];
+
+    const selectedFits =
+      typeof req.query.fit === 'string'
+        ? req.query.fit.split(',')
+        : Array.isArray(req.query.fit)
+        ? req.query.fit
+        : req.query.fit
+        ? [req.query.fit]
+        : [];
+
+    const selectedColors =
+      typeof req.query.color === 'string'
+        ? req.query.color.split(',')
+        : Array.isArray(req.query.color)
+        ? req.query.color
+        : req.query.color
+        ? [req.query.color]
+        : [];
+
     const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : null;
 
+    // ====== Variant filter query ======
     const variantQuery = { isActive: true };
     if (selectedFits.length > 0) variantQuery.fitId = { $in: selectedFits };
     if (selectedColors.length > 0) variantQuery.colorId = { $in: selectedColors };
     if (maxPrice) variantQuery.discountPrice = { $lte: maxPrice };
 
     const matchedVariants = await ProductVariant.find(variantQuery).lean();
-    const matchedProductIds = [...new Set(matchedVariants.map(v => v.productId.toString()))];
+    const matchedProductIds = [...new Set(matchedVariants.map((v) => v.productId.toString()))];
 
+    // ====== Product main query ======
     const productQuery = { isActive: true };
     if (gender) productQuery.genderId = gender;
     if (selectedCategories.length > 0) productQuery.productTypeId = { $in: selectedCategories };
     if (matchedProductIds.length > 0) productQuery._id = { $in: matchedProductIds };
 
+    // ✅ Include search in query
+    if (searchQuery) {
+  productQuery.$or = [
+    { name: { $regex: searchQuery, $options: 'i' } },
+    { description: { $regex: searchQuery, $options: 'i' } },
+  ];
+}
+              
+
+    // ====== Handle no matching variants ======
     if (
       selectedCategories.length === 0 &&
       selectedFits.length + selectedColors.length === 0 &&
@@ -239,37 +275,34 @@ exports.getProductPage = async (req, res) => {
           totalPages: 1,
           sort,
           genderParam,
-          queryParams: { ...req.query }
+          queryParams: { ...req.query },
+          searchQuery,
+          formAction: genderParam === 'all' ? '/products' : `/products/${genderParam}`,
         });
       }
     }
 
-    const totalProducts = await Products.countDocuments(productQuery);
-    const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
-
-    const products = await Products.find(productQuery)
-      .skip(skip)
-      .limit(limit)
+    // ====== Fetch & prepare products ======
+    const allProducts = await Products.find(productQuery)
       .sort({ createdAt: -1 })
       .lean();
 
-    const productIds = products.map(p => p._id);
-
+    const productIds = allProducts.map((p) => p._id);
     const variants = await ProductVariant.find({
       productId: { $in: productIds },
-      isActive: true
+      isActive: true,
     })
       .sort({ createdAt: 1 })
       .lean();
 
     const variantMap = {};
-    variants.forEach(variant => {
+    variants.forEach((variant) => {
       const pid = variant.productId.toString();
       if (!variantMap[pid]) {
         variantMap[pid] = {
           firstImage: variant.images?.[0],
           basePrices: [variant.basePrice],
-          discountPrices: [variant.discountPrice]
+          discountPrices: [variant.discountPrice],
         };
       } else {
         variantMap[pid].basePrices.push(variant.basePrice);
@@ -277,26 +310,36 @@ exports.getProductPage = async (req, res) => {
       }
     });
 
-    const actualProducts = products.map(product => {
+    let actualProducts = allProducts.map((product) => {
       const pid = product._id.toString();
       const variantInfo = variantMap[pid] || {};
       return {
         ...product,
         firstImage: variantInfo.firstImage,
-        minPrice: variantInfo.discountPrices ? Math.min(...variantInfo.discountPrices) : 0,
-        maxPrice: variantInfo.basePrices ? Math.max(...variantInfo.basePrices) : 0
+        minPrice: variantInfo.discountPrices
+          ? Math.min(...variantInfo.discountPrices)
+          : 0,
+        maxPrice: variantInfo.basePrices ? Math.max(...variantInfo.basePrices) : 0,
       };
     });
 
+    // ====== Apply sorting BEFORE pagination ======
     if (sort === 'LowToHigh') {
       actualProducts.sort((a, b) => a.minPrice - b.minPrice);
     } else if (sort === 'HighToLow') {
       actualProducts.sort((a, b) => b.minPrice - a.minPrice);
     }
 
+    // ====== Pagination AFTER sorting ======
+    const totalProducts = actualProducts.length;
+    const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
+    actualProducts = actualProducts.slice(skip, skip + limit);
+
+    // ====== Preserve all query params ======
     const queryParams = { ...req.query };
     delete queryParams.page;
-    console.log(genderParam);
+    if (req.query.search) queryParams.search = req.query.search; // ✅ preserve search param
+
     res.render('user/allProducts', {
       categories,
       fit,
@@ -310,21 +353,23 @@ exports.getProductPage = async (req, res) => {
       totalPages,
       sort,
       genderParam,
-      queryParams
+      queryParams,
+      searchQuery, // ✅ pass search to view
     });
-
   } catch (err) {
     console.error('Error loading product page with filters:', err);
     res.status(500).send('Server Error');
   }
-}; 
+};
+
+
 
 
 exports.getProductDetails = async (req, res) => {
   try {
     const id = req.params.id;
 
-    const product = await Products.findOne({ _id: id, isActive: true }).lean();
+    const product = await Products.findOne({ _id: id }).lean();
     const gender=product.genderId;
     if (!product) return res.redirect('/products');
     const type=await ProductType.findById(product.productTypeId);

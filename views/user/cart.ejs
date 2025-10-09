@@ -7,17 +7,19 @@
   <div class="container my-5">
     <h2 class="cart-title text-center mb-4">YOUR CART</h2>
     <div class="row">
-      
+      <% if(error){%>
+        <p class="text-danger"><b> <%= error %></b></p>
+      <%}%>
       <!-- Cart Items -->
       <div class="col-lg-8 bg-light p-3 rounded">
         <% if(items.length !== 0) { %>
           <% items.forEach(item => { %>
             <div class="cart-item row align-items-center mb-3 p-2 border rounded" data-id="<%=item.variantId%>">
               <div class="col-4 col-md-3">
-                <img src="<%=item.image%>" class="img-fluid rounded" alt="<%=item.name%>">
+               <a href="/details/<%= item.productId %>"> <img src="<%=item.image%>" class="img-fluid rounded" alt="<%=item.name%>"></a>
               </div>
               <div class="col-8 col-md-9">
-                <h6><%=item.name %></h6>
+                <h6><%=item.name %> </h6>
                 <p class="mb-1 text-muted"><%=item.description %></p>
                 <p class="mb-1 text-muted"><%=item.fit%> • <%=item.color%> • Size: <%=item.size%></p>
                 

@@ -20,11 +20,20 @@ exports.addToCart = async (req, res) => {
         if (!variant)
             return res.json({ success: false, message: "this combination is not available" });
 
+        
+
         const existItem = user.cart.find(item =>
             item.variantId.equals(variant._id)
         );
+
+        if(variant.stock===0 ){
+           return res.json({ success: false, message: "Stock unavailable. Available quantity : "+variant.stock });
+        }
         
         if (existItem) {
+          if(variant.stock < (existItem.quantity+1)){
+            return res.json({ success: false, message: "Stock unavailable. Available quantity : "+variant.stock });
+          }
             if (existItem.quantity >= 5)
                 return res.json({ success: false, message: "Maximum 5 same items allowed in cart" });
 
@@ -107,6 +116,9 @@ exports.updateCart = async (req, res) => {
     let errorMessage = null;
 
     if (action === "add") {
+      if(variant.stock===0 || variant.stock < (item.quantity+1)){
+        return res.json({ success: false, message: "Stock is not available. Available quantity is "+variant.stock });
+      }
       if (item.quantity >= 5) errorMessage = "Maximum quantity is 5";
       else if (variant.stock <= 0) errorMessage = "Out of stock";
       else {
