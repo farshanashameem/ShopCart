@@ -12,19 +12,9 @@
 
     .card {
       border-radius: 12px;
-      overflow: hidden;
       border: none;
     }
 
-    .product-img {
-     
-      object-fit: cover;
-    }
-
-
-
-
-    /* Rating Stars */
     .star-rating {
       direction: rtl;
       display: inline-flex;
@@ -41,6 +31,13 @@
     .star-rating label:hover ~ label {
       color: #ffc107;
     }
+
+    /* Tracker */
+    .tracker { position: relative; margin: 30px auto; max-width:600px; }
+    .tracker-step { flex:1; position: relative; text-align:center; }
+    .tracker-circle { width:18px; height:18px; border-radius:50%; margin:0 auto; z-index:1; }
+    .tracker-line { position:absolute; top:8px; left:9%; width:82%; height:3px; background:#dcdcdc; z-index:0; }
+    .tracker-progress { height:100%; background:#28a745; }
   </style>
 </head>
 <body>
@@ -55,232 +52,175 @@
     </div>
 
     <!-- Order Info Card -->
-   <div class="card shadow-sm mb-4 p-3">
-        <div class="row g-0 " style="border-radius:12px; overflow:hidden; background:#fff; min-height:150px; max-height:250px;">
-        
-        <!-- Product Image -->
+    <div class="card shadow-sm mb-4 p-3">
+      <div class="row g-0" style="border-radius:12px; overflow:hidden; background:#fff; min-height:150px; max-height:250px;">
         <div class="col-md-3 d-flex align-items-center">
-            <img src="<%= variant.images[0] %>" 
-                alt="<%= product.name %>" 
-              
-             style="object-fit: cover; object-position: center; border-radius:12px; max-height:100%;max-width: 100%;    /* don't exceed container width */
-                  max-height: 100%; ">
+          <img src="<%= variant.images[0] %>" 
+               alt="<%= product.name %>" 
+               style="object-fit: cover; object-position: center; border-radius:12px; max-width:100%; max-height:100%;">
         </div>
-
-        <!-- Product & Address Details -->
         <div class="col-md-9 p-3 d-flex flex-row justify-content-between">
-            
-            <!-- Product Info -->
-            <div>
+          <div>
             <h5 class="fw-bold mb-2"><%= product.name %></h5>
             <p class="mb-1 text-muted">Quantity: <%= order.quantity %></p>
-            <p class="mb-1 text-muted">Size:<%= variant.size %></p>
+            <p class="mb-1 text-muted">Size: <%= variant.size %></p>
             <p class="mb-1 text-muted">Order ID: <%= order.orderId %></p>
             <p class="mb-1 text-muted">Price: ₹<%= order.price %></p>
             <p class="fw-bold fs-5 text-success">Total: ₹<%= order.price * order.quantity %></p>
-            </div>
-
-            <!-- Delivery Address -->
-            <div>
+          </div>
+          <div>
             <h6 class="fw-bold mb-2">Delivery Address</h6>
             <% if(address) { %>
-                <p class="mb-1"><strong><%= address.name %></strong></p>
-                <p class="mb-1"><%= address.locality %>, <%= address.city %></p>
-                <p class="mb-1"><%= address.state %> - <%= address.pincode %></p>
-                <p class="mb-0 text-muted">Phone: <%= address.phoneNumber %></p>
+              <p class="mb-1"><strong><%= address.name %></strong></p>
+              <p class="mb-1"><%= address.locality %>, <%= address.city %></p>
+              <p class="mb-1"><%= address.state %> - <%= address.pincode %></p>
+              <p class="mb-0 text-muted">Phone: <%= address.phoneNumber %></p>
             <% } else { %>
-                <p>No address found.</p>
+              <p>No address found.</p>
             <% } %>
-            </div>
-
+          </div>
         </div>
-        </div>
-    </div>
-
-
-    <!-- Order Tracker -->
-    <div class="card shadow-sm mb-4 p-3">
-      <h5 class="fw-bold mb-3">Order Status</h5>
-      <div class="track" 
-                    data-status="<%= order.status %>" 
-                    data-expected="<%= expectedDate ? new Date(expectedDate).toDateString() : '' %>" 
-                    data-return="<%= (returnStatus === 'approved' || returnStatus === 'refunded') && returnDate ? new Date(returnDate).toDateString() : '' %>" 
-                    data-return-pending="<%= returnStatus === 'pending'||returnStatus==='approved' || returnStatus==='refunded' ? 'true' : 'false' %>">
-
-                        <!-- Placed -->
-                        <div class="step <%= ['placed','shipped','out-for-delivery','delivered'].includes(order.status) || returnStatus === 'pending' || returnStatus === 'approved' ||returnStatus === 'refunded' ? 'active' : '' %>">
-                            <div class="circle"></div>
-                            <p>Order Placed</p>
-                            <small><%= statusDates.placed ? new Date(statusDates.placed).toDateString() : '' %></small>
-                        </div>
-
-                        <!-- Shipped -->
-                        <div class="step <%= ['shipped','out-for-delivery','delivered'].includes(order.status) || returnStatus === 'pending' || returnStatus === 'approved' || returnStatus === 'refunded' ? 'active' : '' %>">
-                            <div class="circle"></div>
-                            <p>Shipped</p>
-                            <small><%=statusDates.shipped ? new Date(statusDates.shipped).toDateString() : '' %></small>
-                        </div>
-
-                        <!-- Out for Delivery -->
-                        <div class="step <%= ['out-for-delivery','delivered'].includes(order.status) || returnStatus === 'pending' ||returnStatus === 'approved' || order.returnStatus === 'refunded' ? 'active' : '' %>">
-                            <div class="circle"></div>
-                            <p>Out for Delivery</p>
-                            <small> 
-                            <%= statusDates["out-for-delivery"] ? new Date(statusDates["out-for-delivery"]).toDateString() : '' %>
-
-                            </small>
-                        </div>
-
-                        <!-- Delivered / Returned -->
-                        <div class="step <%= order.status === 'delivered' ||returnStatus === 'pending' || returnStatus === 'approved' || returnStatus === 'refunded' ? 'active' : '' %>">
-                            <div class="circle"></div>
-                            <p>
-                                <% if(order.status === 'delivered') { %>
-                                    Delivered
-                                <% } else if(returnStatus === 'pending' || returnStatus === 'approved' ||returnStatus === 'refunded' ||returnStatus === 'rejected') { %>
-                                    Returned
-                                <% } else if(order.status ==='cancelled') { %>
-                                    Cancelled
-                                <% } 
-                                else { %>
-                                    Expected Delivery
-                                <% } %>
-                            </p>
-                            <small>
-                                <% if(order.status === 'delivered') { %>
-                                    <%= statusDates.delivered ? new Date(statusDates.delivered).toDateString() : '' %>
-                                <% } else if(returnStatus === 'pending' ||returnStatus === 'approved' ||returnStatus === 'refunded' ||returnStatus === 'rejected') { %>
-                                    <%= statusDates.returned ? new Date(statusDates.returned).toDateString() : '' %>
-                                <% } if(order.status === 'cancelled') { %>
-                                    <%= statusDates.cancelled ? new Date(statusDates.cancelled).toDateString() : '' %>
-                                <% }
-                                
-                                else { %>
-                                    <%= expectedDate ? new Date(expectedDate).toDateString() : '' %>
-
-                                <% } %>
-                            </small>
-                        </div>
-
       </div>
-       <!-- Buttons -->
-          <div class="d-flex justify-content-center">
-                        <% if (!['delivered','returned','cancelled'].includes(order.status)) { %>
-                            <button class="btn-cancel btn btn-danger"
-                                data-order-id="<%= order.orderId %>"
-                                data-variant-id="<%= order.variantId %>"
-                                data-product-id="<%= order.productId %>">
-                                Cancel Order
-                            </button>
-                        
-
-                        <% } else if(order.status === 'delivered'){ %>
-                            <button 
-                                class="btn-return btn btn-warning" 
-                                data-order-id="<%= order.orderId %>" 
-                                data-variant-id="<%= order.variantId %>" 
-                                data-product-id="<%= order.productId %>" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#returnModal">
-                                Return
-                            </button>
-                        <% } %>
-
-                        <% if(order.status==='cancelled') { %>
-                            <span class="badge bg-danger">Order cancelled</span>
-                            <%}%>
-
-                        <% if(order.returnStatus === "pending"){ %>
-                            <span class="badge bg-warning">Return Request Pending</span>
-                        <% } else if(order.returnStatus === "approved"){ %>
-                            <span class="badge bg-info">Return request accepted</span>
-                        <% } else if(order.returnStatus === "refunded") { %>
-                            <span class="badge bg-success"> Amount refunded</span>
-                            <% } else if(order.returnStatus === "rejected"){ %>
-                            <span class="badge bg-danger">Return Rejected</span>
-                        <% } %>
-          </div>
     </div>
-    
 
-    
-    <!-- Review Section -->
-      <% if(order.status === "delivered") { %>
-        <div class="card shadow-sm p-4">
-          <h5 class="fw-bold mb-3">Leave a Review</h5>
+    <!-- Compact Tracker with Dates -->
+    <div class="tracker">
+      <% const steps = ['placed','shipped','out-for-delivery','delivered']; %>
+      <% const stepLabels = ['Order Placed','Shipped','Out for Delivery','Delivered']; %>
+      <% const statusIndex = steps.indexOf(order.status); %>
 
-          <form id="reviewForm">
-            <input type="hidden" name="productId" value="<%= product._id %>">
-            
-            <div class="mb-2">
-              <label class="form-label">Rating</label><br>
-              <div class="star-rating">
-                <% for (let i=5; i>=1; i--) { %>
-                  <input type="radio" id="star<%= i %>" name="rating" value="<%= i %>">
-                  <label for="star<%= i %>">★</label>
-                <% } %>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <textarea name="comment" class="form-control" rows="3" placeholder="Write your review..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-success px-4">Submit Review</button>
-          </form>
-
-          <hr>
-          <h6 class="fw-bold mt-3">Your Review</h6>
-          <div id="userReview">
-            <% if(userReview) { %>
-              <p><strong>Rating:</strong> <span id="reviewRating"><%= userReview.rating %></span> ★</p>
-              <p><strong>Comment:</strong> <span id="reviewComment"><%= userReview.comment %></span></p>
-              <button class="btn btn-sm btn-primary" id="editReviewBtn">Edit</button>
-            <% } else { %>
-              <p id="noReviewText">You haven't submitted a review yet.</p>
-            <% } %>
+      <div style="display:flex; justify-content:space-between; position:relative; z-index:1;">
+        <% steps.forEach((step, idx) => { %>
+          <div class="tracker-step">
+            <div class="tracker-circle" 
+                 style="background:<%= idx <= statusIndex ? '#28a745' : '#dcdcdc' %>;"></div>
+            <p style="margin-top:6px; font-size:12px; color:#555;"><%= stepLabels[idx] %></p>
+            <small style="font-size:10px; color:#888;">
+              <% if(idx === 0 && statusDates.placed) { %><%= new Date(statusDates.placed).toDateString() %><% } %>
+              <% if(idx === 1 && statusDates.shipped) { %><%= new Date(statusDates.shipped).toDateString() %><% } %>
+              <% if(idx === 2 && statusDates["out-for-delivery"]) { %><%= new Date(statusDates["out-for-delivery"]).toDateString() %><% } %>
+              <% if(idx === 3 && statusDates.delivered) { %><%= new Date(statusDates.delivered).toDateString() %><% } %>
+            </small>
           </div>
-        </div>
+        <% }) %>
+      </div>
 
-      <script src="/js/addReview.js"></script>
+      <!-- Line -->
+      <div class="tracker-line">
+        <div class="tracker-progress" style="width:<%= ((statusIndex+1)/steps.length)*100 %>%"></div>
+      </div>
+    </div>
 
+    <!-- Buttons -->
+    <div class="d-flex justify-content-center mb-4">
+      <% if (!['delivered','returned','cancelled'].includes(order.status)) { %>
+        <button class="btn-cancel btn btn-danger me-2"
+                data-order-id="<%= order.orderId %>"
+                data-variant-id="<%= order.variantId %>"
+                data-product-id="<%= order.productId %>">
+          Cancel Order
+        </button>
+      <% } else if(order.status === 'delivered'){ %>
+        <button class="btn-return btn btn-warning" 
+                data-order-id="<%= order.orderId %>" 
+                data-variant-id="<%= order.variantId %>" 
+                data-product-id="<%= order.productId %>" 
+                data-bs-toggle="modal" 
+                data-bs-target="#returnModal">
+          Return
+        </button>
       <% } %>
 
+      <% if(order.status==='cancelled') { %>
+        <span class="badge bg-danger">Order cancelled</span>
+      <% } %>
+
+      <% if(order.returnStatus === "pending"){ %>
+        <span class="badge bg-warning">Return Request Pending</span>
+      <% } else if(order.returnStatus === "approved"){ %>
+        <span class="badge bg-info">Return request accepted</span>
+      <% } else if(order.returnStatus === "refunded") { %>
+        <span class="badge bg-success">Amount refunded</span>
+      <% } else if(order.returnStatus === "rejected"){ %>
+        <span class="badge bg-danger">Return Rejected</span>
+      <% } %>
+    </div>
+
+    <!-- Review Section -->
+    <% if(order.status === "delivered") { %>
+      <div class="card shadow-sm p-4 mb-5">
+        <h5 class="fw-bold mb-3">Leave a Review</h5>
+        <form id="reviewForm">
+          <input type="hidden" name="productId" value="<%= product._id %>">
+          <div class="mb-2">
+            <label class="form-label">Rating</label><br>
+            <div class="star-rating">
+              <% for (let i=5; i>=1; i--) { %>
+                <input type="radio" id="star<%= i %>" name="rating" value="<%= i %>">
+                <label for="star<%= i %>">★</label>
+              <% } %>
+            </div>
+          </div>
+          <div class="mb-3">
+            <textarea name="comment" class="form-control" rows="3" placeholder="Write your review..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-success px-4">Submit Review</button>
+        </form>
+
+        <hr>
+        <h6 class="fw-bold mt-3">Your Review</h6>
+        <div id="userReview">
+          <% if(userReview) { %>
+            <p><strong>Rating:</strong> <span id="reviewRating"><%= userReview.rating %></span> ★</p>
+            <p><strong>Comment:</strong> <span id="reviewComment"><%= userReview.comment %></span></p>
+            <button class="btn btn-sm btn-primary" id="editReviewBtn">Edit</button>
+          <% } else { %>
+            <p id="noReviewText">You haven't submitted a review yet.</p>
+          <% } %>
+        </div>
+      </div>
+      <script src="/js/addReview.js"></script>
+    <% } %>
 
   </div>
 
   <%- include('../partials/footer') %>
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="/js/tracker.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/cancelOrder.js"></script>
-</body>
- <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/tracker.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/cancelOrder.js"></script>
+
+  <!-- Return Modal -->
+  <div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+      <div class="modal-content">
         <form action="/orders/return" method="POST">
-            <div class="modal-header">
+          <div class="modal-header">
             <h5 class="modal-title">Reason for Return</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
+          </div>
+          <div class="modal-body">
             <input type="hidden" name="orderId" id="modalOrderId">
             <input type="hidden" name="variantId" id="modalVariantId">
             <input type="hidden" name="productId" id="modalProductId">
-            
+
             <label for="reason">Choose a reason:</label>
             <select name="reason" class="form-control" required>
-                <option value="">-- Select Reason --</option>
-                <option>Wrong Size</option>
-                <option>Damaged Product</option>
-                <option>Not as Described</option>
-                <option>Other</option>
+              <option value="">-- Select Reason --</option>
+              <option>Wrong Size</option>
+              <option>Damaged Product</option>
+              <option>Not as Described</option>
+              <option>Other</option>
             </select>
-            </div>
-            <div class="modal-footer">
+          </div>
+          <div class="modal-footer">
             <button type="submit" class="btn btn-danger">Submit</button>
-            </div>
+          </div>
         </form>
-        </div>
+      </div>
     </div>
-    </div>
+  </div>
+</body>
 </html>
+

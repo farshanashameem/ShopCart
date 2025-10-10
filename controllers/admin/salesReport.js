@@ -112,7 +112,8 @@ exports.getSalesReport = async (req, res) => {
 
     const query = { createdAt: { $gte: startDate } };
     const report = await getReportData(query);
-    const orders = await Orders.find();
+
+    const orders = await Orders.find(query); // <-- Apply date filter here
     const orderedItems = await Promise.all(
       orders.map(async (item) => {
         const product = await Products.findById(item.productId);
@@ -138,26 +139,11 @@ exports.getSalesReport = async (req, res) => {
   }
 };
 
-// POST -> For filters & custom dates in the sales report
 exports.postSalesReport = async (req, res) => {
   try {
     const { filter, from, to } = req.body;
     let startDate, endDate;
     const today = new Date();
-     const orders = await Orders.find();
-    const orderedItems = await Promise.all(
-      orders.map(async (item) => {
-        const product = await Products.findById(item.productId);
-        const category = await ProductType.findById(product.productTypeId);
-        return {
-          name: product.name,
-          category: category.name,
-          quantity: item.quantity,
-          total: item.total,
-          date: item.createdAt,
-        };
-      })
-    );
 
     // ==== Case 1: Predefined filter ====
     if (filter) {
@@ -180,15 +166,30 @@ exports.postSalesReport = async (req, res) => {
       const query = { createdAt: { $gte: startDate } };
       const report = await getReportData(query);
 
+      const orders = await Orders.find(query); // <-- Apply date filter here
+      const orderedItems = await Promise.all(
+        orders.map(async (item) => {
+          const product = await Products.findById(item.productId);
+          const category = await ProductType.findById(product.productTypeId);
+          return {
+            name: product.name,
+            category: category.name,
+            quantity: item.quantity,
+            total: item.total,
+            date: item.createdAt,
+          };
+        })
+      );
+
       return res.render("admin/salesReport", {
         filter,
-        ...report,items: orderedItems
+        ...report,
+        items: orderedItems,
       });
     }
 
     // ==== Case 2: Custom Date Range ====
     if (from || to) {
-      // If only one date is provided -> invalid
       if (!from || !to) {
         return res.render("admin/salesReport", {
           filter: "Custom Date",
@@ -198,19 +199,19 @@ exports.postSalesReport = async (req, res) => {
           customers: 0,
           pending: 0,
           cancelled: 0,
-          shipping: 0,items: orderedItems,
+          shipping: 0,
+          items: [],
           errorMessage: "Please select both From and To dates",
         });
       }
 
-      let startDate = new Date(from);
-      let endDate = new Date(to);
+      startDate = new Date(from);
+      endDate = new Date(to);
       endDate.setHours(23, 59, 59, 999);
 
-      // Validation: check valid dates & logical range
-      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate || startDate>today) {
+      if (isNaN(startDate) || isNaN(endDate) || startDate > endDate || startDate > today) {
         return res.render("admin/salesReport", {
-          filter: "Custom Date",items: orderedItems,
+          filter: "Custom Date",
           orders: 0,
           revenue: 0,
           products: 0,
@@ -218,6 +219,7 @@ exports.postSalesReport = async (req, res) => {
           pending: 0,
           cancelled: 0,
           shipping: 0,
+          items: [],
           errorMessage: "Invalid date range",
         });
       }
@@ -225,9 +227,25 @@ exports.postSalesReport = async (req, res) => {
       const query = { createdAt: { $gte: startDate, $lte: endDate } };
       const report = await getReportData(query);
 
+      const orders = await Orders.find(query); // <-- Apply date filter here
+      const orderedItems = await Promise.all(
+        orders.map(async (item) => {
+          const product = await Products.findById(item.productId);
+          const category = await ProductType.findById(product.productTypeId);
+          return {
+            name: product.name,
+            category: category.name,
+            quantity: item.quantity,
+            total: item.total,
+            date: item.createdAt,
+          };
+        })
+      );
+
       return res.render("admin/salesReport", {
         filter: `From ${from} To ${to}`,
-        ...report,items: orderedItems
+        ...report,
+        items: orderedItems,
       });
     }
 
@@ -238,6 +256,7 @@ exports.postSalesReport = async (req, res) => {
     res.status(500).send("Error generating report");
   }
 };
+
 
 //function to calculate the total report in the dashboard
 async function getTotalReport() {

@@ -257,9 +257,11 @@ exports.editProduct = async (req, res) => {
 
     if (!result.isEmpty()) {
       result.array().forEach((error) => {
-        errorsObj[error.path] = error.msg;
-      });
-
+  // Convert dots to bracket notation
+  const key = error.path.replace(/\.(\d+)\./g, '[$1].');
+  errorsObj[key] = error.msg;
+});
+console.log(errorsObj)
       return res.render("admin/editProduct", {
         errors: errorsObj,
         product,
@@ -267,7 +269,9 @@ exports.editProduct = async (req, res) => {
         colors,
         fits,
         productTypes,
-        variants
+        variants: Array.isArray(req.body.variants)
+    ? req.body.variants
+    : Object.values(req.body.variants || {})
       });
     }
 

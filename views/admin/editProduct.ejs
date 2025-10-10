@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%- include('../partials/head', { title: 'Add Product' }) %>
+<%- include('../partials/head', { title: 'Edit Product' }) %>
 
   <body>
     <div class="container-fluid">
@@ -8,7 +8,8 @@
         <%- include('../partials/adminDashboard') %>
 
           <div class="col-md-10 p-5">
-            <h3 class="fw-bold mb-4">Add Product</h3>
+            <h3 class="fw-bold mb-4">Edit Product </h3>
+                  
 
             <form action="/admin/editProduct" method="POST" enctype="multipart/form-data">
               <input type="hidden" value="<%= product._id%>" name="productId">
@@ -36,33 +37,41 @@
                   <% } %>
               </div>
 
-             <!-- Upload Section -->
-          <div class="mb-3">
+           <!-- Upload Section -->
+<div class="mb-3">
   <label class="form-label">Edit Product Images (max 3)</label>
   <div class="d-flex flex-wrap gap-3" id="imageContainer">
-  <% 
-    const images = (variants.length > 0 && variants[0].images) ? variants[0].images : [];
-    for (let i = 0; i < 3; i++) { 
-  %>
-    <div class="upload-box position-relative text-center" data-slot="<%= i %>">
-      <input type="file" class="d-none image-input" name="images<%= i %>" accept="image/*">
-      <% if (images[i]) { %>
-        <input type="hidden" name="existingImages[<%= i %>]" value="<%= images[i] %>">
-        <div class="position-relative d-inline-block">
-          <img src="<%= images[i] %>" class="upload-preview img-thumbnail" style="width:120px;height:120px;object-fit:cover;cursor:pointer;">
-          <button type="button" class="btn btn-sm btn-danger remove-image-btn position-absolute" style="top:2px;right:2px">&times;</button>
-        </div>
-      <% } else { %>
-        <div class="upload-preview d-flex align-items-center justify-content-center bg-light border rounded" style="width:120px;height:120px;cursor:pointer;">
-          <span class="text-muted">+</span>
-        </div>
-      <% } %>
-      <small class="text-muted d-block text-center">Click to upload</small>
-    </div>
-  <% } %>
+    <% 
+      // Use previously submitted images first (oldInput), fallback to DB variant images
+      const variantImages = oldInput?.existingImages
+        ? Object.values(oldInput.existingImages) // {0: 'path', 1:'path'} → ['path0', 'path1']
+        : (variants.length > 0 && variants[0].images)
+          ? variants[0].images
+          : [];
+      
+      for (let i = 0; i < 3; i++) { 
+        const img = variantImages[i];
+    %>
+      <div class="upload-box position-relative text-center" data-slot="<%= i %>">
+        <input type="file" class="d-none image-input" name="images<%= i %>" accept="image/*">
+        
+        <% if (img) { %>
+          <input type="hidden" name="existingImages[<%= i %>]" value="<%= img %>">
+          <div class="position-relative d-inline-block">
+            <img src="<%= img %>" class="upload-preview img-thumbnail" style="width:120px;height:120px;object-fit:cover;cursor:pointer;">
+            <button type="button" class="btn btn-sm btn-danger remove-image-btn position-absolute" style="top:2px;right:2px">&times;</button>
+          </div>
+        <% } else { %>
+          <div class="upload-preview d-flex align-items-center justify-content-center bg-light border rounded" style="width:120px;height:120px;cursor:pointer;">
+            <span class="text-muted">+</span>
+          </div>
+        <% } %>
+        <small class="text-muted d-block text-center">Click to upload</small>
+      </div>
+    <% } %>
+  </div>
 </div>
 
-</div>
 
 
                 <!-- Crop Modal -->
