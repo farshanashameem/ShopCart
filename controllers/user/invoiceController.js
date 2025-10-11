@@ -8,6 +8,8 @@ exports.getInvoicePage = async (req, res) => {
   try {
     const orderId = req.params.orderId;
     const user=await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     // get all orders with same orderId
     const orderItems = await Orders.find({ orderId });
     const discount = orderItems.reduce((sum, item) => sum + (item.couponDiscount || 0), 0);
@@ -63,7 +65,7 @@ exports.getInvoicePage = async (req, res) => {
       grandTotal,
       createdAt: orderItems[0].createdAt,
       discount,offerDiscount,
-      deliveryCharge
+      deliveryCharge,wishlistCount,cartCount
     });
   } catch (err) {
     console.error(err);

@@ -1,15 +1,17 @@
 <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color: rgb(244, 236, 227);">
   <div class="container">
+    <!-- Logo -->
     <a class="navbar-brand fw-bold fs-4" href="/">
       <img src="/images/ShopCart.PNG" class="img-fluid logo-img" alt="ShopCart">
     </a>
 
+    <!-- Toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <!-- Left side nav links -->
+      <!-- Left links -->
       <ul class="navbar-nav me-auto align-items-center gap-3">
         <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="/products/men">Men</a></li>
@@ -17,36 +19,30 @@
         <li class="nav-item"><a class="nav-link" href="/products">All Products</a></li>
       </ul>
 
-      <!-- Search bar -->
-     <form class="d-flex me-3 position-relative" id="productFilterForm" action="/products" method="GET">
-  <input
-    id="searchInput"
-    class="form-control rounded-pill me-2 pe-5"
-    type="text"
-    name="search"
-    value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
-    placeholder="Search products..."
-    aria-label="Search"
-    style="width: 300px;"
-  >
+      <!-- Search -->
+      <form class="d-flex me-3 position-relative" id="productFilterForm" action="/products" method="GET">
+        <input
+          id="searchInput"
+          class="form-control rounded-pill me-2 pe-5"
+          type="text"
+          name="search"
+          value="<%= typeof searchQuery !== 'undefined' ? searchQuery : '' %>"
+          placeholder="Search for products, brands and more..."
+          aria-label="Search"
+          style="width: 300px;"
+        >
 
-  <!-- Clear (X) Button -->
-  <button
-    type="button"
-    id="clearSearchBtn"
-    class="btn position-absolute end-0 me-5"
-    style="background: transparent; border: none; top: 50%; transform: translateY(-50%); display: none;"
-  >
-    <i class="bi bi-x-circle text-secondary"></i>
-  </button>
+        <button type="button" id="clearSearchBtn" class="btn position-absolute end-0 me-5"
+          style="background: transparent; border: none; top: 50%; transform: translateY(-50%); display: none;">
+          <i class="bi bi-x-circle text-secondary"></i>
+        </button>
 
-  <button class="btn btn-dark rounded-pill" type="submit">
-    <i class="bi bi-search"></i>
-  </button>
-</form>
+        <button class="btn btn-dark rounded-pill" type="submit">
+          <i class="bi bi-search"></i>
+        </button>
+      </form>
 
-
-      <!-- Right side auth / icons -->
+      <!-- Right side -->
       <ul class="navbar-nav align-items-center gap-3">
         <% if (!user) { %>
           <li class="nav-item"><a class="nav-link" href="/login">Sign In</a></li>
@@ -54,12 +50,33 @@
             <a href="/signup" class="ms-2 text-decoration-none rounded p-2 bg-dark text-white">Sign Up</a>
           </li>
         <% } else { %>
-          <li class="nav-item">
-            <a class="nav-link" href="/wishlist"><i class="bi bi-heart fs-5"></i></a>
+          <!-- Wishlist -->
+          <li class="nav-item position-relative">
+            <a class="nav-link" href="/wishlist">
+              <i class="bi bi-heart fs-5"></i>
+              <% if (wishlistCount && wishlistCount > 0) { %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  <%= wishlistCount %>
+                  <span class="visually-hidden">wishlist items</span>
+                </span>
+              <% } %>
+            </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/cart"><i class="bi bi-cart fs-5"></i></a>
+
+          <!-- Cart -->
+          <li class="nav-item position-relative">
+            <a class="nav-link" href="/cart">
+              <i class="bi bi-cart fs-5"></i>
+              <% if (cartCount && cartCount > 0) { %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
+                  <%= cartCount %>
+                  <span class="visually-hidden">cart items</span>
+                </span>
+              <% } %>
+            </a>
           </li>
+
+          <!-- Profile -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
               <i class="bi bi-person-circle fs-5"></i>
@@ -74,26 +91,38 @@
       </ul>
     </div>
 
-    <link rel="stylesheet" href="/css/style.css">
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
   </div>
 </nav>
+
+<!-- Optional: CSS for better badge placement -->
+<style>
+  .badge {
+    font-size: 11px;
+    padding: 3px 6px;
+    transform: translate(20%, -20%);
+    
+  }
+  .nav-link i:hover {
+    color: #ff6f00;
+    transition: color 0.2s;
+  }
+</style>
+
 <script>
   const searchInput = document.getElementById("searchInput");
   const clearBtn = document.getElementById("clearSearchBtn");
 
-  // Show the clear button only when there's text
   searchInput.addEventListener("input", () => {
     clearBtn.style.display = searchInput.value ? "block" : "none";
   });
 
-  // Clear the input and resubmit or redirect to /products
   clearBtn.addEventListener("click", () => {
     searchInput.value = "";
     clearBtn.style.display = "none";
-    window.location.href = "/products"; // ✅ Redirect to all products after clear
+    window.location.href = "/products";
   });
 
-  // If there's already a search value (on reload), show the clear button
   if (searchInput.value) clearBtn.style.display = "block";
 </script>

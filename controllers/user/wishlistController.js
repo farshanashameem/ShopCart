@@ -65,6 +65,8 @@ exports.addToWishlist = async (req, res) => {
 exports.getWishlistPage = async (req, res) => {
     try {
         const user = req.session.user;
+        const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
 
 
         const wishlistItems = await Promise.all(
@@ -95,7 +97,7 @@ exports.getWishlistPage = async (req, res) => {
     // slice array for current page
     const paginatedItems = wishlistItems.slice((page - 1) * limit, page * limit);
 
-        res.render('user/wishlist', { wishlistItems:paginatedItems,totalPages, currentPage: page });
+        res.render('user/wishlist', { wishlistItems:paginatedItems,totalPages, currentPage: page,cartCount,wishlistCount });
 
     } catch (err) {
         console.error(err);

@@ -51,7 +51,8 @@ exports.selectAddress = async (req, res) => {
     const data = await buildCheckoutData(req.session.user._id);
     data.showAddressBar = false;
     const user = await User.findById(req.session.user._id);
-
+     const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     const results = await Promise.all(
       user.cart.map(async (item) => {
         const variant = await productVariant
@@ -86,7 +87,7 @@ exports.selectAddress = async (req, res) => {
       return res.redirect("/orders");
     }
     if (!data) return res.redirect("/orders");
-    res.render("user/checkout1", data);
+    res.render("user/checkout1", {...data,wishlistCount,cartCount});
   } catch (err) {
     console.error("Error in checkout:", err);
     res.status(500).send("Internal Server Error");
@@ -100,6 +101,8 @@ exports.addAddress = async (req, res) => {
     const old = req.body;
     const errorsObj = {};
     const user = await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     if (!user.cart || user.cart.length === 0) {
       return res.redirect("/orders");
     }
@@ -115,7 +118,7 @@ exports.addAddress = async (req, res) => {
       data.showAddressBar = true;
       data.errors = errorsObj;
       data.old = old;
-      return res.render("user/checkout1", data);
+      return res.render("user/checkout1",{...data,wishlistCount,cartCount});
     }
     // Get client IP
     const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -139,7 +142,7 @@ exports.addAddress = async (req, res) => {
     await user.save();
     const data = await buildCheckoutData(req.session.user._id);
     data.showAddressBar = false;
-    return res.render("user/checkout1", data);
+    return res.render("user/checkout1", {...data,wishlistCount,cartCount});
   } catch (err) {
     console.log(err);
   }
@@ -151,6 +154,8 @@ exports.updateAddress = async (req, res) => {
     const errorsObj = {};
 
     const user = await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     if (!user.cart || user.cart.length === 0) {
       return res.redirect("/orders");
     }
@@ -172,7 +177,7 @@ exports.updateAddress = async (req, res) => {
       data.showAddressBar = true;
       data.errors = errorsObj;
       data.old = old;
-      return res.render("user/checkout1", data);
+      return res.render("user/checkout1", {...data,wishlistCount,cartCount});
     }
 
     // Get client IP
@@ -202,7 +207,7 @@ exports.updateAddress = async (req, res) => {
 
     const data = await buildCheckoutData(req.session.user._id);
     data.showAddressBar = false;
-    return res.render("user/checkout1", data);
+    return res.render("user/checkout1", {...data,wishlistCount,cartCount});
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Server error" });
@@ -337,7 +342,8 @@ exports.selectPayment = async (req, res) => {
    
 
     const cart = { items: cartItems, total };
-
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     // Render checkout page with user and cart
     res.render("user/checkout2", {
       user,
@@ -345,7 +351,7 @@ exports.selectPayment = async (req, res) => {
       offer,categoryy,
       chosenAddressId: addressId,
       coupons: availableCoupons,
-      deliveryCharge
+      deliveryCharge,cartCount,wishlistCount
     });
   } catch (err) {
     console.log(err);
@@ -357,6 +363,8 @@ exports.selectPayment = async (req, res) => {
 exports.getOrderPage = async (req, res) => {
   try {
     const user = await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
 
     // pagination setup
     const page = parseInt(req.query.page) || 1;
@@ -425,7 +433,7 @@ exports.getOrderPage = async (req, res) => {
       orders: list,
       currentPage: page,
       totalPages,
-      successMessage,
+      successMessage,wishlistCount,cartCount
     });
   } catch (err) {
     console.log(err);
@@ -476,6 +484,8 @@ exports.OrderDetails = async (req, res) => {
     const product = await Products.findById(order.productId);
     const variant = await productVariant.findById(order.variantId);
     const user = await User.findById(order.userId);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     
 
     // 🔹 Address handling
@@ -520,7 +530,7 @@ if (order.createdAt) {
       returnStatus: returnRequest ? returnRequest.status : null,
       returnDate: returnRequest ? returnRequest.returnDate : null,
       expectedDate: expectedDate,
-      userReview: review ? review : null,
+      userReview: review ? review : null,wishlistCount,cartCount
     });
   } catch (err) {
     console.log(err);
@@ -528,12 +538,17 @@ if (order.createdAt) {
   }
 };
 
-exports.getSuccessPage = (req, res) => {
-  res.render("user/success", { orderId: null });
+exports.getSuccessPage = async (req, res) => {
+  const user=await User.findById(req.session.user._id);
+  const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+  res.render("user/success", { orderId: null,wishlistCount,cartCount });
 };
 
 exports.getFailedPage = async (req, res) => {
   const user=await User.findById(req.session.user._id);
+  const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
 
   if(req.session.orderId){
     const failedProducts = user.cart.map(item => ({
@@ -559,5 +574,5 @@ const orderId=req.session.orderId;
   req.session.total=null;
   req.session.payment=null;
   }
-  res.render("user/failed");
+  res.render("user/failed",{cartCount,wishlistCount});
 };

@@ -296,8 +296,10 @@ for (const item of cartItems) {
     user.cart = [];
     await user.save();
     req.session.orderPlaced = true;
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
 
-    return res.render("user/success", {orderId});
+    return res.render("user/success", {orderId,wishlistCount,cartCount});
     
   } catch (err) {
     console.error('Payment processing error:', err);

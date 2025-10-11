@@ -65,7 +65,8 @@ exports.getCartpage = async (req, res) => {
     try {
 
         const user = await User.findById(req.session.user._id);
-        
+         const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
         const items = await Promise.all(
             user.cart.map(async (item) => {
                 const product = await Products.findById(item.productId);
@@ -97,7 +98,7 @@ exports.getCartpage = async (req, res) => {
 
         const cartItems = items.filter(item => item !== null);  
 
-        res.render('user/cart', { items: cartItems, query: req.query });
+        res.render('user/cart', { items: cartItems, query: req.query,wishlistCount,cartCount });
     } catch (err) {
         console.log(err);
     }

@@ -145,10 +145,16 @@ exports.getHomePage = async (req, res) => {
         .filter(Boolean);
     }
 
+     let user = null;
+    if (req.session && req.session.user) {
+      user = await User.findById(req.session.user._id);
+    }
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     res.render('user/home', {
       categories: categoryData,
       trends: topTrends,
-      arrivals: newArrivals
+      arrivals: newArrivals, cartCount,wishlistCount
     });
   } catch (err) {
     console.error('Error in getHomePage:', err);
@@ -340,6 +346,11 @@ exports.getProductPage = async (req, res) => {
     delete queryParams.page;
     if (req.query.search) queryParams.search = req.query.search; // ✅ preserve search param
 
+    //find the count of cart and wishlist
+    const user=await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+
     res.render('user/allProducts', {
       categories,
       fit,
@@ -354,7 +365,8 @@ exports.getProductPage = async (req, res) => {
       sort,
       genderParam,
       queryParams,
-      searchQuery, // ✅ pass search to view
+      searchQuery, // ✅ pass search to view,
+      cartCount,wishlistCount
     });
   } catch (err) {
     console.error('Error loading product page with filters:', err);
@@ -416,7 +428,10 @@ exports.getProductDetails = async (req, res) => {
     const images = variants[0]?.images || [];
     const basePrice = variants[0]?.basePrice || 0;
     const discountPrice = variants[0]?.discountPrice || 0;
-    
+
+    const user=await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     res.render('user/productDetails', {
       product,
       variants,
@@ -424,7 +439,9 @@ exports.getProductDetails = async (req, res) => {
       discountPrice,
        relatedProducts: relatedDatas,
        reviews,
-       avgRating,count,offers
+       avgRating,count,offers,
+       cartCount,
+       wishlistCount
     });
   } catch (err) {
     console.error('Product Details Error:', err.message);
@@ -513,10 +530,13 @@ exports.searchProducts = async (req, res) => {
       };
     });
 
+    const user=await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
     res.render('user/allProducts', {
       products: actualProducts,
       search,
-      categories: [],   // optional if you want to reuse filters here
+      categories: [],   // optional if  want to reuse filters here
       fit: [],
       colour: [],
       selectedFits: [],
@@ -527,7 +547,9 @@ exports.searchProducts = async (req, res) => {
       totalPages,
       sort: null,
       genderParam: "all",
-      queryParams: req.query
+      queryParams: req.query,
+      cartCount,
+      wishlistCount
     });
 
   } catch (err) {

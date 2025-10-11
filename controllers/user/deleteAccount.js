@@ -4,7 +4,9 @@ exports.delete=async(req,res)=>{
     try{
 
         const user=await User.findById(req.session.user._id);
-        res.render('user/deleteAccount',{name:user.name,image:user.image});
+        const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+        res.render('user/deleteAccount',{name:user.name,image:user.image,wishlistCount,cartCount});
 
     }catch(err){
         console.log(err)

@@ -214,7 +214,7 @@
                 <% } else if(order.status==='cancelled') { %> Cancelled 
                 <% } else { %> Expected Delivery <% } %>
               </p>
-              <small>
+              <small>  
                 <% if(order.status==='delivered') { %>
                   <%= new Date(order.statusDates.delivered).toDateString() %>
                 <% } else if(order.returnStatus) { %>

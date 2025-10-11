@@ -4,11 +4,13 @@ const Transactions=require('../../models/WalletTransactions');
 exports.getWalletPage=async (req,res)=>{
     try{
         const user=await User.findById(req.session.user._id);
+        const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
         if(!user) console.log("no user found");
 
         console.log(user.wallet)
         const walletAmount=user.wallet;
-        res.render('user/wallet',{walletAmount:walletAmount,name:user.name,image:user.image});
+        res.render('user/wallet',{walletAmount:walletAmount,name:user.name,image:user.image,cartCount,wishlistCount});
 
     }catch(err){
         console.log(err);
@@ -18,6 +20,8 @@ exports.getWalletPage=async (req,res)=>{
 exports.getTransactions = async (req, res) => {
   try {
     const user = await User.findById(req.session.user._id);
+    const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
 
     // Get all transactions for this user
     const transactions = await Transactions.find({ userId: req.session.user._id })
@@ -27,7 +31,9 @@ exports.getTransactions = async (req, res) => {
       transactions: transactions || [], // fallback if no transactions
       name: user.name,
       image: user.image,
-       balance:user.wallet
+       balance:user.wallet,
+       cartCount,
+       wishlistCount
     });
   } catch (err) {
     console.error("Error fetching transactions:", err);

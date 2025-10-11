@@ -8,7 +8,9 @@ const bcrypt = require("bcrypt");
 
 exports.getProfilePage = (req, res) => {
   const user = req.session.user;
-  res.render("user/profile", { user, errors: {}, old: {} });
+  const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+  res.render("user/profile", { user, errors: {}, old: {} ,cartCount,wishlistCount});
 };
 
 exports.updateProfile = async (req, res) => {
@@ -20,6 +22,8 @@ exports.updateProfile = async (req, res) => {
   const errorsObj = {};
   const old = { name, email, phone };
   const user = await User.findById(req.session.user._id);
+   const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
   try {
     // ✅ Get validation errors
     const result = validationResult(req);
@@ -31,7 +35,7 @@ exports.updateProfile = async (req, res) => {
       return res.render("user/profile", {
         errors: errorsObj,
         old,
-        user: req.session.user,
+        user: req.session.user,cartCount,wishlistCount
       });
     }
     const existNumber = await User.findOne({mobile: phone  ,_id: { $ne:user._id }  });
@@ -40,7 +44,7 @@ exports.updateProfile = async (req, res) => {
       return res.render("user/profile", {
         errors,
         old,
-        user: req.session.user,
+        user: req.session.user,cartCount,wishlistCount
       });
     }
 

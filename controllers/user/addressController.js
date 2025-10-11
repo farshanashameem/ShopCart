@@ -8,8 +8,10 @@ exports.getAddressPage = async (req, res) => {
     try {
 
         const user = await User.findOne({ _id: req.session.user._id }, { address: 1, name:1, image:1 });
-        res.render('user/address', { addresses: user.address, old: {}, errors: {}, address: null,name:user.name,image:user.image });
-
+        const cartCount = user?.cart?.length || 0;
+      const wishlistCount = user?.wishlist?.length || 0;
+        res.render('user/address', { addresses: user.address, old: {}, errors: {}, address: null,name:user.name,image:user.image ,cartCount,wishlistCount});
+       
     } catch (err) {
         console.log(err);
     }
