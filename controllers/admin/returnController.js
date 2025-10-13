@@ -2,13 +2,14 @@ const Orders = require("../../models/Orders");
 const Returns = require("../../models/Returns");
 const User = require("../../models/userModel");
 const WalletTransactions = require("../../models/WalletTransactions");
-const Products = require("../../models/Products");
+const Product = require("../../models/Products");
+const ProductVariant = require("../../models/productVariant");
 
 exports.updateReturnStatus = async (req, res) => {
   try {
     const { orderId, productId, variantId, userId, total, discount, action } =
       req.body;
-    console.log(total);
+   
     if (!["approved", "rejected", "refunded"].includes(action)) {
       return res.json({ success: false, message: "Invalid action" });
     }
@@ -19,17 +20,29 @@ exports.updateReturnStatus = async (req, res) => {
       variantId: variantId,
       userId: userId,
     });
+    
     item.status = action;
     await item.save();
 
     if (action === "refunded") {
       const user = await User.findById(userId);
       let Discount = total - discount;
-      console.log("wallet:" + user.wallet);
-      console.log("discount:" + discount);
       user.wallet = user.wallet + Discount;
       await user.save();
-      console.log(user.wallet);
+
+      const orderedPdt=await Orders.findOne({
+      orderId: orderId,
+      productId: productId,
+      variantId: variantId,
+      userId: userId,
+    });
+      
+const returneditem=await ProductVariant.findById(variantId);
+returneditem.stock+=orderedPdt.quantity;
+returneditem.save();
+
+
+     
       const transaction = new WalletTransactions({
         userId: user._id,
         type: "credit",
