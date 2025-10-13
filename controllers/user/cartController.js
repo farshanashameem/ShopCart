@@ -2,6 +2,7 @@ const User = require("../../models/userModel");
 const productVariant = require("../../models/productVariant");
 const Products = require('../../models/Products');
 const Fit = require('../../models/Fit');
+const Colour = require('../../models/Colour');
 const Orders = require('../../models/Orders');
 const mongoose = require('mongoose');
 
@@ -72,8 +73,9 @@ exports.getCartpage = async (req, res) => {
                 const product = await Products.findById(item.productId);
                 const variant = await productVariant.findById(item.variantId);
                 const fit = await Fit.findById(variant.fitId);
+                const color=await Colour.findById(variant.colorId);
                 if (!product || !variant) return null;
-
+  
                 return {
                     productId: product._id,
                     variantId: variant._id,
@@ -83,7 +85,7 @@ exports.getCartpage = async (req, res) => {
                     basePrice: variant.basePrice,
                     discountPrice: variant.discountPrice,
                     size: variant.size,
-                    color: variant.name,
+                    color: color.name,
                     stock: variant.stock,
                     image: variant.images[0],
                     quantity: item.quantity,

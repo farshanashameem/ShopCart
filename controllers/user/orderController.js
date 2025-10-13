@@ -2,7 +2,8 @@ const User = require("../../models/userModel");
 const mongoose = require("mongoose");
 const productVariant = require("../../models/productVariant");
 const Products = require("../../models/Products");
-const Fit = require("../../models/Fit");
+const Fit = require('../../models/Fit');
+const Colour = require('../../models/Colour');
 const Orders = require("../../models/Orders");
 const Returns = require("../../models/Returns");
 const Review = require("../../models/Review");
@@ -385,7 +386,8 @@ exports.getOrderPage = async (req, res) => {
       orders.map(async (item) => {
         const product = await Products.findById(item.productId).lean();
         const variant = await productVariant.findById(item.variantId).lean();
-        
+         const fit = await Fit.findById(variant.fitId);
+        const color=await Colour.findById(variant.colorId);
 
         // check if return request exists for this order item
         const returnRequest = await Returns.findOne({
@@ -405,7 +407,8 @@ exports.getOrderPage = async (req, res) => {
           address:item.address,
           name: product?.name,
           description: product?.description,
-          color: variant?.color,
+          color: color?.name,
+          fit:fit?.name,
           image: variant?.images?.[0],
           quantity: item.quantity,
           size:variant?.size,
@@ -483,6 +486,8 @@ exports.OrderDetails = async (req, res) => {
     const order = await Orders.findById(id).lean();
     const product = await Products.findById(order.productId);
     const variant = await productVariant.findById(order.variantId);
+    const fit = await Fit.findById(variant.fitId);
+    const color=await Colour.findById(variant.colorId);
     const user = await User.findById(order.userId);
     const cartCount = user?.cart?.length || 0;
       const wishlistCount = user?.wishlist?.length || 0;
@@ -519,13 +524,14 @@ if (order.createdAt) {
   const createdAt = new Date(order.createdAt); // ensure it’s a Date object
   expectedDate = new Date(createdAt.getTime() + 10 * 24 * 60 * 60 * 1000);
 }
-      console.log(order)
+      
     const review = await Review.find(user._id, product._id);
     res.render("user/orderedItem", {
       order,
       address,
       product,
       variant,
+      color:color.name,fit:fit.name,
       statusDates,
       returnStatus: returnRequest ? returnRequest.status : null,
       returnDate: returnRequest ? returnRequest.returnDate : null,
