@@ -23,6 +23,9 @@
        <!-- Product Details -->
         <div class="flex-grow-1">
           <h6 class="mb-1"><%= item.name %></h6>
+          <p class="mb-1 text-muted">Size: <%= item.size %></p>
+             <p class="mb-1 text-muted">Fit: <%= item.fit %></p>
+              <p class="mb-1 text-muted">Color: <%= item.color %></p>
 
           <% if (item.stock > 0) { %>
             <p class="mb-0 text-success">In stock</p>
@@ -30,7 +33,7 @@
             <p class="mb-0 text-danger">Out of stock</p>
           <% } %>
 
-          <p class="mb-0 fw-bold">₹<%= item.price %></p>
+          <p class="mb-0 fw-bold">Price:₹<%= item.price %></p>
         </div>
 
 
