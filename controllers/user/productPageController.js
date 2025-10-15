@@ -180,7 +180,7 @@ exports.getProductPage = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
-    const searchQuery = req.query.search ? req.query.search.trim() : null; // ✅ Added search support
+    const searchQuery = req.query.search ? req.query.search.trim() : null;
 
     // ====== Fetch categories ======
     const categoriesQuery = { isActive: true };
@@ -252,12 +252,11 @@ exports.getProductPage = async (req, res) => {
 
     // ✅ Include search in query
     if (searchQuery) {
-  productQuery.$or = [
-    { name: { $regex: searchQuery, $options: 'i' } },
-    { description: { $regex: searchQuery, $options: 'i' } },
-  ];
-}
-              
+      productQuery.$or = [
+        { name: { $regex: searchQuery, $options: 'i' } },
+        { description: { $regex: searchQuery, $options: 'i' } },
+      ];
+    }
 
     // ====== Handle no matching variants ======
     if (
@@ -289,9 +288,7 @@ exports.getProductPage = async (req, res) => {
     }
 
     // ====== Fetch & prepare products ======
-    const allProducts = await Products.find(productQuery)
-      .sort({ createdAt: -1 })
-      .lean();
+    const allProducts = await Products.find(productQuery).sort({ createdAt: -1 }).lean();
 
     const productIds = allProducts.map((p) => p._id);
     const variants = await ProductVariant.find({
@@ -329,7 +326,7 @@ exports.getProductPage = async (req, res) => {
       };
     });
 
-    // ====== Apply sorting BEFORE pagination ======
+    // ====== Sorting BEFORE pagination ======
     if (sort === 'LowToHigh') {
       actualProducts.sort((a, b) => a.minPrice - b.minPrice);
     } else if (sort === 'HighToLow') {
@@ -341,16 +338,26 @@ exports.getProductPage = async (req, res) => {
     const totalPages = Math.max(1, Math.ceil(totalProducts / limit));
     actualProducts = actualProducts.slice(skip, skip + limit);
 
-    // ====== Preserve all query params ======
+    // ====== Preserve query params ======
     const queryParams = { ...req.query };
     delete queryParams.page;
-    if (req.query.search) queryParams.search = req.query.search; // ✅ preserve search param
+    if (req.query.search) queryParams.search = req.query.search;
 
-    //find the count of cart and wishlist
-    const user=await User.findById(req.session.user._id);
+    // ====== Wishlist + Cart Counts ======
+    const user = await User.findById(req.session.user._id).lean();
     const cartCount = user?.cart?.length || 0;
-      const wishlistCount = user?.wishlist?.length || 0;
+    const wishlistCount = user?.wishlist?.length || 0;
 
+    // ✅ Find wishlist product IDs
+    const wishlistProductIds = user?.wishlist?.map((item) => item.productId.toString()) || [];
+
+    // ✅ Mark each product as wishlisted or not
+    actualProducts = actualProducts.map((p) => ({
+      ...p,
+      isWishlisted: wishlistProductIds.includes(p._id.toString()),
+    }));
+
+    // ====== Render Page ======
     res.render('user/allProducts', {
       categories,
       fit,
@@ -365,14 +372,16 @@ exports.getProductPage = async (req, res) => {
       sort,
       genderParam,
       queryParams,
-      searchQuery, // ✅ pass search to view,
-      cartCount,wishlistCount
+      searchQuery,
+      cartCount,
+      wishlistCount,
     });
   } catch (err) {
     console.error('Error loading product page with filters:', err);
     res.status(500).send('Server Error');
   }
 };
+
 
 
 

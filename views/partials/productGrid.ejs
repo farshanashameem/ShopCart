@@ -1,48 +1,49 @@
 <!-- Products Grid -->
-    <div class="col-12 col-md-9">
-      <div class="row row-cols-2 row-cols-md-3 g-4">
-        <% products.forEach(product => { %>
-          <div class="col">
-            <div class="product-card position-relative">
-              <a href="/details/<%= product._id %>" class="text-decoration-none">
-                <img src="<%= product.firstImage %>" alt="<%= product.name %>" 
-                     class="img-fluid w-100 rounded mb-2">
-              </a>
-              <button class="btn position-absolute top-0 end-0 m-2 wishlist-btn" 
-                      data-product-id="<%= product._id %>" 
-                      style="background: transparent; border: none;">
-                <i class="bi bi-heart fs-4"></i>
-              </button>
-              <a href="/details/<%= product._id %>" class="text-decoration-none">
-                <h5 class="text-truncate"><b><%= product.name %></b></h5>
-                <h6 class="text-truncate"><%= product.description %></h6>
-                <p>Price:<% if(product.maxPrice===product.minPrice){%>
-                      ₹<%= product.minPrice %>
-                <%} else { %>
-                   <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %></p>
-                <%}%>
-              </a>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    </div>
+<div class="col-12 col-md-9">
+  <div class="row row-cols-2 row-cols-md-3 g-4">
+    <% products.forEach(product => { %>
+      <div class="col">
+        <div class="product-card position-relative">
+          <a href="/details/<%= product._id %>" class="text-decoration-none">
+            <img src="<%= product.firstImage %>" alt="<%= product.name %>"
+                 class="img-fluid w-100 rounded mb-2">
+          </a>
 
+          <!-- Wishlist Button -->
+          <button 
+            class="btn position-absolute top-0 end-0 m-2 wishlist-btn"
+            data-product-id="<%= product._id %>"
+            style="background: transparent; border: none;">
+            <i class="bi <%= product.isWishlisted ? 'bi-heart-fill text-danger' : 'bi-heart' %> fs-4"></i>
+          </button>
+
+          <a href="/details/<%= product._id %>" class="text-decoration-none">
+            <h5 class="text-truncate"><b><%= product.name %></b></h5>
+            <h6 class="text-truncate"><%= product.description %></h6>
+            <p>
+              Price: 
+              <% if (product.maxPrice === product.minPrice) { %>
+                ₹<%= product.minPrice %>
+              <% } else { %>
+                <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %>
+              <% } %>
+            </p>
+          </a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</div>
 
 <!-- Responsive Fix -->
 <style>
-  /* Prevent text overlap and allow wrapping */
-  .product-card h5, 
-  .product-card h6 {
+  .product-card h5, .product-card h6 {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  /* On very small screens, let text wrap naturally */
   @media (max-width: 576px) {
-    .product-card h5, 
-    .product-card h6 {
+    .product-card h5, .product-card h6 {
       white-space: normal;
     }
   }
@@ -58,9 +59,10 @@
 
       const productId = this.dataset.productId;
       const icon = this.querySelector('i');
+      const isFilled = icon.classList.contains('bi-heart-fill');
 
       try {
-        // 1. Fetch first variant of the product
+        // Fetch product variant (needed for add/remove)
         const variantRes = await fetch(`/api/products/${productId}/variants`);
         const variantData = await variantRes.json();
 
@@ -73,44 +75,64 @@
         }
 
         const firstVariant = variantData.variants[0];
+        const payload = {
+          productId,
+          size: firstVariant.size,
+          color: firstVariant.colorId
+        };
 
-        // 2. Call addToWishlist with productId, size, and color
-        const res = await fetch('/addToWishlist', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            productId,
-            size: firstVariant.size,
-            color: firstVariant.colorId
-          })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-          icon.classList.remove('bi-heart');
-          icon.classList.add('bi-heart-fill', 'text-danger');
-
-          Swal.fire({
-            icon: 'success',
-            title: 'Added to Wishlist',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
+        if (isFilled) {
+          // 🗑 Remove from Wishlist
+          const res = await fetch(`/wishlistItemDelete/${productId}/${firstVariant._id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
           });
+          const data = await res.json();
+
+          if (data.success) {
+            icon.classList.remove('bi-heart-fill', 'text-danger');
+            icon.classList.add('bi-heart');
+            Swal.fire({
+              icon: 'info',
+              title: 'Removed from Wishlist',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            Swal.fire({ icon: 'warning', title: 'Notice', text: data.message });
+          }
+
         } else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'Notice',
-            text: data.message
+          // ❤️ Add to Wishlist
+          const res = await fetch('/addToWishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
           });
+          const data = await res.json();
+
+          if (data.success) {
+            icon.classList.remove('bi-heart');
+            icon.classList.add('bi-heart-fill', 'text-danger');
+            Swal.fire({
+              icon: 'success',
+              title: 'Added to Wishlist',
+              text: data.message,
+              timer: 1500,
+              showConfirmButton: false
+            });
+          } else {
+            Swal.fire({ icon: 'warning', title: 'Notice', text: data.message });
+          }
         }
       } catch (err) {
-        console.error('Error adding to wishlist:', err);
+        console.error('Wishlist error:', err);
         Swal.fire({
           icon: 'error',
           title: 'Something went wrong!',
-          text: 'Could not add to wishlist. Please try again later.'
+          text: 'Please try again later.'
         });
       }
     });

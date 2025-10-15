@@ -34,10 +34,30 @@ exports.makePayment = async (req, res) => {
       razorpaySignature,
       walletAmount //  to track wallet amount used
     } = req.body;
+    const user = await User.findById(req.session.user._id);
       
+   const cpn=await Coupons.findOne({code:appliedCoupon});
+   if(!cpn.isActive){
+
+     req.flash("error", "This applied coupon become inactive. Please try again");
+     
+     if(payment==='razorpay')
+     {
+      user.wallet+=total;
+      user.save();
+      const transaction = new WalletTransactions({
+              userId: user._id,
+              type: "credit",
+              amount: total,
+              reason: "payment failed through razorpay",
+            });
+            await transaction.save();
+          }
+      return res.redirect('/payment?addressId='+addressId);
+     }
    
     //Creating order Id
-     const timestamp = Date.now();
+     const timestamp = Date.now();  
     const random = Math.floor(Math.random() * 1000);
     const orderId = `ORD-${timestamp}-${random}`;
 
@@ -45,7 +65,7 @@ exports.makePayment = async (req, res) => {
      req.session.amount=total;
      req.session.payment=payment;
 
-    const user = await User.findById(req.session.user._id);
+    
 
     if (!user.cart || user.cart.length === 0) {
       return res.redirect("/orders");  
