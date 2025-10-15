@@ -3,7 +3,8 @@ const { body } = require("express-validator");
 const signupValidationRules = [
   body("name")
     .trim()
-    .notEmpty().withMessage("Name is required"),
+    .notEmpty().withMessage("Name is required")
+     .isLength({ min: 3, max: 10 }).withMessage("Name must be between 3 and 10 characters long"),
 
   body("email")
     .trim()
@@ -54,7 +55,7 @@ const editProfileValidation = [
   body("name")
     .trim()
     .notEmpty().withMessage("Name is required")
-    .isLength({ min: 3 }).withMessage("Name must be at least 3 characters long")
+    .isLength({ min: 3, max: 10 }).withMessage("Name must be between 3 and 10 characters long")
     .matches(/^[A-Za-z\s]+$/).withMessage("Name must contain only letters and spaces"),
 
   body("email")
