@@ -66,9 +66,17 @@
                 ☆☆☆☆☆ (0)
               <% } %>
             </span>
+            <% if(basePrice===discountPrice){ %>
+               <span class="fw-bold fs-5 mt-2 mt-sm-0 ms-sm-3">
+               ₹<%= discountPrice %>
+            </span>
+           <% } else{%>
+
+          
             <span class="fw-bold fs-5 mt-2 mt-sm-0 ms-sm-3">
               <del>₹<%= basePrice %></del> ₹<%= discountPrice %>
             </span>
+            <% }%>
           </div>
 
           <!-- Sizes & Colours side by side -->

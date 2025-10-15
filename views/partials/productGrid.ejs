@@ -16,7 +16,11 @@
               <a href="/details/<%= product._id %>" class="text-decoration-none">
                 <h5 class="text-truncate"><b><%= product.name %></b></h5>
                 <h6 class="text-truncate"><%= product.description %></h6>
-                <p>Price: <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %></p>
+                <p>Price:<% if(product.maxPrice===product.minPrice){%>
+                      ₹<%= product.minPrice %>
+                <%} else { %>
+                   <del>₹<%= product.maxPrice %></del> ₹<%= product.minPrice %></p>
+                <%}%>
               </a>
             </div>
           </div>

@@ -12,7 +12,7 @@ const productValidationRules = [
       if (value < 0) throw new Error('Base Price cannot be negative');
       const index = path.match(/\d+/)[0];
       const discountPrice = req.body.variants[index]?.discountPrice;  
-      if (discountPrice && Number(value) <= Number(discountPrice)) {
+      if (discountPrice && Number(value) < Number(discountPrice)) {
         throw new Error('Base Price must be higher than Discount Price');
       }
       return true;
@@ -60,7 +60,7 @@ const editProductValidator = [
       if (value < 0) throw new Error('Base Price cannot be negative');
       const index = path.match(/\d+/)[0];
       const discountPrice = req.body.variants[index]?.discountPrice;
-      if (discountPrice && Number(value) <= Number(discountPrice)) {
+      if (discountPrice && Number(value) < Number(discountPrice)) {
         throw new Error('Base Price must be higher than Discount Price');
       }
       return true;

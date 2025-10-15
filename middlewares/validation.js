@@ -53,7 +53,9 @@ const changePasswordValidationRules = [
 const editProfileValidation = [
   body("name")
     .trim()
-    .notEmpty().withMessage("Name is required"),
+    .notEmpty().withMessage("Name is required")
+    .isLength({ min: 3 }).withMessage("Name must be at least 3 characters long")
+    .matches(/^[A-Za-z\s]+$/).withMessage("Name must contain only letters and spaces"),
 
   body("email")
     .trim()
@@ -101,7 +103,9 @@ const validateAddress = [
 
   body("name")
     .trim()
-    .notEmpty().withMessage("Name is required"),
+    .notEmpty().withMessage("Name is required")
+     .isLength({ min: 3 }).withMessage("Name must be at least 3 characters long")
+  .matches(/^[A-Za-z\s]+$/).withMessage("Name must contain only letters and spaces"),
 
   body("phone")
     .trim()
@@ -117,7 +121,8 @@ const validateAddress = [
 
   body("locality")
     .trim()
-    .notEmpty().withMessage("locality required"),
+    .notEmpty().withMessage("locality required")
+    .matches(/^[A-Za-z0-9\s]+$/).withMessage("Locality cannot contain only numbers or special characters"),
 
   body("address")
     .trim()
