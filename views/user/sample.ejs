@@ -1,0 +1,28 @@
+<button id="rzp-button1">Pay ₹500</button>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  async function startPayment() {
+    // Call backend to create order
+    const res = await fetch("/payment/create-order", { method: "POST" });
+    const order = await res.json();
+
+    const options = {
+      key: "<%= process.env.RAZORPAY_KEY_ID %>", // Your test key ID
+      amount: order.amount,
+      currency: order.currency,
+      name: "ShopCart",
+      description: "Test Payment",
+      order_id: order.id,
+      handler: function (response) {
+        alert("Payment Successful ✅\nPayment ID: " + response.razorpay_payment_id);
+      },
+      theme: { color: "#3399cc" },
+    };
+
+    const rzp1 = new Razorpay(options);
+    rzp1.open();
+  }
+
+  document.getElementById("rzp-button1").onclick = startPayment;
+</script>

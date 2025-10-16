@@ -94,7 +94,7 @@ exports.getReturnPage = async (req, res) => {
     const items = await Promise.all(
       returns.map(async (item) => {
         const user = await User.findById(item.userId);
-        const product = await Products.findById(item.orderedItem);
+        const product = await Product.findById(item.orderedItem);
         const order = await Orders.findOne({
           orderId: item.orderId,
           productId: item.orderedItem,
